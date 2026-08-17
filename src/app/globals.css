@@ -1,0 +1,355 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens.
+
+   Two complete themes:
+     :root                  -> "light notebook"  (warm paper, ink, ruled lines)
+     [data-theme="dark"]    -> "dark scientific" (deep space graphite, neon data)
+
+   Every value is an `R G B` triple so Tailwind's `<alpha-value>` modifier works.
+--------------------------------------------------------------------------- */
+:root {
+  --bg: 247 245 240;
+  --surface: 255 255 255;
+  --surface-2: 250 248 243;
+  --surface-0: 238 235 228;
+  --border: 223 218 206;
+  --text: 23 26 33;
+  --muted: 89 96 110;
+  --faint: 141 147 160;
+  --accent: 13 116 144;
+  --physics: 2 118 190;
+  --chemistry: 118 51 219;
+  --positive: 21 128 92;
+  --caution: 175 108 6;
+  --negative: 190 40 60;
+  --shadow: 60 55 45;
+
+  /* next/font sets the -loaded vars; the stacks after them are the fallback
+     used for the first paint and if a font ever fails to load. */
+  --font-sans: var(--font-sans-loaded), ui-sans-serif, 'Segoe UI Variable Text', 'Segoe UI',
+    system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: var(--font-display-loaded), 'Segoe UI Variable Display', Georgia, serif;
+  --font-mono: var(--font-mono-loaded), 'Cascadia Code', 'SF Mono', Consolas, monospace;
+  /* Caveat is used when present; otherwise we fall back to handwriting faces
+     that ship with Windows/macOS so the notes tool works with zero network. */
+  --font-hand: 'Caveat', 'Segoe Print', 'Segoe Script', 'Bradley Hand', 'Comic Sans MS', cursive;
+
+  /* Materials. Borders are deliberately lower-contrast than a default grey:
+     hairlines read as craft, hard grey lines read as a wireframe. */
+  --border-soft: 223 218 206;
+  --highlight: 255 255 255;
+  --highlight-strength: 0.9;
+  --grain-opacity: 0.035;
+}
+
+[data-theme='dark'] {
+  /* Layers are separated by more than a couple of points of lightness — a flat
+     near-black with barely-visible cards is the commonest "cheap dark mode" tell. */
+  --bg: 6 8 14;
+  --surface: 14 18 30;
+  --surface-2: 22 29 45;
+  --surface-0: 3 5 10;
+  --border: 36 46 68;
+  --border-soft: 30 39 58;
+  --highlight: 255 255 255;
+  --highlight-strength: 0.06;
+  --grain-opacity: 0.05;
+  --text: 231 238 249;
+  --muted: 142 156 180;
+  --faint: 100 113 138;
+  --accent: 56 189 248;
+  --physics: 56 189 248;
+  --chemistry: 167 139 250;
+  --positive: 52 211 153;
+  --caution: 251 191 36;
+  --negative: 251 113 133;
+  --shadow: 0 0 0;
+}
+
+@layer base {
+  * {
+    @apply border-line;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-page text-ink antialiased;
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv05' 1;
+    /* Prevents the page from ever scrolling sideways on small screens. */
+    overflow-x: hidden;
+  }
+
+  /**
+   * Film grain over the whole page.
+   *
+   * Large flat colour fills are the thing that makes a site look unfinished;
+   * a trace of texture is what reads as "designed". The browser rasterises this
+   * SVG once, so scrolling costs nothing.
+   */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Interface headings stay in the grotesque. Display sizes opt into the serif
+     via .font-display, so the two faces never compete for the same job. */
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight;
+    font-weight: 600;
+  }
+
+  /* Big type needs tighter tracking to look set rather than merely enlarged. */
+  .text-4xl,
+  .text-5xl,
+  .text-6xl,
+  .text-7xl {
+    letter-spacing: -0.03em;
+  }
+
+  ::selection {
+    background: rgb(var(--accent) / 0.28);
+  }
+
+  /* Focus ring — visible for keyboard users, invisible for mouse users. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Scrollbars that match the theme instead of the OS. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgb(var(--border));
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  /**
+   * The primary surface.
+   *
+   * Three things separate this from a plain bordered box: a faint vertical
+   * gradient so the fill is not one flat colour, a one-pixel inner highlight
+   * along the top edge (carried by shadow-panel), and a layered shadow. Together
+   * they read as a physical card catching light from above.
+   */
+  .panel {
+    @apply relative rounded-panel border border-line shadow-panel backdrop-blur-xl;
+    background-image: linear-gradient(
+      to bottom,
+      rgb(var(--surface) / 0.96),
+      rgb(var(--surface-0) / 0.82)
+    );
+  }
+
+  .panel-flat {
+    @apply rounded-card border border-line bg-surface;
+  }
+
+  /**
+   * A hairline that fades at both ends. Borders that stop abruptly look drawn;
+   * ones that dissolve look lit.
+   */
+  .rule-fade {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgb(var(--border)) 15%,
+      rgb(var(--border)) 85%,
+      transparent
+    );
+  }
+
+  /* Thin uppercase label used above sections and stat values. */
+  .eyebrow {
+    @apply text-2xs font-semibold uppercase tracking-[0.18em] text-ink-muted;
+  }
+
+  .hairline {
+    @apply h-px w-full bg-line;
+  }
+
+  /* Inline scientific notation / formula chip. */
+  .formula {
+    font-family: var(--font-mono);
+    @apply rounded-md bg-surface-raised px-1.5 py-0.5 text-[0.95em] text-ink;
+  }
+
+  .prose-science {
+    @apply text-[0.9375rem] leading-relaxed text-ink-muted;
+  }
+  .prose-science strong {
+    @apply font-semibold text-ink;
+  }
+  .prose-science p + p {
+    @apply mt-3;
+  }
+  .prose-science ul {
+    @apply mt-3 space-y-1.5 pl-5;
+    list-style: disc;
+  }
+  .prose-science ol {
+    @apply mt-3 space-y-1.5 pl-5;
+    list-style: decimal;
+  }
+  .prose-science h3 {
+    @apply mb-2 mt-5 text-sm font-semibold uppercase tracking-wide text-ink;
+  }
+  .prose-science code {
+    font-family: var(--font-mono);
+    @apply rounded bg-surface-raised px-1 py-0.5 text-[0.875em];
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Wide content (tables, diagrams) scrolls inside its own box, never the page. */
+  .scroll-x {
+    @apply -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0;
+    scrollbar-width: thin;
+  }
+
+  .gradient-text {
+    @apply bg-accent-sheen bg-clip-text text-transparent;
+  }
+
+  /** Editorial serif, for display sizes only. */
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+
+  /**
+   * A border that is brighter where light would hit it. Painted as two stacked
+   * backgrounds clipped to the padding box and border box, which is the only
+   * way to get a true gradient *border* rather than a gradient background.
+   */
+  .border-gradient {
+    border: 1px solid transparent;
+    background-image:
+      linear-gradient(to bottom, rgb(var(--surface) / 0.96), rgb(var(--surface-0) / 0.85)),
+      linear-gradient(
+        145deg,
+        rgb(var(--highlight) / 0.28),
+        rgb(var(--border) / 0.7) 35%,
+        rgb(var(--border) / 0.35)
+      );
+    background-origin: border-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  /**
+   * The hero light source: overlapping wide colour fields that behave like
+   * gels on a studio light, rather than a single flat gradient.
+   */
+  .aurora {
+    background-image:
+      radial-gradient(38rem 24rem at 12% -8%, rgb(var(--physics) / 0.24), transparent 62%),
+      radial-gradient(34rem 22rem at 88% 4%, rgb(var(--chemistry) / 0.2), transparent 60%),
+      radial-gradient(46rem 30rem at 50% -18%, rgb(var(--accent) / 0.16), transparent 70%);
+  }
+
+  /** Slow drift so the light never sits perfectly still. */
+  .aurora-drift {
+    animation: aurora-drift 22s ease-in-out infinite alternate;
+  }
+
+  @keyframes aurora-drift {
+    from {
+      transform: translate3d(-1.5%, -1%, 0) scale(1.02);
+    }
+    to {
+      transform: translate3d(1.5%, 1.5%, 0) scale(1.06);
+    }
+  }
+
+  /** Lifts an interactive card on hover with a spring, not a linear slide. */
+  .hover-lift {
+    transition:
+      transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.3s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    @apply shadow-lift;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility: honour the OS "reduce motion" setting everywhere, including
+   the 3D canvases (which read the same signal through usePrefersReducedMotion).
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print styles — used by the notes exporter (Print -> Save as PDF). */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .print-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+  @page {
+    margin: 14mm;
+  }
+}

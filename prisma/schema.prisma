@@ -1,0 +1,572 @@
+// IGCSE Science Lab — data model
+//
+// The schema is deliberately normalised: syllabus structure, authored content,
+// AI output and student activity are separate concerns and never collapsed into
+// one blob. Fields that hold structured payloads (options, mark schemes, note
+// blocks, diagram specs) are stored as JSON *strings* with typed helpers in
+// src/lib/json.ts, which keeps the schema portable between SQLite and Postgres.
+//
+// To move to Postgres: change `provider` to "postgresql" and point DATABASE_URL
+// at the server. No model changes are required.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & roles
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("STUDENT") // STUDENT | ADMIN
+  targetGrade  String?
+  examSeries   String?
+  theme        String   @default("system") // system | dark | light
+  xp           Int      @default(0)
+  streakDays   Int      @default(0)
+  lastActiveOn String? // ISO date (yyyy-mm-dd) used for streak arithmetic
+
+  /// TRIAL | FREE | PRO. Never trusted on its own — src/lib/billing/entitlements.ts
+  /// recomputes access from trialEndsAt and the live subscription, so an expired
+  /// trial cannot leave someone on PRO by accident.
+  plan         String   @default("TRIAL")
+  /// Null on legacy rows; the trial is then measured from createdAt.
+  trialEndsAt  DateTime?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  attempts      QuestionAttempt[]
+  notes         Note[]
+  media         GeneratedMedia[]
+  progress      Progress[]
+  mistakes      Mistake[]
+  sessions      StudySession[]
+  conversations AIConversation[]
+  achievements  UserAchievement[]
+  reviews       FlashcardReview[]
+  plans         DailyPlan[]
+  subscriptions Subscription[]
+  authoredContent ContentReview[] @relation("ContentReviewer")
+
+  @@index([role])
+}
+
+// ---------------------------------------------------------------------------
+// Curriculum structure — Subject > SyllabusVersion > Topic > Subtopic
+// ---------------------------------------------------------------------------
+
+model Subject {
+  id          String   @id @default(cuid())
+  code        String   @unique // "0625" | "0620"
+  slug        String   @unique // "physics" | "chemistry"
+  name        String
+  tagline     String
+  accent      String // design token key: "physics" | "chemistry"
+  createdAt   DateTime @default(now())
+
+  versions    SyllabusVersion[]
+  formulas    Formula[]
+  definitions Definition[]
+  questions   Question[]
+  simulations Simulation[]
+}
+
+/// A dated Cambridge specification. Content is attached to a version so the
+/// platform can be updated when Cambridge revises the syllabus without
+/// destroying the previous year's material.
+model SyllabusVersion {
+  id         String   @id @default(cuid())
+  subjectId  String
+  code       String   @unique // e.g. "0625-2023-2025"
+  label      String // "Physics 0625 (for examination 2023-2025)"
+  examFrom   Int
+  examTo     Int
+  isActive   Boolean  @default(false)
+  /// Where this structure came from, shown in the UI so nothing masquerades as
+  /// an official Cambridge document.
+  provenance String   @default("UNVERIFIED") // UNVERIFIED | TEACHER_MAPPED | OFFICIAL_CHECKED
+  sourceNote String?
+  createdAt  DateTime @default(now())
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topics  Topic[]
+
+  @@index([subjectId, isActive])
+}
+
+model Topic {
+  id                String @id @default(cuid())
+  syllabusVersionId String
+  number            String // "1", "2", ...
+  slug              String
+  title             String
+  summary           String
+  order             Int
+
+  version   SyllabusVersion @relation(fields: [syllabusVersionId], references: [id], onDelete: Cascade)
+  subtopics Subtopic[]
+
+  @@unique([syllabusVersionId, slug])
+  @@index([syllabusVersionId, order])
+}
+
+model Subtopic {
+  id      String @id @default(cuid())
+  topicId String
+  number  String // "1.1"
+  slug    String
+  title   String
+  summary String
+  order   Int
+  /// Slugs of subtopics that should be understood first. Rendered as edges in
+  /// the knowledge graph and as "revise this first" prompts.
+  prerequisites String @default("[]")
+
+  topic       Topic               @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  objectives  LearningObjective[]
+  lessons     Lesson[]
+  formulas    Formula[]
+  definitions Definition[]
+  questions   Question[]
+  flashcards  Flashcard[]
+  simulations Simulation[]
+  progress    Progress[]
+  mistakes    Mistake[]
+  notes       Note[]
+
+  @@unique([topicId, slug])
+  @@index([topicId, order])
+}
+
+model LearningObjective {
+  id         String  @id @default(cuid())
+  subtopicId String
+  code       String // "1.1.2"
+  statement  String
+  /// CORE is examined in all papers; SUPPLEMENT only in extended papers.
+  tier       String  @default("CORE") // CORE | SUPPLEMENT
+  order      Int
+  verified   Boolean @default(false)
+
+  subtopic Subtopic @relation(fields: [subtopicId], references: [id], onDelete: Cascade)
+
+  @@index([subtopicId, order])
+}
+
+// ---------------------------------------------------------------------------
+// Authored teaching content
+// ---------------------------------------------------------------------------
+
+model Lesson {
+  id             String   @id @default(cuid())
+  subtopicId     String
+  slug           String
+  title          String
+  order          Int
+  readingMinutes Int      @default(6)
+  /// Markdown-ish body rendered by src/components/content/RichText.tsx
+  body           String
+  analogy        String?
+  /// JSON string[] — see src/lib/json.ts
+  misconceptions String   @default("[]")
+  examTips       String   @default("[]")
+  workedExamples String   @default("[]")
+  status         String   @default("PUBLISHED") // DRAFT | PUBLISHED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  subtopic Subtopic @relation(fields: [subtopicId], references: [id], onDelete: Cascade)
+
+  @@unique([subtopicId, slug])
+  @@index([subtopicId, order])
+}
+
+model Formula {
+  id         String  @id @default(cuid())
+  subjectId  String
+  subtopicId String?
+  key        String  @unique
+  name       String
+  /// Human-readable expression, e.g. "v = s / t"
+  expression String
+  /// JSON: { symbol, label, unit, si }[] — powers the calculator + unit checks.
+  variables  String
+  resultUnit String
+  notes      String?
+  verified   Boolean @default(false)
+
+  subject  Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subtopic Subtopic? @relation(fields: [subtopicId], references: [id], onDelete: SetNull)
+
+  @@index([subjectId])
+}
+
+model Definition {
+  id         String  @id @default(cuid())
+  subjectId  String
+  subtopicId String?
+  term       String
+  statement  String
+  /// The phrasing an examiner expects, when it differs from the plain wording.
+  examWording String?
+  verified   Boolean @default(false)
+
+  subject  Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subtopic Subtopic? @relation(fields: [subtopicId], references: [id], onDelete: SetNull)
+
+  @@index([subjectId, term])
+}
+
+// ---------------------------------------------------------------------------
+// Assessment
+// ---------------------------------------------------------------------------
+
+model Question {
+  id         String  @id @default(cuid())
+  subjectId  String
+  subtopicId String?
+  /// MCQ | STRUCTURED | NUMERICAL | GRAPH | DIAGRAM
+  type       String
+  /// FOUNDATION | STANDARD | CHALLENGE
+  difficulty String  @default("STANDARD")
+  stem       String
+  /// JSON: { id, text, why? }[] for MCQ; "[]" otherwise.
+  options    String  @default("[]")
+  answer     String
+  markScheme String  @default("[]") // JSON string[] of marking points
+  marks      Int     @default(1)
+  explanation String
+  hint       String?
+  /// AUTHORED (written by a person) | AI_GENERATED (must be labelled in the UI)
+  origin     String  @default("AUTHORED")
+  reviewStatus String @default("APPROVED") // PENDING | APPROVED | REJECTED
+  createdAt  DateTime @default(now())
+
+  subject  Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subtopic Subtopic?         @relation(fields: [subtopicId], references: [id], onDelete: SetNull)
+  attempts QuestionAttempt[]
+
+  @@index([subjectId, type])
+  @@index([subtopicId])
+}
+
+model QuestionAttempt {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  response   String
+  isCorrect  Boolean
+  marksAwarded Int    @default(0)
+  timeMs     Int      @default(0)
+  /// quick | topic | mixed | challenge | exam | timed | weak | random
+  mode       String   @default("topic")
+  createdAt  DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  mistakes Mistake[]
+
+  @@index([userId, createdAt])
+  @@index([questionId])
+}
+
+// ---------------------------------------------------------------------------
+// Student-generated artefacts
+// ---------------------------------------------------------------------------
+
+model Note {
+  id         String   @id @default(cuid())
+  userId     String
+  subtopicId String?
+  title      String
+  /// clean | notebook | revision | mindmap | formula
+  style      String   @default("clean")
+  /// JSON NoteDoc — see src/lib/types/notes.ts
+  content    String
+  /// JSON string[] of subtopic numbers the content was grounded in.
+  sourceRefs String   @default("[]")
+  generatedBy String  @default("ai") // ai | curriculum | manual
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subtopic Subtopic? @relation(fields: [subtopicId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+model GeneratedMedia {
+  id        String   @id @default(cuid())
+  userId    String
+  /// DIAGRAM | EXPLAINER
+  kind      String
+  title     String
+  /// JSON DiagramSpec / StoryboardSpec — rendered programmatically as SVG so the
+  /// science stays accurate. `storageKey` is populated only when a rasterised
+  /// export is written through the storage adapter.
+  spec      String
+  storageKey String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind, createdAt])
+}
+
+model Simulation {
+  id          String  @id @default(cuid())
+  subjectId   String
+  subtopicId  String?
+  slug        String  @unique
+  title       String
+  description String
+  /// Key into the client-side simulation registry (src/components/sim/registry.ts)
+  component   String
+  concepts    String  @default("[]")
+  order       Int     @default(0)
+
+  subject  Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subtopic Subtopic? @relation(fields: [subtopicId], references: [id], onDelete: SetNull)
+
+  @@index([subjectId, order])
+}
+
+model Flashcard {
+  id         String   @id @default(cuid())
+  subtopicId String?
+  front      String
+  back       String
+  difficulty String   @default("MEDIUM") // EASY | MEDIUM | HARD
+  origin     String   @default("AUTHORED")
+  createdAt  DateTime @default(now())
+
+  subtopic Subtopic?         @relation(fields: [subtopicId], references: [id], onDelete: SetNull)
+  reviews  FlashcardReview[]
+
+  @@index([subtopicId])
+}
+
+/// SM-2 style spaced repetition state, one row per (card, student).
+model FlashcardReview {
+  id          String   @id @default(cuid())
+  userId      String
+  flashcardId String
+  ease        Float    @default(2.5)
+  intervalDays Int     @default(0)
+  repetitions Int      @default(0)
+  lapses      Int      @default(0)
+  dueOn       String // ISO date
+  lastRating  String? // again | hard | good | easy
+  updatedAt   DateTime @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, flashcardId])
+  @@index([userId, dueOn])
+}
+
+// ---------------------------------------------------------------------------
+// Progress, diagnosis and planning
+// ---------------------------------------------------------------------------
+
+model Progress {
+  id           String   @id @default(cuid())
+  userId       String
+  subtopicId   String
+  /// 0-100, decays over time so "mastered in March" doesn't stay green in November.
+  mastery      Int      @default(0)
+  confidence   Int      @default(0)
+  attempts     Int      @default(0)
+  correct      Int      @default(0)
+  minutesSpent Int      @default(0)
+  lastStudiedAt DateTime?
+  updatedAt    DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subtopic Subtopic @relation(fields: [subtopicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subtopicId])
+  @@index([userId, mastery])
+}
+
+model Mistake {
+  id         String   @id @default(cuid())
+  userId     String
+  attemptId  String?
+  subtopicId String?
+  /// CONCEPTUAL | CALCULATION | UNIT | FORMULA | MISREAD | DEFINITION | GRAPH
+  category   String
+  detail     String
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempt  QuestionAttempt? @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  subtopic Subtopic?        @relation(fields: [subtopicId], references: [id], onDelete: SetNull)
+
+  @@index([userId, category])
+}
+
+model StudySession {
+  id        String   @id @default(cuid())
+  userId    String
+  activity  String // learn | practice | exam | flashcards | tutor | simulation | notes
+  subjectId String?
+  minutes   Int      @default(0)
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
+}
+
+model DailyPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  date      String // ISO date
+  /// JSON PlanItem[] — { id, label, subject, subtopicSlug, minutes, kind, done }
+  items     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+// ---------------------------------------------------------------------------
+// AI transcripts & content governance
+// ---------------------------------------------------------------------------
+
+model AIConversation {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String
+  subjectId  String?
+  subtopicId String?
+  /// SIMPLE | IGCSE | DEEP | EXAM | SOCRATIC
+  mode       String   @default("IGCSE")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AIMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model AIMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String // user | assistant
+  content        String
+  /// JSON string[] of curriculum references the answer was grounded in.
+  grounding      String   @default("[]")
+  provider       String?
+  createdAt      DateTime @default(now())
+
+  conversation AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+/// Audit trail for the admin verification workflow. AI-produced content starts
+/// PENDING and is only presented as verified once a human approves it.
+model ContentReview {
+  id         String   @id @default(cuid())
+  entityType String // lesson | question | formula | definition | objective
+  entityId   String
+  status     String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  notes      String?
+  reviewerId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  reviewer User? @relation("ContentReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([status, entityType])
+}
+
+// ---------------------------------------------------------------------------
+// Billing
+// ---------------------------------------------------------------------------
+
+/// One row per subscription attempt, kept even after it ends so the payment
+/// history survives. Access is derived from the newest active row, never from
+/// deleting old ones.
+model Subscription {
+  id                 String    @id @default(cuid())
+  userId             String
+  provider           String    @default("razorpay")
+  /// Provider-side subscription id. Null until checkout is created.
+  providerId         String?   @unique
+  providerCustomerId String?
+  /// MONTHLY | YEARLY
+  interval           String
+  /// created | active | pending | halted | cancelled | completed | expired
+  status             String    @default("created")
+  /// Stored in the smallest currency unit (paise) — never floats for money.
+  amountMinor        Int
+  currency           String    @default("INR")
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+  /// True when the owner granted access by hand rather than through payment.
+  grantedByOwner     Boolean   @default(false)
+  note               String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([status, currentPeriodEnd])
+}
+
+/// Raw webhook audit trail. `eventId` is unique so a provider retrying a
+/// delivery cannot grant a second month of access.
+model PaymentEvent {
+  id        String   @id @default(cuid())
+  provider  String   @default("razorpay")
+  eventId   String   @unique
+  eventType String
+  payload   String
+  handled   Boolean  @default(false)
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([eventType, createdAt])
+}
+
+model Achievement {
+  id          String @id @default(cuid())
+  key         String @unique
+  title       String
+  description String
+  icon        String
+  xp          Int    @default(50)
+
+  earned UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  earnedAt      DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
