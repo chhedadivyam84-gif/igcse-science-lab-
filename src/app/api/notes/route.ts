@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUBJECT_SLUGS } from '@/lib/types';
 import { db } from '@/lib/db';
 import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireAiAccess } from '@/lib/ai/guard';
@@ -18,7 +19,7 @@ const STYLES = ['clean', 'notebook', 'revision', 'mindmap', 'formula'] as const;
 const schema = z.object({
   request: z.string().trim().min(4, 'Say what the notes should cover.').max(300),
   style: z.enum(STYLES).default('clean'),
-  subject: z.enum(['physics', 'chemistry']).optional(),
+  subject: z.enum(SUBJECT_SLUGS).optional(),
   save: z.boolean().default(true),
 });
 

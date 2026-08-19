@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUBJECT_SLUGS } from '@/lib/types';
 import { db } from '@/lib/db';
 import { fail, handleRoute, parseBody } from '@/lib/api';
 import { requireAiAccess } from '@/lib/ai/guard';
@@ -20,7 +21,7 @@ export const dynamic = 'force-dynamic';
 const schema = z.object({
   message: z.string().trim().min(1, 'Say something first.').max(1000),
   conversationId: z.string().cuid().optional(),
-  subject: z.enum(['physics', 'chemistry']).optional(),
+  subject: z.enum(SUBJECT_SLUGS).optional(),
   topicHint: z.string().max(160).optional(),
 });
 

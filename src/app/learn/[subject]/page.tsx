@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function SubjectPage({ params }: Params) {
   const { subject: slug } = await params;
-  if (slug !== 'physics' && slug !== 'chemistry') notFound();
-
+  // Any seeded subject is valid — the database lookup below is the gate, so
+  // adding a syllabus never requires editing a list of allowed slugs here.
   const session = await getSessionUser();
   const [subject, progress] = await Promise.all([
     db.subject.findUnique({

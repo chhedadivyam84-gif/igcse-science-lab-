@@ -1,5 +1,6 @@
 import type { SubjectSlug } from '@/lib/types';
 import { z } from 'zod';
+import { SUBJECT_SLUGS } from '@/lib/types';
 import { db } from '@/lib/db';
 import { handleRoute, parseBody } from '@/lib/api';
 import { requireAiAccess } from '@/lib/ai/guard';
@@ -16,7 +17,7 @@ const schema = z.object({
   message: z.string().trim().min(2, 'Ask a question first.').max(2000),
   mode: z.enum(TUTOR_MODES).default('IGCSE'),
   conversationId: z.string().cuid().optional(),
-  subject: z.enum(['physics', 'chemistry']).optional(),
+  subject: z.enum(SUBJECT_SLUGS).optional(),
   subtopicNumber: z.string().max(8).optional(),
   topicHint: z.string().max(160).optional(),
 });

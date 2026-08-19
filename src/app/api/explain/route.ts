@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUBJECT_SLUGS } from '@/lib/types';
 import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireAiAccess } from '@/lib/ai/guard';
 import { getAiProvider } from '@/lib/ai';
@@ -14,7 +15,7 @@ export const dynamic = 'force-dynamic';
 
 const schema = z.object({
   question: z.string().trim().min(4, 'Ask a fuller question.').max(400),
-  subject: z.enum(['physics', 'chemistry']).optional(),
+  subject: z.enum(SUBJECT_SLUGS).optional(),
 });
 
 // The model's JSON is validated before it reaches the UI, so a malformed

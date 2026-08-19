@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUBJECT_SLUGS } from '@/lib/types';
 import { db } from '@/lib/db';
 import { fail, handleRoute, ok } from '@/lib/api';
 import { requireUser } from '@/lib/auth';
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 const query = z.object({
   mode: z.enum(PRACTICE_MODES).default('quick'),
-  subject: z.enum(['physics', 'chemistry']).optional(),
+  subject: z.enum(SUBJECT_SLUGS).optional(),
   subtopicId: z.string().optional(),
   count: z.coerce.number().min(1).max(40).default(8),
 });

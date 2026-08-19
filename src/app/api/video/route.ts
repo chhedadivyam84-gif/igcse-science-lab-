@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUBJECT_SLUGS } from '@/lib/types';
 import { db } from '@/lib/db';
 import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireAiAccess } from '@/lib/ai/guard';
@@ -18,13 +19,13 @@ const VISUALS = ['intro', 'diagram', 'particles', 'wave', 'circuit', 'graph', 's
 
 const schema = z.object({
   request: z.string().trim().min(4, 'Say what the explainer should cover.').max(300),
-  subject: z.enum(['physics', 'chemistry']).optional(),
+  subject: z.enum(SUBJECT_SLUGS).optional(),
   save: z.boolean().default(true),
 });
 
 const modelSchema = z.object({
   title: z.string(),
-  subject: z.enum(['physics', 'chemistry']),
+  subject: z.enum(SUBJECT_SLUGS),
   scenes: z
     .array(
       z.object({

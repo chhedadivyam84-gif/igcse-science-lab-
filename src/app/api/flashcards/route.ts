@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUBJECT_SLUGS } from '@/lib/types';
 import { db } from '@/lib/db';
 import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireUser } from '@/lib/auth';
@@ -8,7 +9,7 @@ import { isoDate, seededShuffle } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 const query = z.object({
-  subject: z.enum(['physics', 'chemistry']).optional(),
+  subject: z.enum(SUBJECT_SLUGS).optional(),
   subtopicId: z.string().optional(),
   difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']).optional(),
   limit: z.coerce.number().min(1).max(60).default(20),

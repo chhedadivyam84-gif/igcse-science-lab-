@@ -8,7 +8,8 @@
  * rather than repeating the literals, so a subject cannot be half-added and
  * silently missing from one screen.
  */
-export type SubjectSlug = 'physics' | 'chemistry' | 'biology' | 'ict';
+export const SUBJECT_SLUGS = ['physics', 'chemistry', 'biology', 'ict'] as const;
+export type SubjectSlug = (typeof SUBJECT_SLUGS)[number];
 export type Tier = 'CORE' | 'SUPPLEMENT';
 export type Origin = 'AUTHORED' | 'AI_GENERATED';
 export type ReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
