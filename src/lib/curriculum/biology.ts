@@ -169,6 +169,84 @@ A good key uses only **visible, unambiguous** features: "has six legs" works; "i
             },
           ],
         },
+        {
+          number: '1.3',
+          slug: 'features-of-organisms',
+          title: 'Features of organisms',
+          summary: 'The main groups of living things, and why viruses sit outside them.',
+          prerequisites: ['1.2'],
+          objectives: [
+            { code: '1.3.1', statement: 'List the main features used to place organisms into kingdoms and groups.', tier: 'CORE' },
+            { code: '1.3.2', statement: 'Describe the main groups of vertebrates, arthropods and plants.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'features-of-organisms',
+              title: 'Features of organisms',
+              readingMinutes: 6,
+              body: `Classification groups organisms by **shared features**, and each group has a small set of defining characteristics worth learning precisely.
+### The five kingdoms
+- **Animals** — multicellular, no cell walls, no chloroplasts, feed on organic material.
+- **Plants** — multicellular, cellulose cell walls, chloroplasts, photosynthesise.
+- **Fungi** — cell walls not made of cellulose, no chloroplasts, feed by **saprophytic** or parasitic nutrition, often multinucleate.
+- **Protoctists** — mostly single-celled with a nucleus; some resemble plants, some animals.
+- **Prokaryotes (bacteria)** — no nucleus, DNA loose in the cytoplasm, plus plasmids; cell wall not made of cellulose.
+The dividing line that matters most: **prokaryotes have no nucleus**; everything else does.
+### Vertebrate groups
+| Group | Key features |
+|---|---|
+| Fish | wet scales, gills, external fertilisation |
+| Amphibians | moist permeable skin, larval stage in water |
+| Reptiles | dry scaly skin, soft-shelled eggs on land |
+| Birds | feathers, beak, hard-shelled eggs |
+| Mammals | fur/hair, mammary glands, external ear |
+### Arthropods
+All have a **hard exoskeleton** and **jointed legs**. The four groups are told apart by leg count and body sections: **insects** (6 legs, 3 body parts, usually wings), **arachnids** (8 legs, 2 body parts), **crustaceans** (many legs, chalky exoskeleton), **myriapods** (many segments, one or two pairs of legs each).
+### Viruses
+Viruses are **not placed in any kingdom** and are not usually considered living. They have no cell structure — just genetic material in a protein coat — and can only reproduce **inside a host cell**. Applying MRS GREN shows why: they carry out none of the seven processes independently.`,
+              analogy: 'Classification groups are nested boxes with a label on each: "has a backbone", "has fur". Viruses are the object that fits in none of the boxes, which is precisely why biologists set them aside rather than forcing them in.',
+              misconceptions: [
+                'Placing viruses in a kingdom. They are excluded because they have no cell structure and cannot carry out life processes alone.',
+                'Thinking fungi are plants. Fungi have no chloroplasts and do not photosynthesise — they feed on organic material.',
+                'Confusing arachnids with insects. Spiders have 8 legs and 2 body sections, not 6 and 3.',
+              ],
+              examTips: [
+                'For "which kingdom" questions, quote the decisive feature — presence of a nucleus, cell wall composition, or chloroplasts.',
+                'When asked why viruses are not classed as living, refer to MRS GREN: they cannot respire, grow or reproduce independently.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'An organism is multicellular, has cell walls that are not cellulose, and feeds on dead organic matter. Which kingdom is it in, and why?',
+                  steps: ['Cell walls are present, so it is not an animal.', 'The walls are not cellulose and there are no chloroplasts, so it is not a plant.', 'Feeding on dead organic material is saprophytic nutrition, characteristic of fungi.'],
+                  answer: 'The fungi kingdom — it has non-cellulose cell walls, no chloroplasts, and feeds saprophytically.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What defines a prokaryote?', back: 'It has no nucleus — its DNA lies loose in the cytoplasm, along with plasmids.', difficulty: 'MEDIUM' },
+            { front: 'Give two features of fungi.', back: 'Cell walls not made of cellulose, no chloroplasts, and saprophytic or parasitic nutrition.', difficulty: 'MEDIUM' },
+            { front: 'How do you tell an arachnid from an insect?', back: 'Arachnids have 8 legs and 2 body sections; insects have 6 legs and 3 body sections.', difficulty: 'MEDIUM' },
+            { front: 'Why are viruses not classed as living?', back: 'They have no cell structure and cannot carry out life processes or reproduce outside a host cell.', difficulty: 'HARD' },
+            { front: 'Which vertebrate group has moist permeable skin?', back: 'Amphibians.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'Explain why viruses are not placed in any of the five kingdoms. [2]',
+              answer:
+                'Viruses have no cellular structure — they consist only of genetic material surrounded by a protein coat, with no cytoplasm, membrane-bound organelles or nucleus. They also cannot carry out the characteristics of living organisms independently, since they can only reproduce inside a host cell.',
+              markScheme: [
+                'They have no cell structure / are not made of cells (1)',
+                'They cannot reproduce or carry out life processes except inside a host cell (1)',
+              ],
+              marks: 2,
+              explanation:
+                'Classification into kingdoms assumes a cellular organism. Since viruses fail that basic condition, they are treated as a separate category outside the system.',
+            },
+          ],
+        },
       ],
     },
     {
@@ -317,6 +395,82 @@ In every one of these, the exam answer has the same shape: name the feature, the
               marks: 2,
               explanation:
                 'Both marks depend on stating the purpose. "It has a tail and mitochondria" simply restates the question and earns nothing.',
+            },
+          ],
+        },
+        {
+          number: '2.3',
+          slug: 'size-of-specimens',
+          title: 'Size of specimens and magnification',
+          summary: 'Calculating magnification and actual size, and converting units.',
+          prerequisites: ['2.1'],
+          objectives: [
+            { code: '2.3.1', statement: 'Calculate magnification and actual size of biological specimens.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'size-of-specimens',
+              title: 'Size of specimens and magnification',
+              readingMinutes: 4,
+              body: `Cells are measured in units far smaller than everyday ones, and most marks lost here are unit-conversion errors rather than biology.
+### The formula
+\`magnification = image size ÷ actual size\`
+Rearranged as needed:
+- \`actual size = image size ÷ magnification\`
+- \`image size = actual size × magnification\`
+A memory triangle helps: image size on top, actual size and magnification underneath.
+### Units
+- 1 mm = **1000 µm** (micrometres)
+- 1 µm = **1000 nm** (nanometres)
+- 1 m = 1000 mm
+Cells are usually measured in **micrometres**. A typical animal cell is around 20 µm across, a bacterium about 1-5 µm.
+### The method that avoids errors
+1. Measure the image with a ruler, in **mm**.
+2. **Convert both measurements to the same unit** before dividing — this is the step people skip.
+3. Divide.
+Magnification has **no units**, because it is a ratio of two lengths. If your answer has units, something has gone wrong.
+### Drawing scale
+For a scale drawing, the same formula applies. If asked to state the magnification of your own drawing, measure a feature on the drawing and divide by the real size of that feature.`,
+              analogy: 'Magnification is the zoom factor on a map. Saying "×400" is like "1 cm represents 25 m" — a pure ratio, which is exactly why it carries no units.',
+              misconceptions: [
+                'Dividing without converting units first, e.g. mixing mm and µm, which shifts the answer by a factor of 1000.',
+                'Giving magnification a unit. It is a ratio and is dimensionless.',
+                'Inverting the formula — magnification is image ÷ actual, not actual ÷ image.',
+              ],
+              examTips: [
+                'Write both measurements in micrometres before dividing; the conversion step is where nearly all errors occur.',
+                'Sense-check the answer: a magnified image should be larger than the real object, so magnification should exceed 1.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A cell appears 40 mm wide in a photograph taken at ×2000 magnification. Calculate its actual width in micrometres.',
+                  steps: ['actual size = image size ÷ magnification.', 'Convert the image size to micrometres first: 40 mm = 40 × 1000 = 40 000 µm.', 'actual size = 40 000 ÷ 2000 = 20 µm.'],
+                  answer: '20 µm',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'Give the magnification formula.', back: 'magnification = image size ÷ actual size', difficulty: 'EASY' },
+            { front: 'How many micrometres are in 1 mm?', back: '1000 µm', difficulty: 'MEDIUM' },
+            { front: 'Does magnification have units?', back: 'No — it is a ratio of two lengths, so it is dimensionless.', difficulty: 'MEDIUM' },
+            { front: 'How do you find actual size?', back: 'Actual size = image size ÷ magnification.', difficulty: 'MEDIUM' },
+            { front: 'What is the typical width of an animal cell?', back: 'About 20 µm.', difficulty: 'HARD' },
+          ],
+          questions: [
+            {
+              type: 'NUMERICAL',
+              difficulty: 'STANDARD',
+              stem: 'A structure is 5 µm wide in reality and appears 15 mm wide in a drawing. Calculate the magnification of the drawing.',
+              answer: '3000',
+              markScheme: [
+                'Converts to the same units: 15 mm = 15 000 µm (1)',
+                'Uses magnification = image ÷ actual (1)',
+                'Answer ×3000 (1)',
+              ],
+              marks: 3,
+              explanation:
+                '15 000 ÷ 5 = 3000. Dividing 15 by 5 without converting gives 3, which is out by a factor of 1000 — the classic error this question targets.',
             },
           ],
         },
@@ -708,6 +862,81 @@ Reading a graph: while the line is rising, the factor on the x-axis is limiting.
             },
           ],
         },
+        {
+          number: '6.2',
+          slug: 'leaf-structure',
+          title: 'Leaf structure and mineral needs',
+          summary: 'How a leaf is adapted for photosynthesis, and why plants need minerals.',
+          prerequisites: ['6.1'],
+          objectives: [
+            { code: '6.2.1', statement: 'Relate the structure of a leaf to its function in photosynthesis.', tier: 'CORE' },
+            { code: '6.2.2', statement: 'Explain the need for nitrate and magnesium ions and the effects of deficiency.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'leaf-structure',
+              title: 'Leaf structure and mineral needs',
+              readingMinutes: 5,
+              body: `A leaf is an organ built for one job, and every layer is an adaptation for it.
+### The layers, top to bottom
+- **Waxy cuticle** — waterproof, reduces water loss by evaporation. Transparent, so it does not block light.
+- **Upper epidermis** — thin and transparent, letting light through to the layer below.
+- **Palisade mesophyll** — tall cells packed with **chloroplasts**, positioned near the top to absorb the most light. This is where most photosynthesis happens.
+- **Spongy mesophyll** — loosely packed cells with **air spaces** between them, allowing carbon dioxide to diffuse to all the cells.
+- **Lower epidermis** — contains the **stomata**.
+- **Stomata** — pores that let CO₂ diffuse in and O₂ and water vapour out. Each is opened and closed by two **guard cells**, which close them at night and in drought to conserve water.
+- **Veins (xylem and phloem)** — deliver water and carry away sugars.
+### Why leaves are broad and thin
+**Broad** gives a large surface area for absorbing light; **thin** gives a short diffusion distance for gases. Most stomata are on the **underside**, which is shaded and cooler, reducing water loss.
+### Mineral ions
+- **Nitrate ions** — needed to make **amino acids and proteins**. Deficiency causes stunted growth and older leaves yellowing.
+- **Magnesium ions** — needed to make **chlorophyll**. Deficiency causes yellowing between leaf veins (chlorosis), so less photosynthesis occurs.
+These are absorbed from the soil by **active transport** through root hair cells.`,
+              analogy: 'A leaf is a solar panel with plumbing: broad and flat to catch light, thin so gases move quickly, and veined so raw materials arrive and product leaves without the panel having to move.',
+              misconceptions: [
+                'Thinking stomata are on the upper surface. Most are on the underside, where it is shaded and water loss is lower.',
+                'Confusing the roles of nitrate and magnesium. Nitrate builds proteins; magnesium builds chlorophyll.',
+                'Believing the waxy cuticle blocks light. It is transparent — its role is waterproofing only.',
+              ],
+              examTips: [
+                'For "how is a leaf adapted" questions, pair every structure with its purpose: "palisade cells contain many chloroplasts **so that** more light is absorbed".',
+                'Deficiency questions want the chain: no magnesium → no chlorophyll → less photosynthesis → poor growth.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'Explain why the palisade mesophyll is located near the upper surface of a leaf.',
+                  steps: ['Palisade cells contain the most chloroplasts of any leaf cell.', 'Light intensity is greatest at the top of the leaf, decreasing as light passes deeper.', 'Positioning these cells near the top means they absorb the maximum light for photosynthesis.'],
+                  answer: 'Because palisade cells contain the most chloroplasts, placing them nearest the light maximises light absorption and so the rate of photosynthesis.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'Which leaf layer carries out most photosynthesis?', back: 'The palisade mesophyll, packed with chloroplasts near the upper surface.', difficulty: 'MEDIUM' },
+            { front: 'Why does the spongy mesophyll have air spaces?', back: 'To allow carbon dioxide to diffuse freely to all the photosynthesising cells.', difficulty: 'MEDIUM' },
+            { front: 'What controls the opening of stomata?', back: 'Guard cells.', difficulty: 'EASY' },
+            { front: 'Why do plants need nitrate ions?', back: 'To make amino acids and therefore proteins for growth.', difficulty: 'MEDIUM' },
+            { front: 'Why do plants need magnesium ions?', back: 'To make chlorophyll — deficiency causes yellowing between the veins.', difficulty: 'HARD' },
+            { front: 'Why are most stomata on the lower surface?', back: 'It is shaded and cooler, so less water is lost by evaporation.', difficulty: 'HARD' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'A plant grown without magnesium ions has yellow leaves and grows poorly. Explain why. [3]',
+              answer:
+                'Magnesium ions are needed to make chlorophyll. Without magnesium the plant cannot produce enough chlorophyll, so the leaves appear yellow rather than green. Since chlorophyll absorbs the light energy used in photosynthesis, less photosynthesis occurs, so less glucose is made for respiration and growth, and the plant grows poorly.',
+              markScheme: [
+                'Magnesium is needed to make chlorophyll (1)',
+                'Less chlorophyll means leaves are yellow and absorb less light (1)',
+                'Less photosynthesis, so less glucose for growth (1)',
+              ],
+              marks: 3,
+              explanation:
+                'Each mark is a link in the chain. Naming magnesium\'s role without following through to reduced growth scores only the first mark.',
+            },
+          ],
+        },
       ],
     },
     {
@@ -1035,6 +1264,83 @@ Arteries have thick elastic walls to withstand and smooth out high pressure surg
               marks: 2,
               explanation:
                 'In a single circulation, blood loses most of its pressure passing through the gill or lung capillaries and then travels to the body sluggishly — which limits how fast the animal can respire.',
+            },
+          ],
+        },
+        {
+          number: '9.2',
+          slug: 'blood',
+          title: 'Blood and its components',
+          summary: 'Red cells, white cells, platelets and plasma, and what each does.',
+          prerequisites: ['9.1'],
+          objectives: [
+            { code: '9.2.1', statement: 'Identify the components of blood and state their functions.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'blood',
+              title: 'Blood and its components',
+              readingMinutes: 5,
+              body: `Blood is a **tissue**, made of four components suspended in a liquid.
+### Red blood cells
+Transport **oxygen**, using the protein **haemoglobin**. In the lungs haemoglobin combines with oxygen to form **oxyhaemoglobin**; in respiring tissues, where oxygen concentration is low, it releases it again.
+Three adaptations, each with a reason:
+- **Biconcave disc** — large surface area for gas exchange.
+- **No nucleus** — more room for haemoglobin.
+- **Small and flexible** — squeezes through narrow capillaries.
+### White blood cells
+Defend against pathogens. Two types:
+- **Phagocytes** — engulf and digest pathogens; a general defence, with a lobed nucleus.
+- **Lymphocytes** — produce **antibodies** specific to one antigen.
+Unlike red cells, white cells **have a nucleus**.
+### Platelets
+Fragments of cells that trigger **blood clotting** at a wound. Clotting seals the cut, preventing further blood loss and stopping pathogens entering — so it is both a circulatory and a defensive function.
+### Plasma
+The straw-coloured liquid, mostly water, which transports **everything dissolved**: carbon dioxide, digested food (glucose, amino acids), urea, hormones, ions, and heat around the body.
+### The one-line summary
+Red cells carry oxygen, white cells fight infection, platelets clot, plasma carries everything else.`,
+              analogy: 'Blood is a delivery network: red cells are the oxygen tankers, white cells the security staff, platelets the emergency repair crew, and plasma the road itself, carrying everything dissolved along with it.',
+              misconceptions: [
+                'Saying red blood cells "have no nucleus so they are dead". They are living cells; losing the nucleus makes room for more haemoglobin.',
+                'Thinking plasma only carries carbon dioxide. It also transports glucose, amino acids, urea, hormones and heat.',
+                'Confusing platelets with white cells. Platelets clot blood; white cells fight pathogens.',
+              ],
+              examTips: [
+                'Adaptation questions want feature plus consequence: "biconcave **so that** the surface area for oxygen absorption is larger".',
+                'If asked how blood transports carbon dioxide, the answer is mostly dissolved in the **plasma**, not by haemoglobin.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'Explain two ways a red blood cell is adapted for transporting oxygen.',
+                  steps: ['It has no nucleus, which leaves more space inside the cell for haemoglobin, so more oxygen can be carried.', 'Its biconcave shape gives a larger surface area to volume ratio, so oxygen diffuses in and out more quickly.'],
+                  answer: 'No nucleus, giving more room for haemoglobin and so more oxygen carried; and a biconcave shape giving a large surface area for rapid diffusion of oxygen.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What protein in red blood cells carries oxygen?', back: 'Haemoglobin, which forms oxyhaemoglobin in the lungs.', difficulty: 'EASY' },
+            { front: 'Give two adaptations of a red blood cell.', back: 'Biconcave shape for a large surface area, and no nucleus so it holds more haemoglobin.', difficulty: 'MEDIUM' },
+            { front: 'What do platelets do?', back: 'Trigger blood clotting to seal wounds and prevent pathogen entry.', difficulty: 'MEDIUM' },
+            { front: 'What does plasma transport?', back: 'Carbon dioxide, digested food, urea, hormones, ions and heat.', difficulty: 'MEDIUM' },
+            { front: 'What are the two types of white blood cell?', back: 'Phagocytes, which engulf pathogens, and lymphocytes, which make antibodies.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'MCQ',
+              difficulty: 'FOUNDATION',
+              stem: 'Which blood component is mainly responsible for clotting at a wound?',
+              options: [
+                { id: 'a', text: 'Platelets', why: '' },
+                { id: 'b', text: 'Red blood cells', why: 'Red blood cells transport oxygen; they play no role in clotting.' },
+                { id: 'c', text: 'Lymphocytes', why: 'Lymphocytes produce antibodies against pathogens.' },
+                { id: 'd', text: 'Plasma', why: 'Plasma is the transport liquid, though it does carry the clotting proteins.' },
+              ],
+              answer: 'a',
+              markScheme: ['Platelets (1)'],
+              marks: 1,
+              explanation:
+                'Clotting seals the wound, which both limits blood loss and blocks a route of entry for pathogens — a defensive function as well as a circulatory one.',
             },
           ],
         },
@@ -1526,6 +1832,157 @@ In **type 1 diabetes** the pancreas produces insufficient insulin, so blood gluc
             },
           ],
         },
+        {
+          number: '14.3',
+          slug: 'the-eye',
+          title: 'Sense organs — the eye',
+          summary: 'Structure of the eye, and the pupil and accommodation reflexes.',
+          prerequisites: ['14.1'],
+          objectives: [
+            { code: '14.3.1', statement: 'Identify the structures of the eye and describe the pupil reflex and accommodation.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'the-eye',
+              title: 'Sense organs — the eye',
+              readingMinutes: 6,
+              body: `The eye is a **sense organ**: a group of receptor cells responding to one stimulus, here **light**.
+### The structures
+- **Cornea** — transparent front layer; does most of the **refraction** (bending) of light.
+- **Iris** — the coloured ring of muscle controlling pupil size.
+- **Pupil** — the hole letting light in (not a structure, but a gap).
+- **Lens** — **fine-focuses** light onto the retina; its shape can change.
+- **Retina** — contains light receptors: **rods** (dim light, no colour) and **cones** (colour, bright light).
+- **Fovea** — the region of the retina with the highest concentration of cones, giving sharpest vision.
+- **Optic nerve** — carries impulses to the brain.
+- **Blind spot** — where the optic nerve leaves; no receptors, so no image forms there.
+### The pupil reflex
+In **bright** light: circular muscles of the iris **contract**, radial muscles relax, the pupil **constricts**, and less light enters — protecting the retina from damage.
+In **dim** light: radial muscles contract, circular muscles relax, the pupil **dilates**, letting more light in.
+This is a **reflex**, so it is automatic and rapid. The two muscle types are **antagonistic** — one contracts as the other relaxes.
+### Accommodation — focusing
+- **Near object**: ciliary muscles **contract**, suspensory ligaments **slacken**, and the lens becomes **fatter** (more curved), refracting light more strongly.
+- **Distant object**: ciliary muscles **relax**, suspensory ligaments **pull tight**, and the lens becomes **thinner**, refracting light less.
+The counter-intuitive part is that the ligaments slacken when the muscle contracts — because the ciliary muscle forms a ring, contracting it reduces the ring's diameter and releases the tension.`,
+              analogy: 'The iris is a camera aperture and the lens is the focus ring. Accommodation is not moving the lens back and forth as a camera does — the eye changes the lens\'s *shape* instead.',
+              misconceptions: [
+                'Thinking the lens does most of the focusing. The **cornea** does most of the refraction; the lens fine-tunes it.',
+                'Getting accommodation backwards. For a **near** object the lens becomes **fatter**, not thinner.',
+                'Believing the pupil itself changes size actively. The pupil is a hole — the **iris muscles** change it.',
+              ],
+              examTips: [
+                'For accommodation, state all three changes together: ciliary muscle, suspensory ligaments, and lens shape.',
+                'For the pupil reflex, name both muscle types and say which contracts — "circular muscles contract" is the marking point, not just "the pupil gets smaller".',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'Describe what happens in the eye when a person moves from a dark room into bright sunlight.',
+                  steps: ['Light receptors detect the increase in light intensity.', 'This is a reflex, so the response is automatic.', 'The circular muscles of the iris contract and the radial muscles relax.', 'The pupil constricts, so less light enters and the retina is protected from damage.'],
+                  answer: 'Circular iris muscles contract and radial muscles relax, constricting the pupil so less light enters and the retina is not damaged.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'Which part of the eye does most of the refraction?', back: 'The cornea — the lens only fine-focuses.', difficulty: 'HARD' },
+            { front: 'What happens to the iris muscles in bright light?', back: 'Circular muscles contract and radial muscles relax, constricting the pupil.', difficulty: 'MEDIUM' },
+            { front: 'What shape is the lens for a near object?', back: 'Fatter and more curved, because the ciliary muscles contract and the ligaments slacken.', difficulty: 'HARD' },
+            { front: 'What is the difference between rods and cones?', back: 'Rods work in dim light without colour; cones detect colour in bright light.', difficulty: 'MEDIUM' },
+            { front: 'What is the blind spot?', back: 'Where the optic nerve leaves the retina — there are no receptor cells there.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'CHALLENGE',
+              stem: 'Describe how the eye changes to focus on a nearby object. [3]',
+              answer:
+                'The ciliary muscles contract, which reduces the diameter of the ciliary ring and causes the suspensory ligaments to slacken. With less tension pulling on it, the lens becomes fatter and more curved. This refracts the light more strongly, bringing the light from the near object to a focus on the retina.',
+              markScheme: [
+                'Ciliary muscles contract (1)',
+                'Suspensory ligaments slacken / lose tension (1)',
+                'Lens becomes fatter/more curved, refracting light more (1)',
+              ],
+              marks: 3,
+              explanation:
+                'The most common error is stating that the ligaments tighten when the muscle contracts. Because the ciliary muscle is a ring, contraction shrinks the ring and releases tension.',
+              hint: 'What happens to the diameter of a ring of muscle when it contracts?',
+            },
+          ],
+        },
+        {
+          number: '14.4',
+          slug: 'tropisms',
+          title: 'Tropic responses in plants',
+          summary: 'Phototropism, gravitropism and the role of auxin.',
+          prerequisites: ['14.1'],
+          objectives: [
+            { code: '14.4.1', statement: 'Describe phototropism and gravitropism and explain the role of auxin.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'tropisms',
+              title: 'Tropic responses in plants',
+              readingMinutes: 5,
+              body: `Plants respond to stimuli by **growing**, which is slower than an animal's movement but achieves the same end.
+### The definitions
+A **tropism** is a growth response in which the **direction** of growth is determined by the direction of the stimulus.
+- **Phototropism** — response to **light**. Shoots are **positively** phototropic (grow towards light); roots are negatively phototropic.
+- **Gravitropism (geotropism)** — response to **gravity**. Roots are **positively** gravitropic (grow downwards); shoots are negatively gravitropic.
+"Positive" means growing **towards** the stimulus, "negative" means away.
+### Why these responses help
+A shoot growing towards light reaches more light for **photosynthesis**. A root growing downwards reaches **water and mineral ions** and anchors the plant.
+### The role of auxin
+**Auxin** is a plant hormone made at the shoot tip that stimulates **cell elongation**.
+When light comes from one side:
+1. Auxin moves to the **shaded** side of the shoot.
+2. A higher auxin concentration there makes those cells **elongate more**.
+3. The shaded side grows longer than the lit side, so the shoot **bends towards the light**.
+The bending is caused by **unequal growth**, not by the plant "turning".
+### The root behaves oppositely
+In roots, a high auxin concentration **inhibits** elongation. So on the lower side of a horizontal root, accumulated auxin slows growth there, the upper side grows faster, and the root bends **downwards**. The same hormone produces opposite effects in the two organs, which is exactly what makes this a favourite exam question.`,
+              analogy: 'A shoot bends towards light the way a marching column turns when the outside rank takes longer strides. Nobody steers — one side simply grows more than the other.',
+              misconceptions: [
+                'Thinking the plant "moves" towards light. It **grows** unequally; no existing tissue relocates.',
+                'Assuming auxin accumulates on the lit side. It moves to the **shaded** side.',
+                'Applying the shoot rule to roots. In roots, high auxin **inhibits** elongation, producing the opposite bend.',
+              ],
+              examTips: [
+                'Always name the direction of the stimulus and the side auxin moves to before describing the bend — those are the marking points.',
+                'State the benefit if asked "why is this an advantage": more light for photosynthesis, or reaching water and anchorage.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'Explain why a shoot grows towards a light source coming from one side.',
+                  steps: ['Auxin is produced at the shoot tip.', 'Light causes auxin to move to the shaded side of the shoot.', 'The higher auxin concentration there stimulates greater cell elongation on that side.', 'The shaded side therefore grows longer than the lit side, bending the shoot towards the light.'],
+                  answer: 'Auxin accumulates on the shaded side, where it stimulates more cell elongation, so that side grows longer and the shoot bends towards the light.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'Define a tropism.', back: 'A growth response in which the direction of growth is determined by the direction of the stimulus.', difficulty: 'MEDIUM' },
+            { front: 'Are shoots positively or negatively phototropic?', back: 'Positively — they grow towards light.', difficulty: 'EASY' },
+            { front: 'Are roots positively or negatively gravitropic?', back: 'Positively — they grow downwards, towards gravity.', difficulty: 'MEDIUM' },
+            { front: 'Which side of a shoot does auxin move to in one-sided light?', back: 'The shaded side.', difficulty: 'HARD' },
+            { front: 'What does auxin do in shoots and in roots?', back: 'In shoots it stimulates cell elongation; in roots high concentrations inhibit it.', difficulty: 'HARD' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'Explain the advantage to a plant of its roots being positively gravitropic. [2]',
+              answer:
+                'Growing downwards in the direction of gravity means the roots grow deeper into the soil, where they can absorb water and mineral ions needed for growth. Deeper roots also anchor the plant firmly so it is not easily blown over or washed away.',
+              markScheme: [
+                'Roots grow down into the soil to reach water and mineral ions (1)',
+                'Provides anchorage and stability for the plant (1)',
+              ],
+              marks: 2,
+              explanation:
+                'Both marks are for the biological benefit, not the mechanism. Describing how auxin works would not answer the question asked.',
+            },
+          ],
+        },
       ],
     },
     {
@@ -1682,6 +2139,166 @@ In sexual reproduction, gametes are made by **meiosis**, which halves the chromo
             },
           ],
         },
+        {
+          number: '16.2',
+          slug: 'reproduction-in-plants',
+          title: 'Sexual reproduction in plants',
+          summary: 'Flower structure, pollination, fertilisation and seed dispersal.',
+          prerequisites: ['16.1'],
+          objectives: [
+            { code: '16.2.1', statement: 'Identify the parts of a flower and describe pollination and fertilisation.', tier: 'CORE' },
+            { code: '16.2.2', statement: 'Compare insect-pollinated and wind-pollinated flowers.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'reproduction-in-plants',
+              title: 'Sexual reproduction in plants',
+              readingMinutes: 6,
+              body: `### Parts of a flower
+**Male parts (stamen)**: the **anther** produces pollen; the **filament** holds it up.
+**Female parts (carpel)**: the **stigma** receives pollen; the **style** connects it to the **ovary**, which contains the **ovules**.
+Also: **petals** (attract insects), **sepals** (protect the bud).
+### Pollination versus fertilisation
+These are different events and the distinction is examined constantly:
+- **Pollination** is the **transfer of pollen** from anther to stigma.
+- **Fertilisation** is the **fusion of the pollen nucleus with the ovule nucleus**, which happens later, after a pollen tube grows down the style.
+Pollination is transport; fertilisation is fusion.
+### Self versus cross pollination
+- **Self-pollination** — pollen lands on the stigma of the same plant. Produces less variation, but does not need another plant.
+- **Cross-pollination** — pollen transfers to a different plant of the same species. Produces **more genetic variation**, which is the advantage.
+### Insect versus wind pollination
+| | Insect-pollinated | Wind-pollinated |
+|---|---|---|
+| Petals | large, brightly coloured, scented | small, green, no scent |
+| Nectar | present | absent |
+| Anthers | inside the flower | hanging outside, exposed |
+| Stigma | inside, sticky | outside, large and feathery |
+| Pollen | sticky or spiky, small amounts | smooth and light, large amounts |
+Every difference follows from the mechanism: insects must be attracted and must brush past the parts, whereas wind requires exposure and sheer quantity.
+### After fertilisation
+The **ovule becomes the seed**, and the **ovary becomes the fruit**. Seeds are then dispersed — by wind, animals, water or explosive mechanisms — so that seedlings do not compete with the parent plant for light, water and minerals.`,
+              analogy: 'Insect pollination is a courier with an address; wind pollination is dropping thousands of leaflets from a rooftop. One invests in precision, the other in volume — which explains every structural difference between the flowers.',
+              misconceptions: [
+                'Using pollination and fertilisation interchangeably. Pollination is transfer; fertilisation is nuclear fusion afterwards.',
+                'Thinking wind-pollinated plants have no flowers. They have flowers, but small, green and unscented ones — there is nothing to attract.',
+                'Saying the ovary becomes the seed. The **ovule** becomes the seed; the **ovary** becomes the fruit.',
+              ],
+              examTips: [
+                'When comparing pollination types, give the feature **and** the reason: "feathery stigma **to** catch pollen blowing past".',
+                'For dispersal questions, state the benefit: reduced competition with the parent plant for light, water and minerals.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A flower has small green petals, no scent, anthers hanging outside and a large feathery stigma. How is it pollinated, and how do you know?',
+                  steps: ['Small green unscented petals and no nectar mean insects are not attracted.', 'Anthers hanging outside allow pollen to be blown away easily.', 'A large feathery stigma has a big surface area to catch pollen carried in the air.'],
+                  answer: 'It is wind-pollinated — the exposed anthers and feathery stigma are adaptations for releasing and catching airborne pollen, and there is nothing to attract insects.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'Define pollination.', back: 'The transfer of pollen from the anther to the stigma.', difficulty: 'MEDIUM' },
+            { front: 'Define fertilisation in a plant.', back: 'The fusion of the pollen nucleus with the ovule nucleus.', difficulty: 'MEDIUM' },
+            { front: 'What do the ovule and ovary become?', back: 'The ovule becomes the seed; the ovary becomes the fruit.', difficulty: 'HARD' },
+            { front: 'Give two features of a wind-pollinated flower.', back: 'Exposed anthers and a large feathery stigma; also small green petals and no nectar.', difficulty: 'MEDIUM' },
+            { front: 'What is the advantage of cross-pollination?', back: 'It produces greater genetic variation in the offspring.', difficulty: 'MEDIUM' },
+            { front: 'Why is seed dispersal important?', back: 'It reduces competition between seedlings and the parent plant for light, water and minerals.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'Explain the difference between pollination and fertilisation in a flowering plant. [2]',
+              answer:
+                'Pollination is the transfer of pollen grains from the anther to the stigma, which is simply the movement of pollen. Fertilisation occurs afterwards, when a pollen tube has grown down the style and the nucleus from the pollen grain fuses with the nucleus of the ovule.',
+              markScheme: [
+                'Pollination is the transfer of pollen from anther to stigma (1)',
+                'Fertilisation is the fusion of the pollen nucleus with the ovule nucleus (1)',
+              ],
+              marks: 2,
+              explanation:
+                'Pollination can occur without fertilisation following — for example if the pollen is from a different species. That is why they must be defined separately.',
+            },
+          ],
+        },
+        {
+          number: '16.3',
+          slug: 'reproduction-in-humans',
+          title: 'Sexual reproduction in humans',
+          summary: 'Gametes, fertilisation, pregnancy and the role of hormones.',
+          prerequisites: ['16.1'],
+          objectives: [
+            { code: '16.3.1', statement: 'Describe fertilisation, the development of the fetus and the function of the placenta.', tier: 'CORE' },
+            { code: '16.3.2', statement: 'Describe the menstrual cycle and the roles of oestrogen and progesterone.', tier: 'SUPPLEMENT' },
+          ],
+          lessons: [
+            {
+              slug: 'reproduction-in-humans',
+              title: 'Sexual reproduction in humans',
+              readingMinutes: 6,
+              body: `### The gametes
+- **Sperm** — small, motile, with a **tail** for swimming and **many mitochondria** for energy. Produced in vast numbers.
+- **Egg (ovum)** — much larger, non-motile, containing **food stores (yolk)** for the early embryo.
+The size difference is the point: the egg supplies resources, the sperm supplies mobility.
+### Fertilisation
+**Fertilisation** is the fusion of the sperm nucleus with the egg nucleus, forming a **zygote**. It occurs in the **oviduct** (fallopian tube), not the uterus.
+The zygote divides by **mitosis** to form an embryo, which travels to the uterus and **implants** in the thickened uterus lining.
+### The placenta
+The organ of exchange between mother and fetus. Their blood **does not mix**; instead materials diffuse across a thin barrier with a very large surface area.
+- **To the fetus**: oxygen, glucose, amino acids, antibodies.
+- **From the fetus**: carbon dioxide and urea.
+Why blood must not mix: the mother's blood pressure would damage fetal vessels, blood groups may differ, and it limits pathogen transfer.
+The **umbilical cord** connects fetus to placenta, and the **amniotic fluid** cushions the fetus against physical damage.
+### The menstrual cycle
+Roughly 28 days, controlled by hormones:
+- **Oestrogen** — from the ovaries, **repairs and thickens** the uterus lining, and triggers ovulation.
+- **Progesterone** — **maintains** the uterus lining. When it falls, the lining breaks down and menstruation begins.
+- **Ovulation** — release of an egg, around day 14.
+The pattern to remember: oestrogen builds, progesterone maintains, and withdrawal of progesterone triggers the period.`,
+              analogy: 'The placenta is a service interface, not a merger: two separate blood supplies run close enough to trade goods across a membrane, but never join — much like passing parcels through a hatch rather than opening the door.',
+              misconceptions: [
+                'Thinking fertilisation happens in the uterus. It occurs in the **oviduct**; implantation happens in the uterus.',
+                'Believing maternal and fetal blood mix in the placenta. They stay separate and exchange by diffusion.',
+                'Confusing the hormone roles — oestrogen builds the lining, progesterone maintains it.',
+              ],
+              examTips: [
+                'For placenta questions, always state "large surface area and thin barrier for diffusion" plus "blood does not mix".',
+                'For hormone questions, link the falling level of progesterone to the start of menstruation — that causal step is a mark.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'Explain how the placenta allows the fetus to receive oxygen without the two blood supplies mixing.',
+                  steps: ['The placenta has villi giving a very large surface area for exchange.', 'The barrier between maternal and fetal blood is very thin, giving a short diffusion distance.', 'Oxygen concentration is higher in the mother\'s blood, so oxygen diffuses down its concentration gradient into fetal blood.', 'The two circulations remain separate throughout, so only dissolved substances cross.'],
+                  answer: 'Oxygen diffuses across a thin, large-surface-area barrier from the mother\'s blood, where its concentration is higher, into the fetal blood — the two blood supplies stay separate.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'Where does fertilisation occur in humans?', back: 'In the oviduct (fallopian tube).', difficulty: 'MEDIUM' },
+            { front: 'Give two adaptations of a sperm cell.', back: 'A tail for swimming and many mitochondria to release energy for movement.', difficulty: 'MEDIUM' },
+            { front: 'What passes from mother to fetus across the placenta?', back: 'Oxygen, glucose, amino acids and antibodies.', difficulty: 'MEDIUM' },
+            { front: 'Why must maternal and fetal blood not mix?', back: 'The mother\'s blood pressure would damage fetal vessels, blood groups may differ, and it limits pathogen transfer.', difficulty: 'HARD' },
+            { front: 'What does progesterone do?', back: 'Maintains the uterus lining; when it falls, the lining breaks down and menstruation begins.', difficulty: 'HARD' },
+            { front: 'What is the function of amniotic fluid?', back: 'It cushions and protects the fetus from physical damage.', difficulty: 'EASY' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'CHALLENGE',
+              stem: 'Describe two ways the placenta is adapted for the exchange of substances between mother and fetus. [2]',
+              answer:
+                'The placenta has villi that project into the uterus lining, giving a very large surface area over which substances can diffuse. The barrier separating maternal and fetal blood is only a few cells thick, giving a short diffusion distance so exchange is rapid.',
+              markScheme: [
+                'Villi give a large surface area for exchange (1)',
+                'Thin barrier gives a short diffusion distance (1)',
+              ],
+              marks: 2,
+              explanation:
+                'These are the same two adaptations seen in alveoli and the small intestine — surface area and diffusion distance recur wherever exchange happens efficiently.',
+            },
+          ],
+        },
       ],
     },
     {
@@ -1768,6 +2385,165 @@ Two heterozygous parents (Bb) both show the dominant phenotype but each carry th
               explanation:
                 'A homozygous dominant crossed with a homozygous recessive always gives 100% heterozygous offspring showing the dominant phenotype — the classic F1 generation result.',
               hint: 'What gametes can each parent make if they are homozygous?',
+            },
+          ],
+        },
+        {
+          number: '17.2',
+          slug: 'dna-and-protein-synthesis',
+          title: 'DNA and protein synthesis',
+          summary: 'The structure of DNA and how genes code for proteins.',
+          prerequisites: ['17.1'],
+          objectives: [
+            { code: '17.2.1', statement: 'Describe the structure of DNA and explain how a gene codes for a protein.', tier: 'SUPPLEMENT' },
+          ],
+          lessons: [
+            {
+              slug: 'dna-and-protein-synthesis',
+              title: 'DNA and protein synthesis',
+              readingMinutes: 6,
+              body: `### Structure of DNA
+DNA is a **double helix**: two strands twisted around each other, held together by **base pairs**.
+There are four bases, and they pair in a fixed way — **complementary base pairing**:
+- **A pairs with T**
+- **C pairs with G**
+So a strand reading \`ATGCC\` has the complementary strand \`TACGG\`.
+Because the pairing is fixed, one strand carries all the information needed to rebuild the other, which is what makes accurate copying possible.
+### Genes and proteins
+A **gene** is a length of DNA that codes for one **protein**. The sequence of bases determines the sequence of **amino acids**, and the amino acid sequence determines the protein's shape and therefore its function.
+Each amino acid is coded by a sequence of **three bases**.
+### How a protein is made
+1. The gene stays in the **nucleus** — DNA is too large to leave.
+2. A copy of the gene is made as **mRNA**, which is small enough to pass out through a nuclear pore.
+3. The mRNA travels to a **ribosome** in the cytoplasm.
+4. The ribosome reads the base sequence in threes and assembles the matching **amino acids** in order.
+5. The chain of amino acids folds into a protein.
+### Why this matters
+Different cells make different proteins because different genes are **switched on**. A muscle cell and a nerve cell contain identical DNA — their difference lies entirely in which genes are expressed.
+A **mutation** — a change in the base sequence — can change one amino acid, altering the protein's shape. In an enzyme, that may change the active site so the substrate no longer fits.`,
+              analogy: 'DNA is a reference library that cannot be taken out. mRNA is a photocopy of a single page, carried to the workshop (ribosome) where the item is built to that specification.',
+              misconceptions: [
+                'Thinking DNA leaves the nucleus. It does not — mRNA carries the copy instead.',
+                'Believing different cells contain different DNA. They contain the same DNA; different genes are switched on.',
+                'Getting base pairing wrong. A pairs with T and C with G — never A with C.',
+              ],
+              examTips: [
+                'For "how does a gene control a characteristic", give the chain: base sequence → amino acid sequence → protein shape → function.',
+                'When asked why a mutation matters, link the changed base to a changed amino acid and then to a changed protein shape.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'One strand of DNA reads TACGGA. Write the complementary strand and explain your reasoning.',
+                  steps: ['Base pairing is fixed: A pairs with T, and C pairs with G.', 'Take each base in turn: T→A, A→T, C→G, G→C, G→C, A→T.', 'This gives ATGCCT.'],
+                  answer: 'ATGCCT — because A always pairs with T and C always pairs with G.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What shape is a DNA molecule?', back: 'A double helix — two strands held together by paired bases.', difficulty: 'EASY' },
+            { front: 'Which bases pair together?', back: 'A with T, and C with G.', difficulty: 'EASY' },
+            { front: 'What does a gene code for?', back: 'One protein — the base sequence determines the amino acid sequence.', difficulty: 'MEDIUM' },
+            { front: 'How many bases code for one amino acid?', back: 'Three.', difficulty: 'MEDIUM' },
+            { front: 'Why is mRNA needed?', back: 'DNA is too large to leave the nucleus, so mRNA carries a copy of the gene to the ribosome.', difficulty: 'HARD' },
+            { front: 'Why do different cells make different proteins?', back: 'They contain the same DNA but different genes are switched on.', difficulty: 'HARD' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'CHALLENGE',
+              stem: 'Explain how a mutation in a gene can stop an enzyme from working. [3]',
+              answer:
+                'A mutation changes the sequence of bases in the gene, which changes the sequence of amino acids assembled at the ribosome. Since the amino acid sequence determines how the protein folds, the enzyme takes on a different three-dimensional shape. If this alters the shape of the active site, the substrate can no longer fit into it, so no enzyme-substrate complexes form and the enzyme cannot catalyse its reaction.',
+              markScheme: [
+                'Mutation changes the base sequence, so the amino acid sequence changes (1)',
+                'The protein folds into a different shape (1)',
+                'The active site shape changes so the substrate no longer fits (1)',
+              ],
+              marks: 3,
+              explanation:
+                'This question links three topics — DNA, proteins and enzymes. The marks follow the causal chain, so each step must be stated explicitly.',
+              hint: 'Follow the chain: bases → amino acids → shape → active site.',
+            },
+          ],
+        },
+        {
+          number: '17.3',
+          slug: 'mitosis-and-meiosis',
+          title: 'Mitosis and meiosis',
+          summary: 'The two types of cell division and what each is for.',
+          prerequisites: ['17.1'],
+          objectives: [
+            { code: '17.3.1', statement: 'Describe mitosis and meiosis and state their roles.', tier: 'SUPPLEMENT' },
+          ],
+          lessons: [
+            {
+              slug: 'mitosis-and-meiosis',
+              title: 'Mitosis and meiosis',
+              readingMinutes: 5,
+              body: `Both are cell division, but they serve opposite purposes — one preserves the genome, the other shuffles it.
+### Mitosis
+Produces **two genetically identical** daughter cells, each with the **same** chromosome number as the parent (**diploid**).
+Used for **growth**, **repair** of damaged tissue, **replacement** of worn-out cells, and **asexual reproduction**.
+Before division, the DNA is **replicated exactly**, so each daughter cell receives a complete identical copy.
+### Meiosis
+Produces **four genetically different** cells, each with **half** the chromosome number (**haploid**). Used **only** to make **gametes**.
+Two features generate variation:
+- Chromosomes are **shuffled** so each gamete gets a different combination.
+- Which gamete fuses at fertilisation is **random**.
+### Why halving is essential
+If gametes were diploid, fertilisation would double the chromosome number every generation. Meiosis halves it so that fusion of two haploid gametes restores the **normal diploid** number — 46 in humans, from two gametes of 23.
+### Comparison
+| | Mitosis | Meiosis |
+|---|---|---|
+| Daughter cells | 2 | 4 |
+| Genetically | identical | different |
+| Chromosome number | same (diploid) | halved (haploid) |
+| Purpose | growth, repair, asexual reproduction | gamete formation |
+The link to earlier work: mitosis produces **clones**, which is why asexual reproduction gives no variation; meiosis is one of the two sources of variation in sexual reproduction.`,
+              analogy: 'Mitosis is photocopying a document — two identical copies. Meiosis is dealing a shuffled deck into four hands, each holding half the cards and no two alike.',
+              misconceptions: [
+                'Thinking meiosis produces two cells. It produces **four**, each haploid.',
+                'Believing mitosis creates variation. It produces genetically identical cells; only mutation introduces change.',
+                'Saying gametes are diploid. They are **haploid** — that is the entire point of meiosis.',
+              ],
+              examTips: [
+                'If a question mentions growth, repair or asexual reproduction, the answer is mitosis. If it mentions gametes or variation, it is meiosis.',
+                'For "why must gametes be haploid", state that fertilisation would otherwise double the chromosome number each generation.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'Human body cells contain 46 chromosomes. State the number in a human sperm cell and explain why.',
+                  steps: ['Sperm are gametes, produced by meiosis.', 'Meiosis halves the chromosome number, producing haploid cells.', 'Half of 46 is 23.', 'At fertilisation, 23 from the sperm and 23 from the egg restore the diploid number of 46.'],
+                  answer: '23 — meiosis halves the chromosome number so that fertilisation restores the normal diploid number of 46.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'How many cells does mitosis produce, and are they identical?', back: 'Two, genetically identical to each other and to the parent cell.', difficulty: 'EASY' },
+            { front: 'How many cells does meiosis produce?', back: 'Four, all genetically different and haploid.', difficulty: 'MEDIUM' },
+            { front: 'What is mitosis used for?', back: 'Growth, repair, replacement of cells, and asexual reproduction.', difficulty: 'MEDIUM' },
+            { front: 'What is meiosis used for?', back: 'Producing gametes.', difficulty: 'MEDIUM' },
+            { front: 'Why must gametes be haploid?', back: 'So fertilisation restores the diploid number rather than doubling it each generation.', difficulty: 'HARD' },
+            { front: 'What do diploid and haploid mean?', back: 'Diploid has the full chromosome number; haploid has half.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'MCQ',
+              difficulty: 'STANDARD',
+              stem: 'Which process produces cells used for the repair of damaged tissue?',
+              options: [
+                { id: 'a', text: 'Mitosis, because it produces genetically identical diploid cells', why: '' },
+                { id: 'b', text: 'Meiosis, because it produces four cells', why: 'Meiosis produces haploid gametes, which cannot replace body cells.' },
+                { id: 'c', text: 'Meiosis, because the cells are genetically different', why: 'Repair requires identical replacement cells, not varied ones.' },
+                { id: 'd', text: 'Fertilisation', why: 'Fertilisation is the fusion of gametes, not a form of cell division for repair.' },
+              ],
+              answer: 'a',
+              markScheme: ['Mitosis — genetically identical diploid cells for repair (1)'],
+              marks: 1,
+              explanation:
+                'Repair needs replacement cells identical to those lost. Haploid, genetically varied cells from meiosis would be useless for rebuilding a tissue.',
             },
           ],
         },
@@ -1937,6 +2713,163 @@ Because energy is lost at each transfer, feeding grain to humans directly suppor
               explanation:
                 'This is the practical consequence of the 10% rule, and a favourite exam application because it connects biology to food security.',
               hint: 'How many energy transfers happen in each case?',
+            },
+          ],
+        },
+        {
+          number: '19.2',
+          slug: 'nutrient-cycles',
+          title: 'The carbon and nitrogen cycles',
+          summary: 'How carbon and nitrogen are recycled through ecosystems.',
+          prerequisites: ['19.1'],
+          objectives: [
+            { code: '19.2.1', statement: 'Describe the carbon cycle and the role of decomposers.', tier: 'CORE' },
+            { code: '19.2.2', statement: 'Describe the nitrogen cycle and the roles of the bacteria involved.', tier: 'SUPPLEMENT' },
+          ],
+          lessons: [
+            {
+              slug: 'nutrient-cycles',
+              title: 'The carbon and nitrogen cycles',
+              readingMinutes: 6,
+              body: `Energy **flows** through an ecosystem and is lost as heat. Nutrients are different — they **cycle**, being used repeatedly.
+### The carbon cycle
+Carbon **removed** from the atmosphere:
+- **Photosynthesis** — the only significant route, converting CO₂ into glucose in plants.
+Carbon **returned** to the atmosphere:
+- **Respiration** by plants, animals and decomposers.
+- **Combustion** of fuels, including fossil fuels and wood.
+- **Decomposition** — decomposers respire as they break down dead material.
+Carbon passes **along food chains** when animals eat plants, and is locked away long-term as **fossil fuels** when dead organisms do not fully decompose.
+The modern imbalance: combustion of fossil fuels releases carbon stored for millions of years faster than photosynthesis removes it, raising atmospheric CO₂.
+### Decomposers
+**Bacteria and fungi** break down dead organisms and waste, releasing **mineral ions** back into the soil for plants to reuse. Without them, nutrients would stay locked in dead material and ecosystems would collapse — which is why they appear in every cycle.
+### The nitrogen cycle
+Nitrogen gas is 78% of the air but **unreactive**, so most organisms cannot use it directly. Four groups of bacteria do the work:
+- **Nitrogen-fixing bacteria** — convert atmospheric N₂ into nitrogen compounds. Some live free in soil, some in **root nodules of legumes**.
+- **Decomposers** — break down proteins in dead matter into **ammonium** compounds.
+- **Nitrifying bacteria** — convert ammonium into **nitrites** then **nitrates**, the form plants absorb.
+- **Denitrifying bacteria** — convert nitrates back into **nitrogen gas**, reducing soil fertility. They thrive in **waterlogged, low-oxygen** soils, which is why good drainage matters.
+Plants absorb **nitrates** to make **amino acids and proteins**; animals obtain nitrogen by eating plants.
+Lightning also fixes small amounts of nitrogen.`,
+              analogy: 'Nutrients are library books and energy is the electricity bill: the books circulate endlessly between borrowers, while the electricity is consumed and gone. That is why one cycles and the other must be constantly resupplied by the Sun.',
+              misconceptions: [
+                'Saying energy is recycled. Energy flows one way and is lost as heat; only nutrients cycle.',
+                'Thinking plants absorb nitrogen gas from the air. They absorb **nitrates** from the soil.',
+                'Confusing nitrifying with denitrifying bacteria. Nitrifying makes nitrates (helpful); denitrifying destroys them (harmful to fertility).',
+              ],
+              examTips: [
+                'Name the specific bacteria group in nitrogen cycle answers — "bacteria" alone rarely earns the mark.',
+                'For the carbon cycle, remember photosynthesis is the only major process removing CO₂, while three processes return it.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'Explain why waterlogged soil becomes less fertile for crop growth.',
+                  steps: ['Waterlogged soil contains little oxygen.', 'Denitrifying bacteria thrive in low-oxygen conditions.', 'They convert nitrates in the soil back into nitrogen gas, which plants cannot absorb.', 'With fewer nitrates, plants cannot make enough amino acids and proteins, so growth is poor.'],
+                  answer: 'Low oxygen favours denitrifying bacteria, which convert useful nitrates back into unusable nitrogen gas, so plants have less nitrate for making proteins.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'Which process removes carbon dioxide from the atmosphere?', back: 'Photosynthesis.', difficulty: 'EASY' },
+            { front: 'Name three processes that return CO₂ to the atmosphere.', back: 'Respiration, combustion and decomposition.', difficulty: 'MEDIUM' },
+            { front: 'What do decomposers do for nutrient cycles?', back: 'Break down dead material, releasing mineral ions back into the soil for plants.', difficulty: 'MEDIUM' },
+            { front: 'What do nitrogen-fixing bacteria do?', back: 'Convert atmospheric nitrogen gas into nitrogen compounds plants can use.', difficulty: 'HARD' },
+            { front: 'What do denitrifying bacteria do?', back: 'Convert nitrates back into nitrogen gas, reducing soil fertility.', difficulty: 'HARD' },
+            { front: 'In what form do plants absorb nitrogen?', back: 'As nitrate ions from the soil.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'Explain the importance of decomposers in the carbon cycle. [3]',
+              answer:
+                'Decomposers such as bacteria and fungi break down dead organisms and waste material. As they do so they respire, releasing carbon dioxide back into the atmosphere where it becomes available for photosynthesis again. They also release mineral ions back into the soil, so nutrients locked in dead material are recycled rather than lost from the ecosystem.',
+              markScheme: [
+                'Decomposers break down dead organisms and waste (1)',
+                'They respire, returning carbon dioxide to the atmosphere (1)',
+                'Nutrients/mineral ions are released back into the soil for reuse (1)',
+              ],
+              marks: 3,
+              explanation:
+                'Without decomposers, carbon and mineral nutrients would remain trapped in dead bodies indefinitely, and the cycle would stop.',
+            },
+          ],
+        },
+        {
+          number: '19.3',
+          slug: 'populations',
+          title: 'Populations and population growth',
+          summary: 'The phases of a population growth curve and what limits size.',
+          prerequisites: ['19.1'],
+          objectives: [
+            { code: '19.3.1', statement: 'Describe the phases of a population growth curve and the factors affecting population size.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'populations',
+              title: 'Populations and population growth',
+              readingMinutes: 5,
+              body: `### Definitions
+- **Population** — all the organisms of **one species** in an area at one time.
+- **Community** — all the populations of **different species** in that area.
+- **Ecosystem** — the community plus the **non-living** environment it interacts with.
+### The population growth curve
+Four phases, each with a cause:
+1. **Lag phase** — slow growth. Few individuals are present and they are adapting to the conditions.
+2. **Exponential (log) phase** — rapid growth. Resources are plentiful, so the population roughly doubles in each equal time period.
+3. **Stationary phase** — growth levels off. Birth rate equals death rate as resources become limited. The population has reached the **carrying capacity** of the environment.
+4. **Death phase** — the population falls, as food runs out and toxic waste accumulates.
+### What limits population size
+- **Food supply** and **water**
+- **Predation**
+- **Disease**, which spreads faster in dense populations
+- **Competition** for space, light or mates
+- **Accumulation of waste**
+These are **density-dependent** — their effect increases as the population grows, which is exactly why growth slows rather than continuing forever.
+### Human population
+The human population shows exponential growth, driven by improved food supply, better medical care and sanitation reducing death rates. Whether a stationary phase follows depends on whether resources can keep pace — the same biological limits apply to us as to any other species.`,
+              analogy: 'The growth curve is a party in a small flat: slow at first, then filling rapidly, then jammed to the doors because the space simply cannot hold more. The carrying capacity is how many the flat holds, not how many wanted to come.',
+              misconceptions: [
+                'Thinking a population stops growing because reproduction ceases. Birth rate simply comes to **equal** death rate.',
+                'Confusing population and community — a population is one species only.',
+                'Assuming exponential growth can continue indefinitely. Resource limits always intervene.',
+              ],
+              examTips: [
+                'Name all four phases in order and give a **cause** for each — the causes are the marks, not the labels.',
+                'Use the term "carrying capacity" when explaining the stationary phase; it is a specific marking point.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'Explain why a population of bacteria in a closed flask eventually stops increasing and then falls.',
+                  steps: ['During exponential growth, nutrients are plentiful and the population increases rapidly.', 'As numbers rise, nutrients are used up and competition increases, so the birth rate falls until it equals the death rate — the stationary phase.', 'In a closed flask no new nutrients arrive and toxic waste products accumulate.', 'The death rate then exceeds the birth rate, so the population declines.'],
+                  answer: 'Nutrients become limiting and waste accumulates, so birth rate first equals then falls below death rate, giving a stationary phase followed by a death phase.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'Define a population.', back: 'All the organisms of one species living in an area at one time.', difficulty: 'EASY' },
+            { front: 'Name the four phases of a population growth curve.', back: 'Lag, exponential (log), stationary and death phase.', difficulty: 'MEDIUM' },
+            { front: 'What happens in the stationary phase?', back: 'Birth rate equals death rate as resources become limiting — the carrying capacity is reached.', difficulty: 'HARD' },
+            { front: 'What is carrying capacity?', back: 'The maximum population size an environment can support with its available resources.', difficulty: 'MEDIUM' },
+            { front: 'Name three factors limiting population size.', back: 'Food supply, predation, disease, competition or waste accumulation.', difficulty: 'MEDIUM' },
+            { front: 'Why does the death phase occur in a closed container?', back: 'Nutrients run out and toxic waste products accumulate.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'Explain why the exponential phase of population growth cannot continue indefinitely. [2]',
+              answer:
+                'During exponential growth the population increases rapidly because resources are plentiful. As numbers rise, food, water and space become limiting and competition between individuals increases, while disease spreads more easily in a dense population. The death rate therefore rises until it equals the birth rate, and growth stops at the carrying capacity of the environment.',
+              markScheme: [
+                'Resources such as food, water or space become limiting / competition increases (1)',
+                'Death rate rises until it equals birth rate, so growth stops at the carrying capacity (1)',
+              ],
+              marks: 2,
+              explanation:
+                'The key idea is that limiting factors are density-dependent — their effect strengthens as the population grows, which is what produces the levelling off.',
             },
           ],
         },
