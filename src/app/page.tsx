@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { ArrowRight, Atom, Braces, CheckCircle2, Sparkles, Zap } from 'lucide-react';
+import { ArrowRight, Braces, CheckCircle2, Sparkles } from 'lucide-react';
 
 import { LazyHeroScene } from '@/components/three/LazyScene';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal';
 import { Badge, LinkButton } from '@/components/ui';
 import { NavIcon } from '@/components/layout/icons';
-import { PRIMARY_NAV, SECONDARY_NAV, SUBJECTS } from '@/lib/nav';
+import { DEFAULT_SUBJECT_STYLE, PRIMARY_NAV, SECONDARY_NAV, SUBJECT_STYLES } from '@/lib/nav';
 import { curriculumStats, syllabuses } from '@/lib/curriculum';
 import { getSessionUser } from '@/lib/auth';
 import { aiStatus } from '@/lib/ai';
@@ -49,7 +49,7 @@ export default async function HomePage() {
           <div className="max-w-3xl">
             <Reveal>
               <Badge tone="accent" icon={<Sparkles className="h-3 w-3" />}>
-                Cambridge IGCSE Physics 0625 · Chemistry 0620
+                Cambridge IGCSE · {syllabuses.map((s) => s.subject.code).join(' · ')}
               </Badge>
             </Reveal>
 
@@ -59,7 +59,7 @@ export default async function HomePage() {
               <h1 className="mt-6 text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.035em] text-ink sm:text-7xl lg:text-8xl">
                 Master IGCSE{' '}
                 <span className="font-display gradient-text block italic sm:inline">
-                  Physics &amp; Chemistry
+                  Science &amp; Maths
                 </span>
               </h1>
             </Reveal>
@@ -85,41 +85,40 @@ export default async function HomePage() {
           </div>
 
           {/* Subject entry points */}
-          <Stagger className="mt-14 grid gap-4 sm:mt-20 sm:grid-cols-2">
-            {SUBJECTS.map((subject) => {
-              const syllabus = syllabuses.find((s) => s.subject.slug === subject.slug);
-              const topics = syllabus?.topics.length ?? 0;
-              const subtopics = syllabus?.topics.reduce((n, t) => n + t.subtopics.length, 0) ?? 0;
+          {/* Driven by the curriculum, not a separate list — adding a syllabus
+              makes it appear here automatically. */}
+          <Stagger className="mt-14 grid gap-4 sm:mt-20 sm:grid-cols-2 lg:grid-cols-3">
+            {syllabuses.map((syllabus) => {
+              const { slug, code, name, tagline } = syllabus.subject;
+              const style = SUBJECT_STYLES[slug] ?? DEFAULT_SUBJECT_STYLE;
+              const topics = syllabus.topics.length;
+              const subtopics = syllabus.topics.reduce((n, t) => n + t.subtopics.length, 0);
 
               return (
-                <StaggerItem key={subject.slug}>
+                <StaggerItem key={slug}>
                   <Link
-                    href={`/learn/${subject.slug}`}
+                    href={`/learn/${slug}`}
                     className={`group hover-lift border-gradient relative flex h-full flex-col justify-between overflow-hidden rounded-panel p-6 shadow-panel backdrop-blur-xl sm:p-8`}
                   >
                     <div
-                      className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${subject.gradient} opacity-70 transition-opacity duration-300 group-hover:opacity-100`}
+                      className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-70 transition-opacity duration-300 group-hover:opacity-100`}
                       aria-hidden="true"
                     />
                     <div className="relative">
                       <div className="flex items-center justify-between gap-3">
-                        <span className={`font-mono text-sm ${subject.accentClass}`}>{subject.code}</span>
-                        {subject.slug === 'physics' ? (
-                          <Zap className={`h-5 w-5 ${subject.accentClass}`} />
-                        ) : (
-                          <Atom className={`h-5 w-5 ${subject.accentClass}`} />
-                        )}
+                        <span className={`font-mono text-sm ${style.accentClass}`}>{code}</span>
+                        <NavIcon name={style.icon} className={`h-5 w-5 ${style.accentClass}`} />
                       </div>
                       <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-                        {subject.name}
+                        {name}
                       </h2>
-                      <p className="mt-2 max-w-sm text-sm text-ink-muted">{subject.tagline}</p>
+                      <p className="mt-2 max-w-sm text-sm text-ink-muted">{tagline}</p>
                     </div>
                     <div className="relative mt-8 flex items-center justify-between">
                       <span className="text-sm text-ink-muted">
                         {topics} topics · {subtopics} subtopics
                       </span>
-                      <span className={`flex items-center gap-1 text-sm font-medium ${subject.accentClass}`}>
+                      <span className={`flex items-center gap-1 text-sm font-medium ${style.accentClass}`}>
                         Open
                         <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                       </span>

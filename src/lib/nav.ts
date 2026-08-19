@@ -41,25 +41,74 @@ export const SECONDARY_NAV: NavItem[] = [
 
 export const ALL_NAV = [...PRIMARY_NAV, ...SECONDARY_NAV];
 
-export const SUBJECTS = [
-  {
-    slug: 'physics' as const,
-    code: '0625',
-    name: 'Physics',
-    tagline: 'Motion, energy, waves, electricity and the universe.',
+/**
+ * Presentation only, keyed by subject slug.
+ *
+ * The subjects themselves come from the curriculum seed — this map supplies
+ * nothing but colour and an icon. Keeping the list of subjects here as well is
+ * what previously left Biology, Maths and ICT invisible on the homepage while
+ * they were live everywhere else, so it deliberately holds no names or codes.
+ */
+export const SUBJECT_STYLES: Record<
+  string,
+  { accentClass: string; borderClass: string; bgClass: string; gradient: string; icon: string }
+> = {
+  physics: {
     accentClass: 'text-physics',
     borderClass: 'border-physics/30',
     bgClass: 'bg-physics/10',
     gradient: 'from-physics/25 via-physics/5 to-transparent',
+    icon: 'Zap',
   },
-  {
-    slug: 'chemistry' as const,
-    code: '0620',
-    name: 'Chemistry',
-    tagline: 'Particles, bonding, reactions and the chemistry of the world.',
+  chemistry: {
     accentClass: 'text-chemistry',
     borderClass: 'border-chemistry/30',
     bgClass: 'bg-chemistry/10',
     gradient: 'from-chemistry/25 via-chemistry/5 to-transparent',
+    icon: 'Atom',
   },
-];
+  biology: {
+    accentClass: 'text-biology',
+    borderClass: 'border-biology/30',
+    bgClass: 'bg-biology/10',
+    gradient: 'from-biology/25 via-biology/5 to-transparent',
+    icon: 'Leaf',
+  },
+  maths: {
+    accentClass: 'text-maths',
+    borderClass: 'border-maths/30',
+    bgClass: 'bg-maths/10',
+    gradient: 'from-maths/25 via-maths/5 to-transparent',
+    icon: 'Sigma',
+  },
+  'add-maths': {
+    accentClass: 'text-add-maths',
+    borderClass: 'border-add-maths/30',
+    bgClass: 'bg-add-maths/10',
+    gradient: 'from-add-maths/25 via-add-maths/5 to-transparent',
+    icon: 'Infinity',
+  },
+  'intl-maths': {
+    accentClass: 'text-intl-maths',
+    borderClass: 'border-intl-maths/30',
+    bgClass: 'bg-intl-maths/10',
+    gradient: 'from-intl-maths/25 via-intl-maths/5 to-transparent',
+    icon: 'Globe',
+  },
+  ict: {
+    accentClass: 'text-ict',
+    borderClass: 'border-ict/30',
+    bgClass: 'bg-ict/10',
+    gradient: 'from-ict/25 via-ict/5 to-transparent',
+    icon: 'MonitorSmartphone',
+  },
+};
+
+/** Falls back to the accent colour so a new subject is never invisible. */
+export const DEFAULT_SUBJECT_STYLE = {
+  accentClass: 'text-accent',
+  borderClass: 'border-accent/30',
+  bgClass: 'bg-accent/10',
+  gradient: 'from-accent/25 via-accent/5 to-transparent',
+  icon: 'BookOpen',
+};

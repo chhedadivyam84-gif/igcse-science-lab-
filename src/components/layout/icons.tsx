@@ -1,15 +1,20 @@
 import {
   AlertTriangle,
+  Atom,
   BookOpen,
   Calculator,
   CalendarCheck,
   Camera,
   FlaskConical,
+  Globe,
   Grid3x3,
+  Infinity as InfinityIcon,
   LayoutDashboard,
   Layers,
+  Leaf,
   Lightbulb,
   Mic,
+  MonitorSmartphone,
   Network,
   NotebookPen,
   PenLine,
@@ -18,22 +23,28 @@ import {
   Sigma,
   Sparkles,
   TrendingUp,
+  Zap,
   type LucideIcon,
 } from 'lucide-react';
 
 /** Explicit map rather than dynamic lookup, so icons are tree-shaken properly. */
 export const NAV_ICONS: Record<string, LucideIcon> = {
   AlertTriangle,
+  Atom,
   BookOpen,
   Calculator,
   CalendarCheck,
   Camera,
   FlaskConical,
+  Globe,
   Grid3x3,
+  Infinity: InfinityIcon,
   LayoutDashboard,
   Layers,
+  Leaf,
   Lightbulb,
   Mic,
+  MonitorSmartphone,
   Network,
   NotebookPen,
   PenLine,
@@ -42,6 +53,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   Sigma,
   Sparkles,
   TrendingUp,
+  Zap,
 };
 
 export function NavIcon({ name, className }: { name: string; className?: string }) {
