@@ -160,13 +160,24 @@ export function SectionHeader({
 /* Badge                                                                      */
 /* -------------------------------------------------------------------------- */
 
-type BadgeTone = 'neutral' | 'accent' | 'physics' | 'chemistry' | 'positive' | 'caution' | 'negative';
+type BadgeTone =
+  | 'neutral'
+  | 'accent'
+  | 'physics'
+  | 'chemistry'
+  | 'biology'
+  | 'ict'
+  | 'positive'
+  | 'caution'
+  | 'negative';
 
 const BADGE_TONES: Record<BadgeTone, string> = {
   neutral: 'border-line bg-surface-raised text-ink-muted',
   accent: 'border-accent/30 bg-accent/10 text-accent',
   physics: 'border-physics/30 bg-physics/10 text-physics',
   chemistry: 'border-chemistry/30 bg-chemistry/10 text-chemistry',
+  biology: 'border-biology/30 bg-biology/10 text-biology',
+  ict: 'border-ict/30 bg-ict/10 text-ict',
   positive: 'border-positive/30 bg-positive/10 text-positive',
   caution: 'border-caution/30 bg-caution/10 text-caution',
   negative: 'border-negative/30 bg-negative/10 text-negative',

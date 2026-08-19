@@ -331,6 +331,22 @@ export default async function HomePage() {
             0625 and 0620 are used to identify the specifications this tool is designed around. Always
             check the official syllabus document published by Cambridge for authoritative requirements.
           </p>
+          {/* Payment providers require these to be reachable from every page a
+              student can pay from, so they live in the shared footer. */}
+          <nav className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-5">
+            <Link href="/legal/terms" className="hover:text-ink">
+              Terms
+            </Link>
+            <Link href="/legal/privacy" className="hover:text-ink">
+              Privacy
+            </Link>
+            <Link href="/legal/refunds" className="hover:text-ink">
+              Refunds &amp; cancellation
+            </Link>
+            <Link href="/legal/contact" className="hover:text-ink">
+              Contact
+            </Link>
+          </nav>
         </div>
       </footer>
     </>

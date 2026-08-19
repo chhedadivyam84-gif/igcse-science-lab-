@@ -1,3 +1,4 @@
+import type { SubjectSlug } from '@/lib/types';
 import { z } from 'zod';
 import { db } from '@/lib/db';
 import { handleRoute, parseBody } from '@/lib/api';
@@ -143,7 +144,7 @@ export const POST = handleRoute('tutor', async (request) => {
 /** Assembles an answer purely from stored curriculum content. */
 async function curriculumAnswer(
   question: string,
-  subject?: 'physics' | 'chemistry',
+  subject?: SubjectSlug,
   subtopicNumber?: string,
 ): Promise<string> {
   const results = await searchCurriculum(question, { subject, subtopicNumber, limit: 2 });

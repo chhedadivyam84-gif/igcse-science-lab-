@@ -1,5 +1,6 @@
 import 'server-only';
 
+import type { SubjectSlug } from '@/lib/types';
 import { db } from '@/lib/db';
 import { addDays, clamp, daysBetween, isoDate } from '@/lib/utils';
 import type { Difficulty, MistakeCategory } from '@/lib/types';
@@ -216,7 +217,7 @@ export type SubtopicProgress = {
   title: string;
   slug: string;
   topicSlug: string;
-  subject: 'physics' | 'chemistry';
+  subject: SubjectSlug;
   mastery: number;
   attempts: number;
   correct: number;
@@ -237,7 +238,7 @@ export async function progressForUser(userId: string): Promise<SubtopicProgress[
     title: row.subtopic.title,
     slug: row.subtopic.slug,
     topicSlug: row.subtopic.topic.slug,
-    subject: row.subtopic.topic.version.subject.slug as 'physics' | 'chemistry',
+    subject: row.subtopic.topic.version.subject.slug as SubjectSlug,
     mastery: effectiveMastery(row.mastery, row.lastStudiedAt),
     attempts: row.attempts,
     correct: row.correct,
@@ -245,7 +246,7 @@ export async function progressForUser(userId: string): Promise<SubtopicProgress[
   }));
 }
 
-export function subjectMastery(progress: SubtopicProgress[], subject: 'physics' | 'chemistry', totalSubtopics: number) {
+export function subjectMastery(progress: SubtopicProgress[], subject: SubjectSlug, totalSubtopics: number) {
   const rows = progress.filter((p) => p.subject === subject);
   if (!rows.length || totalSubtopics === 0) {
     return { studied: 0, total: totalSubtopics, mastery: 0, mastered: 0 };

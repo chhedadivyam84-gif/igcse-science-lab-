@@ -1,5 +1,6 @@
 'use client';
 
+import type { SubjectSlug } from '@/lib/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Ear, Loader2, Mic, MicOff, RotateCcw, Square, Volume2 } from 'lucide-react';
 
@@ -60,7 +61,7 @@ export function VoiceTutor({
   subject,
   topicHint,
 }: {
-  subject?: 'physics' | 'chemistry';
+  subject?: SubjectSlug;
   topicHint?: string;
 }) {
   const [supported, setSupported] = useState<boolean | null>(null);

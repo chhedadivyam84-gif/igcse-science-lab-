@@ -6,9 +6,11 @@
  * Simulation Lab renders an honest "planned" card instead of a dead button —
  * the availability badge is derived from the registry, never hard-coded here.
  */
+import type { SubjectSlug } from '../types';
+
 export type SimulationSeed = {
   slug: string;
-  subject: 'physics' | 'chemistry';
+  subject: SubjectSlug;
   subtopicNumber?: string;
   title: string;
   description: string;

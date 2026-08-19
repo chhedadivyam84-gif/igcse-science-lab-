@@ -1,5 +1,6 @@
 'use client';
 
+import type { SubjectSlug } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Copy, NotebookPen, Printer, Sparkles } from 'lucide-react';
 
@@ -23,7 +24,7 @@ export function NotesWorkbench({
   aiConfigured,
 }: {
   initialTopic?: string;
-  initialSubject?: 'physics' | 'chemistry';
+  initialSubject?: SubjectSlug;
   aiConfigured: boolean;
 }) {
   const [request, setRequest] = useState(initialTopic ?? '');

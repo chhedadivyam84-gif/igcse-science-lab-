@@ -1,5 +1,6 @@
 import 'server-only';
 
+import type { SubjectSlug } from '@/lib/types';
 import { db } from '@/lib/db';
 import { isoDate } from '@/lib/utils';
 import { progressForUser } from '@/lib/progress';
@@ -86,7 +87,7 @@ export async function buildDailyPlan(userId: string): Promise<PlanItem[]> {
   });
 
   if (untouched) {
-    const subject = untouched.topic.version.subject.slug as 'physics' | 'chemistry';
+    const subject = untouched.topic.version.subject.slug as SubjectSlug;
     items.push({
       id: `new-${untouched.id}`,
       label: `New: ${untouched.title}`,

@@ -1,5 +1,6 @@
 'use client';
 
+import type { SubjectSlug } from '@/lib/types';
 import { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, Send, Square, Volume2, VolumeX } from 'lucide-react';
 
@@ -34,7 +35,7 @@ export function TutorChat({
   initialMessages: Message[];
   conversationId?: string;
   topicHint?: string;
-  subject?: 'physics' | 'chemistry';
+  subject?: SubjectSlug;
   aiConfigured: boolean;
 }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);

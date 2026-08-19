@@ -1,5 +1,6 @@
 'use client';
 
+import type { SubjectSlug } from '@/lib/types';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
@@ -15,7 +16,7 @@ export type MapNode = {
   topicSlug: string;
   topicNumber: string;
   topicTitle: string;
-  subject: 'physics' | 'chemistry';
+  subject: SubjectSlug;
   prerequisites: string[];
   mastery: number | null;
   hasLesson: boolean;
@@ -35,7 +36,7 @@ const MARGIN_Y = 40;
  * curves are prerequisite links. Laying it out this way means the picture is
  * the syllabus structure — not an arbitrary force-directed blob.
  */
-export function KnowledgeMap({ nodes, subject }: { nodes: MapNode[]; subject: 'physics' | 'chemistry' }) {
+export function KnowledgeMap({ nodes, subject }: { nodes: MapNode[]; subject: SubjectSlug }) {
   const [selected, setSelected] = useState<MapNode | null>(null);
 
   const { positioned, width, height, edges } = useMemo(() => {
@@ -258,7 +259,7 @@ export function KnowledgeMap({ nodes, subject }: { nodes: MapNode[]; subject: 'p
   );
 }
 
-export function MapLegendBadges({ subject }: { subject: 'physics' | 'chemistry' }) {
+export function MapLegendBadges({ subject }: { subject: SubjectSlug }) {
   return (
     <Badge tone={subject === 'physics' ? 'physics' : 'chemistry'}>
       {subject === 'physics' ? 'Physics 0625' : 'Chemistry 0620'}

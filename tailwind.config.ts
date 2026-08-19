@@ -31,6 +31,8 @@ const config: Config = {
         accent: token('accent'),
         physics: token('physics'),
         chemistry: token('chemistry'),
+        biology: token('biology'),
+        ict: token('ict'),
         positive: token('positive'),
         caution: token('caution'),
         negative: token('negative'),

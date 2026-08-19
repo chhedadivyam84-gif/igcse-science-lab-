@@ -6,7 +6,10 @@ async function main(){
   const qApproved = await db.question.count({ where:{ reviewStatus:'APPROVED' } });
   const cards = await db.flashcard.count();
   const sims = await db.simulation.count();
-  for (const slug of ['physics','chemistry']) {
+  // Derived from the data, not hard-coded, so a newly added subject cannot be
+  // silently left out of the coverage report.
+  const slugs = [...new Set(subs.map(s=>s.topic.version.subject.slug))].sort();
+  for (const slug of slugs) {
     const mine = subs.filter(s=>s.topic.version.subject.slug===slug);
     const withLesson = mine.filter(s=>s._count.lessons>0).length;
     const withQ = mine.filter(s=>s._count.questions>0).length;

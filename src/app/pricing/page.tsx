@@ -203,6 +203,24 @@ export default async function PricingPage() {
           </dl>
         </section>
       </Reveal>
+
+      {/* Anyone about to pay should be one click from the refund terms. */}
+      <Reveal delay={0.05}>
+        <nav className="mt-14 flex flex-wrap justify-center gap-x-5 gap-y-2 border-t border-line pt-6 text-xs text-ink-faint">
+          <Link href="/legal/terms" className="hover:text-ink">
+            Terms
+          </Link>
+          <Link href="/legal/privacy" className="hover:text-ink">
+            Privacy
+          </Link>
+          <Link href="/legal/refunds" className="hover:text-ink">
+            Refunds &amp; cancellation
+          </Link>
+          <Link href="/legal/contact" className="hover:text-ink">
+            Contact
+          </Link>
+        </nav>
+      </Reveal>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 // Relative import (not the `@/` alias) so the Prisma seed script can run this
 // file through tsx without extra path resolution.
-import type { Difficulty, Provenance, QuestionType, Tier } from '../types';
+import type { Difficulty, Provenance, QuestionType, SubjectSlug, Tier } from '../types';
 
 /**
  * The curriculum seed format.
@@ -82,10 +82,10 @@ export type TopicSeed = {
 export type SyllabusSeed = {
   subject: {
     code: string;
-    slug: 'physics' | 'chemistry';
+    slug: SubjectSlug;
     name: string;
     tagline: string;
-    accent: 'physics' | 'chemistry';
+    accent: SubjectSlug;
   };
   version: {
     code: string;
@@ -100,7 +100,7 @@ export type SyllabusSeed = {
 
 export type FormulaSeed = {
   key: string;
-  subject: 'physics' | 'chemistry';
+  subject: SubjectSlug;
   subtopicNumber?: string;
   name: string;
   expression: string;
@@ -110,7 +110,7 @@ export type FormulaSeed = {
 };
 
 export type DefinitionSeed = {
-  subject: 'physics' | 'chemistry';
+  subject: SubjectSlug;
   subtopicNumber?: string;
   term: string;
   statement: string;

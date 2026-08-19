@@ -1,6 +1,14 @@
 /** Shared vocabulary for content, AI output and student activity. */
 
-export type SubjectSlug = 'physics' | 'chemistry';
+/**
+ * Every subject the platform teaches.
+ *
+ * Widening this union is the single switch that adds a subject: the curriculum
+ * seed, accent colours, knowledge map and progress maths all derive from it
+ * rather than repeating the literals, so a subject cannot be half-added and
+ * silently missing from one screen.
+ */
+export type SubjectSlug = 'physics' | 'chemistry' | 'biology' | 'ict';
 export type Tier = 'CORE' | 'SUPPLEMENT';
 export type Origin = 'AUTHORED' | 'AI_GENERATED';
 export type ReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
