@@ -688,7 +688,7 @@ Long, mixing upper and lower case, digits and symbols, avoiding dictionary words
     {
       number: '9',
       slug: 'audience-and-communication',
-      title: 'Audience and communication',
+      title: 'Audience',
       summary: 'Audience appreciation, copyright, and communicating appropriately.',
       subtopics: [
         {
@@ -772,19 +772,182 @@ Note the distinction candidates most often miss: **freeware is free but closed**
       ],
     },
     {
-      number: '10',
-      slug: 'data-handling-and-databases',
-      title: 'Databases and data handling',
+      number: '16',
+      slug: 'graphs-and-charts',
+      title: 'Graphs and charts',
+      summary: 'Choosing the right chart type for the data and labelling it correctly.',
+      subtopics: [
+        {
+          number: '16.1',
+          slug: 'graphs-and-charts',
+          title: 'Graphs and charts',
+          summary: 'Choosing the right chart type and labelling it properly.',
+          objectives: [
+            { code: '16.1.1', statement: 'Select and create appropriate chart types and label them correctly.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'graphs-and-charts',
+              title: 'Graphs and charts',
+              readingMinutes: 4,
+              body: `Choosing the wrong chart type is the fastest way to lose marks in the practical papers, and the rules are simple.
+### Which chart for which job
+- **Pie chart** — showing the **proportions of a whole**, e.g. the percentage of sales by product. Only sensible when the segments add to 100% and there are not too many of them.
+- **Bar chart** — **comparing** separate categories, e.g. sales in each shop.
+- **Line graph** — showing a **trend over time**, e.g. temperature across a year.
+- **Scatter graph** — showing the **relationship between two variables**, e.g. revision hours against exam score.
+The test is what the data *is*: parts of a whole, separate categories, change over time, or a relationship.
+### Labelling — where the marks are
+Every chart needs:
+- A meaningful **title** describing what it shows;
+- **Axis labels** with **units** where relevant;
+- A **legend/key** when more than one data series is plotted (and none when only one, since it adds clutter);
+- **Category labels** on the correct axis;
+- **Segment labels or percentages** on a pie chart.
+### A common trap
+Using a pie chart for data that does not form a whole — such as comparing the populations of five unrelated countries — is wrong, because the segments do not represent parts of a single total. Use a bar chart instead.`,
+              analogy: 'Chart choice is like choosing a sentence structure: the facts may be right, but a question mark on a statement misleads the reader. A pie chart on non-proportional data misleads in exactly the same way.',
+              misconceptions: [
+                'Using a pie chart for any comparison. Pie charts only work for parts of a single whole.',
+                'Omitting axis labels and units. These are separate marking points in practical assessments and are lost constantly.',
+                'Including a legend for a single data series, which adds clutter without adding information.',
+              ],
+              examTips: [
+                'Decide the chart type from the wording of the question: "proportion" or "percentage of total" → pie; "compare" → bar; "over time" → line; "relationship between" → scatter.',
+                'Before submitting any chart, check the title, both axis labels with units, and the legend. That checklist recovers marks reliably.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A shop wants to show how its total monthly sales changed across a year. State the most suitable chart type and justify your choice.',
+                  steps: ['The data is a single measurement recorded at regular time intervals.', 'The purpose is to show how it changes over time, i.e. a trend.', 'A line graph joins the points, making the trend and any seasonal pattern visible.'],
+                  answer: 'A line graph, because it shows how a value changes over time and makes the trend across the twelve months clearly visible.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'When should you use a pie chart?', back: 'When showing proportions of a single whole, where the segments total 100%.', difficulty: 'MEDIUM' },
+            { front: 'Which chart shows a trend over time?', back: 'A line graph.', difficulty: 'EASY' },
+            { front: 'Which chart shows the relationship between two variables?', back: 'A scatter graph.', difficulty: 'MEDIUM' },
+            { front: 'Name four things every chart needs.', back: 'A meaningful title, labelled axes with units, a legend when there is more than one series, and category labels.', difficulty: 'MEDIUM' },
+            { front: 'Why is a pie chart wrong for comparing unrelated totals?', back: 'The segments would not be parts of a single whole, so the proportions would be meaningless.', difficulty: 'HARD' },
+          ],
+          questions: [
+            {
+              type: 'MCQ',
+              difficulty: 'FOUNDATION',
+              stem: 'A school wants to display what percentage of its students choose each of four option subjects. Which chart type is most appropriate?',
+              options: [
+                { id: 'a', text: 'Pie chart', why: '' },
+                { id: 'b', text: 'Line graph', why: 'Line graphs show change over time, and there is no time variable here.' },
+                { id: 'c', text: 'Scatter graph', why: 'Scatter graphs show the relationship between two numeric variables.' },
+                { id: 'd', text: 'Flowchart', why: 'A flowchart shows a process, not numerical data.' },
+              ],
+              answer: 'a',
+              markScheme: ['Pie chart (1)'],
+              marks: 1,
+              explanation:
+                'The four options together account for all students, so the data forms parts of a single whole totalling 100% — exactly what a pie chart represents.',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      number: '17',
+      slug: 'document-production',
+      title: 'Document production',
+      summary: 'Formatting text, page layout, consistent styles and proofing.',
+      subtopics: [
+        {
+          number: '17.1',
+          slug: 'document-production',
+          title: 'Document production, styles and proofing',
+          summary: 'Formatting text, using styles consistently, and proofing techniques.',
+          objectives: [
+            { code: '17.1.1', statement: 'Format text and organise page layout, including margins, columns and tables.', tier: 'CORE' },
+            { code: '17.1.2', statement: 'Use consistent styles and apply proofing techniques including spell check and proofreading.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'document-production',
+              title: 'Document production, styles and proofing',
+              readingMinutes: 5,
+              body: `### Page layout
+Control **margins**, **orientation** (portrait or landscape), **page size**, **columns**, **headers and footers** (for page numbers, filenames and dates), and **page breaks** to place content deliberately rather than letting it fall where it happens to.
+Use **tables** to organise data in rows and columns, and **widow/orphan control** to stop a single line of a paragraph being stranded on its own page.
+### Styles
+A **style** is a named set of formatting — font, size, colour, spacing — applied to text. Using styles rather than manual formatting means:
+- The document is **consistent** throughout;
+- Changing the style **updates every instance at once**, saving considerable time;
+- Heading styles allow an automatic **table of contents** and improve accessibility for screen readers.
+Corporate house styles work precisely this way, which is why professional documents look uniform.
+### Text formatting basics
+**Serif** fonts (with small strokes on letter ends) are traditional for printed body text; **sans-serif** fonts are cleaner on screen. Whichever you choose, be consistent, and use **alignment** (left, centre, right, justified) purposefully — justified text gives straight edges on both sides but can create uneven word spacing.
+### Proofing
+- **Spell check** catches misspelt words, but **not** words spelt correctly and used wrongly — "their" for "there", or "form" for "from", both pass.
+- **Grammar check** flags likely grammatical errors, though it is unreliable and sometimes wrong.
+- **Proofreading** by a human is the only way to catch context errors, wrong facts and awkward phrasing.
+The exam point: **a spell check is not sufficient on its own**, and questions often ask exactly why.`,
+              analogy: 'A style is a uniform rather than dressing each person individually. When the uniform changes, everyone changes at once — which is why editing one style beats editing two hundred headings by hand.',
+              misconceptions: [
+                'Believing a spell check makes proofreading unnecessary. It cannot detect a correctly spelt wrong word, which is the most common real error.',
+                'Formatting each heading manually instead of using styles, then finding that a design change means editing everything by hand.',
+                'Thinking justified text is always best. It creates rivers of white space in narrow columns and can be harder to read.',
+              ],
+              examTips: [
+                'When asked why styles should be used, give consistency **and** the ability to update all instances at once. The second is the stronger, more technical point.',
+                'For proofing questions, always give an example of an error a spell check would miss — "form" instead of "from" makes the point instantly.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A student runs a spell check on an essay and finds no errors, but their teacher still finds mistakes. Explain how this is possible.',
+                  steps: ['A spell check compares each word against a dictionary and flags words not found in it.', 'A word that is spelt correctly but used in the wrong context still exists in the dictionary, so it is not flagged.', 'Examples include "their" for "there", or "form" for "from" — and grammar or factual errors are also missed.'],
+                  answer: 'A spell check only detects words that are not in its dictionary. Correctly spelt but wrongly used words such as "their" for "there" pass unnoticed, so human proofreading is still needed.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What is a style in a word processor?', back: 'A named set of formatting (font, size, colour, spacing) that can be applied to text and updated everywhere at once.', difficulty: 'MEDIUM' },
+            { front: 'Give two advantages of using styles.', back: 'Consistency throughout the document, and changing the style updates every instance at once.', difficulty: 'MEDIUM' },
+            { front: 'What error can a spell check not detect?', back: 'A correctly spelt word used in the wrong context, e.g. "their" instead of "there".', difficulty: 'MEDIUM' },
+            { front: 'What goes in a header or footer?', back: 'Repeating information such as page numbers, dates, filenames or the document title.', difficulty: 'EASY' },
+            { front: 'Difference between serif and sans-serif fonts?', back: 'Serif fonts have small strokes on the ends of letters and suit printed body text; sans-serif fonts have none and are cleaner on screen.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'A company wants all its reports to look the same. Explain how using styles helps achieve this, and give one further advantage. [2]',
+              answer:
+                'Applying the same named styles to headings and body text in every report ensures the font, size, colour and spacing are identical throughout and across documents, giving a consistent corporate appearance. A further advantage is that if the company decides to change its house font, editing the style updates every instance automatically instead of reformatting each document by hand.',
+              markScheme: [
+                'Styles apply identical formatting throughout, giving consistency (1)',
+                'Changing the style updates all text using it automatically, saving time (1)',
+              ],
+              marks: 2,
+              explanation:
+                'Automatic updating is the advantage that scales: for a hundred-page report, manual reformatting is not merely tedious but a reliable source of inconsistency.',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      number: '18',
+      slug: 'databases',
+      title: 'Databases',
       summary: 'Database structure, field types, validation and verification.',
       subtopics: [
         {
-          number: '10.1',
+          number: '18.1',
           slug: 'databases',
           title: 'Database structure and field types',
           summary: 'Records, fields, keys, and choosing the right data type.',
           objectives: [
-            { code: '10.1.1', statement: 'Describe the structure of a database including records, fields and primary keys.', tier: 'CORE' },
-            { code: '10.1.2', statement: 'Select appropriate data types and describe relational database structure.', tier: 'CORE' },
+            { code: '18.1.1', statement: 'Describe the structure of a database including records, fields and primary keys.', tier: 'CORE' },
+            { code: '18.1.2', statement: 'Select appropriate data types and describe relational database structure.', tier: 'CORE' },
           ],
           lessons: [
             {
@@ -855,13 +1018,13 @@ The classic trap: a **telephone number** is stored as **text**, not numeric, bec
           ],
         },
         {
-          number: '10.2',
+          number: '18.2',
           slug: 'validation-and-verification',
           title: 'Validation and verification',
           summary: 'Two different checks on data entry, and the types of validation check.',
-          prerequisites: ['10.1'],
+          prerequisites: ['18.1'],
           objectives: [
-            { code: '10.2.1', statement: 'Distinguish between validation and verification and describe the main validation checks.', tier: 'CORE' },
+            { code: '18.2.1', statement: 'Distinguish between validation and verification and describe the main validation checks.', tier: 'CORE' },
           ],
           lessons: [
             {
@@ -936,175 +1099,19 @@ So: **validation asks "is this sensible?"; verification asks "is this what was o
       ],
     },
     {
-      number: '11',
-      slug: 'document-and-data-presentation',
-      title: 'Document production and data presentation',
-      summary: 'Document layout, styles, proofing, and presenting data in charts.',
-      subtopics: [
-        {
-          number: '11.1',
-          slug: 'document-production',
-          title: 'Document production, styles and proofing',
-          summary: 'Formatting text, using styles consistently, and proofing techniques.',
-          objectives: [
-            { code: '11.1.1', statement: 'Format text and organise page layout, including margins, columns and tables.', tier: 'CORE' },
-            { code: '11.1.2', statement: 'Use consistent styles and apply proofing techniques including spell check and proofreading.', tier: 'CORE' },
-          ],
-          lessons: [
-            {
-              slug: 'document-production',
-              title: 'Document production, styles and proofing',
-              readingMinutes: 5,
-              body: `### Page layout
-Control **margins**, **orientation** (portrait or landscape), **page size**, **columns**, **headers and footers** (for page numbers, filenames and dates), and **page breaks** to place content deliberately rather than letting it fall where it happens to.
-Use **tables** to organise data in rows and columns, and **widow/orphan control** to stop a single line of a paragraph being stranded on its own page.
-### Styles
-A **style** is a named set of formatting — font, size, colour, spacing — applied to text. Using styles rather than manual formatting means:
-- The document is **consistent** throughout;
-- Changing the style **updates every instance at once**, saving considerable time;
-- Heading styles allow an automatic **table of contents** and improve accessibility for screen readers.
-Corporate house styles work precisely this way, which is why professional documents look uniform.
-### Text formatting basics
-**Serif** fonts (with small strokes on letter ends) are traditional for printed body text; **sans-serif** fonts are cleaner on screen. Whichever you choose, be consistent, and use **alignment** (left, centre, right, justified) purposefully — justified text gives straight edges on both sides but can create uneven word spacing.
-### Proofing
-- **Spell check** catches misspelt words, but **not** words spelt correctly and used wrongly — "their" for "there", or "form" for "from", both pass.
-- **Grammar check** flags likely grammatical errors, though it is unreliable and sometimes wrong.
-- **Proofreading** by a human is the only way to catch context errors, wrong facts and awkward phrasing.
-The exam point: **a spell check is not sufficient on its own**, and questions often ask exactly why.`,
-              analogy: 'A style is a uniform rather than dressing each person individually. When the uniform changes, everyone changes at once — which is why editing one style beats editing two hundred headings by hand.',
-              misconceptions: [
-                'Believing a spell check makes proofreading unnecessary. It cannot detect a correctly spelt wrong word, which is the most common real error.',
-                'Formatting each heading manually instead of using styles, then finding that a design change means editing everything by hand.',
-                'Thinking justified text is always best. It creates rivers of white space in narrow columns and can be harder to read.',
-              ],
-              examTips: [
-                'When asked why styles should be used, give consistency **and** the ability to update all instances at once. The second is the stronger, more technical point.',
-                'For proofing questions, always give an example of an error a spell check would miss — "form" instead of "from" makes the point instantly.',
-              ],
-              workedExamples: [
-                {
-                  prompt: 'A student runs a spell check on an essay and finds no errors, but their teacher still finds mistakes. Explain how this is possible.',
-                  steps: ['A spell check compares each word against a dictionary and flags words not found in it.', 'A word that is spelt correctly but used in the wrong context still exists in the dictionary, so it is not flagged.', 'Examples include "their" for "there", or "form" for "from" — and grammar or factual errors are also missed.'],
-                  answer: 'A spell check only detects words that are not in its dictionary. Correctly spelt but wrongly used words such as "their" for "there" pass unnoticed, so human proofreading is still needed.',
-                },
-              ],
-            },
-          ],
-          flashcards: [
-            { front: 'What is a style in a word processor?', back: 'A named set of formatting (font, size, colour, spacing) that can be applied to text and updated everywhere at once.', difficulty: 'MEDIUM' },
-            { front: 'Give two advantages of using styles.', back: 'Consistency throughout the document, and changing the style updates every instance at once.', difficulty: 'MEDIUM' },
-            { front: 'What error can a spell check not detect?', back: 'A correctly spelt word used in the wrong context, e.g. "their" instead of "there".', difficulty: 'MEDIUM' },
-            { front: 'What goes in a header or footer?', back: 'Repeating information such as page numbers, dates, filenames or the document title.', difficulty: 'EASY' },
-            { front: 'Difference between serif and sans-serif fonts?', back: 'Serif fonts have small strokes on the ends of letters and suit printed body text; sans-serif fonts have none and are cleaner on screen.', difficulty: 'MEDIUM' },
-          ],
-          questions: [
-            {
-              type: 'STRUCTURED',
-              difficulty: 'STANDARD',
-              stem: 'A company wants all its reports to look the same. Explain how using styles helps achieve this, and give one further advantage. [2]',
-              answer:
-                'Applying the same named styles to headings and body text in every report ensures the font, size, colour and spacing are identical throughout and across documents, giving a consistent corporate appearance. A further advantage is that if the company decides to change its house font, editing the style updates every instance automatically instead of reformatting each document by hand.',
-              markScheme: [
-                'Styles apply identical formatting throughout, giving consistency (1)',
-                'Changing the style updates all text using it automatically, saving time (1)',
-              ],
-              marks: 2,
-              explanation:
-                'Automatic updating is the advantage that scales: for a hundred-page report, manual reformatting is not merely tedious but a reliable source of inconsistency.',
-            },
-          ],
-        },
-        {
-          number: '11.2',
-          slug: 'graphs-and-charts',
-          title: 'Graphs and charts',
-          summary: 'Choosing the right chart type and labelling it properly.',
-          prerequisites: ['11.1'],
-          objectives: [
-            { code: '11.2.1', statement: 'Select and create appropriate chart types and label them correctly.', tier: 'CORE' },
-          ],
-          lessons: [
-            {
-              slug: 'graphs-and-charts',
-              title: 'Graphs and charts',
-              readingMinutes: 4,
-              body: `Choosing the wrong chart type is the fastest way to lose marks in the practical papers, and the rules are simple.
-### Which chart for which job
-- **Pie chart** — showing the **proportions of a whole**, e.g. the percentage of sales by product. Only sensible when the segments add to 100% and there are not too many of them.
-- **Bar chart** — **comparing** separate categories, e.g. sales in each shop.
-- **Line graph** — showing a **trend over time**, e.g. temperature across a year.
-- **Scatter graph** — showing the **relationship between two variables**, e.g. revision hours against exam score.
-The test is what the data *is*: parts of a whole, separate categories, change over time, or a relationship.
-### Labelling — where the marks are
-Every chart needs:
-- A meaningful **title** describing what it shows;
-- **Axis labels** with **units** where relevant;
-- A **legend/key** when more than one data series is plotted (and none when only one, since it adds clutter);
-- **Category labels** on the correct axis;
-- **Segment labels or percentages** on a pie chart.
-### A common trap
-Using a pie chart for data that does not form a whole — such as comparing the populations of five unrelated countries — is wrong, because the segments do not represent parts of a single total. Use a bar chart instead.`,
-              analogy: 'Chart choice is like choosing a sentence structure: the facts may be right, but a question mark on a statement misleads the reader. A pie chart on non-proportional data misleads in exactly the same way.',
-              misconceptions: [
-                'Using a pie chart for any comparison. Pie charts only work for parts of a single whole.',
-                'Omitting axis labels and units. These are separate marking points in practical assessments and are lost constantly.',
-                'Including a legend for a single data series, which adds clutter without adding information.',
-              ],
-              examTips: [
-                'Decide the chart type from the wording of the question: "proportion" or "percentage of total" → pie; "compare" → bar; "over time" → line; "relationship between" → scatter.',
-                'Before submitting any chart, check the title, both axis labels with units, and the legend. That checklist recovers marks reliably.',
-              ],
-              workedExamples: [
-                {
-                  prompt: 'A shop wants to show how its total monthly sales changed across a year. State the most suitable chart type and justify your choice.',
-                  steps: ['The data is a single measurement recorded at regular time intervals.', 'The purpose is to show how it changes over time, i.e. a trend.', 'A line graph joins the points, making the trend and any seasonal pattern visible.'],
-                  answer: 'A line graph, because it shows how a value changes over time and makes the trend across the twelve months clearly visible.',
-                },
-              ],
-            },
-          ],
-          flashcards: [
-            { front: 'When should you use a pie chart?', back: 'When showing proportions of a single whole, where the segments total 100%.', difficulty: 'MEDIUM' },
-            { front: 'Which chart shows a trend over time?', back: 'A line graph.', difficulty: 'EASY' },
-            { front: 'Which chart shows the relationship between two variables?', back: 'A scatter graph.', difficulty: 'MEDIUM' },
-            { front: 'Name four things every chart needs.', back: 'A meaningful title, labelled axes with units, a legend when there is more than one series, and category labels.', difficulty: 'MEDIUM' },
-            { front: 'Why is a pie chart wrong for comparing unrelated totals?', back: 'The segments would not be parts of a single whole, so the proportions would be meaningless.', difficulty: 'HARD' },
-          ],
-          questions: [
-            {
-              type: 'MCQ',
-              difficulty: 'FOUNDATION',
-              stem: 'A school wants to display what percentage of its students choose each of four option subjects. Which chart type is most appropriate?',
-              options: [
-                { id: 'a', text: 'Pie chart', why: '' },
-                { id: 'b', text: 'Line graph', why: 'Line graphs show change over time, and there is no time variable here.' },
-                { id: 'c', text: 'Scatter graph', why: 'Scatter graphs show the relationship between two numeric variables.' },
-                { id: 'd', text: 'Flowchart', why: 'A flowchart shows a process, not numerical data.' },
-              ],
-              answer: 'a',
-              markScheme: ['Pie chart (1)'],
-              marks: 1,
-              explanation:
-                'The four options together account for all students, so the data forms parts of a single whole totalling 100% — exactly what a pie chart represents.',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      number: '12',
-      slug: 'spreadsheets-and-modelling',
-      title: 'Spreadsheets and modelling',
+      number: '20',
+      slug: 'spreadsheets',
+      title: 'Spreadsheets',
       summary: 'Formulae, functions, absolute and relative references, and what-if modelling.',
       subtopics: [
         {
-          number: '12.1',
+          number: '20.1',
           slug: 'spreadsheets',
           title: 'Formulae, functions and cell references',
           summary: 'Building a working model and referencing cells correctly.',
           objectives: [
-            { code: '12.1.1', statement: 'Create formulae and use functions including SUM, AVERAGE, IF, COUNTIF and VLOOKUP.', tier: 'CORE' },
-            { code: '12.1.2', statement: 'Explain the difference between absolute and relative cell references and use spreadsheets for modelling.', tier: 'CORE' },
+            { code: '20.1.1', statement: 'Create formulae and use functions including SUM, AVERAGE, IF, COUNTIF and VLOOKUP.', tier: 'CORE' },
+            { code: '20.1.2', statement: 'Explain the difference between absolute and relative cell references and use spreadsheets for modelling.', tier: 'CORE' },
           ],
           lessons: [
             {
@@ -1176,19 +1183,19 @@ Advantages of modelling rather than testing reality: it is **cheaper**, **faster
       ],
     },
     {
-      number: '13',
+      number: '21',
       slug: 'website-authoring',
       title: 'Website authoring',
       summary: 'HTML structure, CSS presentation, and the separation of the two.',
       subtopics: [
         {
-          number: '13.1',
+          number: '21.1',
           slug: 'html-and-css',
           title: 'HTML structure and CSS presentation',
           summary: 'Why content and presentation are kept separate, and the basics of each.',
           prerequisites: ['9.1'],
           objectives: [
-            { code: '13.1.1', statement: 'Describe the use of HTML for structure and CSS for presentation, and explain the benefits of separating them.', tier: 'CORE' },
+            { code: '21.1.1', statement: 'Describe the use of HTML for structure and CSS for presentation, and explain the benefits of separating them.', tier: 'CORE' },
           ],
           lessons: [
             {
