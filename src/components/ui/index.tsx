@@ -167,6 +167,9 @@ type BadgeTone =
   | 'chemistry'
   | 'biology'
   | 'ict'
+  | 'maths'
+  | 'add-maths'
+  | 'intl-maths'
   | 'positive'
   | 'caution'
   | 'negative';
@@ -178,6 +181,9 @@ const BADGE_TONES: Record<BadgeTone, string> = {
   chemistry: 'border-chemistry/30 bg-chemistry/10 text-chemistry',
   biology: 'border-biology/30 bg-biology/10 text-biology',
   ict: 'border-ict/30 bg-ict/10 text-ict',
+  maths: 'border-maths/30 bg-maths/10 text-maths',
+  'add-maths': 'border-add-maths/30 bg-add-maths/10 text-add-maths',
+  'intl-maths': 'border-intl-maths/30 bg-intl-maths/10 text-intl-maths',
   positive: 'border-positive/30 bg-positive/10 text-positive',
   caution: 'border-caution/30 bg-caution/10 text-caution',
   negative: 'border-negative/30 bg-negative/10 text-negative',

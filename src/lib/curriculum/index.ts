@@ -1,6 +1,9 @@
+import { addMaths0606 } from './add-maths';
 import { biology0610 } from './biology';
 import { chemistry0620 } from './chemistry';
 import { ict0417 } from './ict';
+import { intlMaths0607 } from './intl-maths';
+import { maths0580 } from './maths';
 import { physics0625 } from './physics';
 import { definitions } from './definitions';
 import { formulas } from './formulas';
@@ -8,7 +11,18 @@ import { simulations } from './simulations';
 import type { SubtopicSeed, SyllabusSeed, TopicSeed } from './types';
 import type { SubjectSlug } from '../types';
 
-export { biology0610, chemistry0620, ict0417, physics0625, definitions, formulas, simulations };
+export {
+  addMaths0606,
+  biology0610,
+  chemistry0620,
+  ict0417,
+  intlMaths0607,
+  maths0580,
+  physics0625,
+  definitions,
+  formulas,
+  simulations,
+};
 export type * from './types';
 
 /**
@@ -16,7 +30,15 @@ export type * from './types';
  * appending a new seed here and flipping `isActive` at seed time — nothing in
  * the application reads the syllabus any other way.
  */
-export const syllabuses: SyllabusSeed[] = [physics0625, chemistry0620, biology0610, ict0417];
+export const syllabuses: SyllabusSeed[] = [
+  physics0625,
+  chemistry0620,
+  biology0610,
+  maths0580,
+  addMaths0606,
+  intlMaths0607,
+  ict0417,
+];
 
 export function syllabusFor(subject: SubjectSlug): SyllabusSeed {
   const found = syllabuses.find((s) => s.subject.slug === subject);
