@@ -31,7 +31,15 @@ export const GET = handleRoute('search', async (request) => {
   const terms = words.length ? words : [params.q.toLowerCase()];
   const user = await getSessionUser();
 
-  const [subtopics, lessons, definitions, formulas, sims, questions, notes] = await Promise.all([
+  const [topics, subtopics, lessons, definitions, formulas, sims, questions, notes] = await Promise.all([
+    db.topic.findMany({
+      where: {
+        version: { isActive: true },
+        OR: [...terms.map((t) => ({ title: { contains: t } })), ...terms.map((t) => ({ summary: { contains: t } }))],
+      },
+      include: { version: { include: { subject: true } } },
+      take: 6,
+    }),
     db.subtopic.findMany({
       where: { OR: [...terms.map((t) => ({ title: { contains: t } })), ...terms.map((t) => ({ summary: { contains: t } }))] },
       include: { topic: { include: { version: { include: { subject: true } } } } },
@@ -71,6 +79,17 @@ export const GET = handleRoute('search', async (request) => {
   ]);
 
   const hits: SearchHit[] = [
+    // Topics were declared in the SearchHit union but never actually searched,
+    // so typing a topic name — "spreadsheets", "presentations", "databases" —
+    // returned nothing even though the topic existed.
+    ...topics.map((t) => ({
+      kind: 'topic' as const,
+      title: `Topic ${t.number} · ${t.title}`,
+      detail: t.summary,
+      href: `/learn/${t.version.subject.slug}/${t.slug}`,
+      subject: t.version.subject.slug,
+      badge: 'Topic',
+    })),
     ...subtopics.map((s) => ({
       kind: 'subtopic' as const,
       title: `${s.number} ${s.title}`,
