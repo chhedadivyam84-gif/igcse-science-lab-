@@ -32,7 +32,6 @@ export default async function SimulationPage({ params }: Params) {
   if (!simulation) notFound();
 
   const concepts = parseList<string>(simulation.concepts);
-  const isPhysics = simulation.subject.slug === 'physics';
   const available = isSimulationAvailable(simulation.component);
 
   return (

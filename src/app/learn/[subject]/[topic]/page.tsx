@@ -46,7 +46,6 @@ export default async function TopicPage({ params }: Params) {
   if (!topic) notFound();
 
   const masteryByNumber = new Map(progress.map((p) => [p.number, p.mastery]));
-  const isPhysics = slug === 'physics';
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">

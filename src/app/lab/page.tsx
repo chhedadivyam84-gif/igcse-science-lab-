@@ -6,11 +6,12 @@ import { db } from '@/lib/db';
 import { parseList } from '@/lib/json';
 import { isSimulationAvailable } from '@/components/sim/available';
 import { Badge, Card, Notice, Panel } from '@/components/ui';
-import { isSubjectSlug, subjectTextClass, subjectTone } from '@/lib/subjects';
+import { ALL_SUBJECTS, isSubjectSlug, subjectTextClass, subjectTone } from '@/lib/subjects';
 
 export const metadata: Metadata = {
   title: 'Simulation Lab',
-  description: 'Interactive physics and chemistry simulations built around observe, predict, experiment, explain.',
+  description:
+    'Interactive Physics, Chemistry, Biology, Maths and ICT simulations built around observe, predict, experiment, explain.',
 };
 export const dynamic = 'force-dynamic';
 
@@ -21,11 +22,16 @@ export default async function LabPage({
 }) {
   const { subject } = await searchParams;
 
-  const simulations = await db.simulation.findMany({
-    where: isSubjectSlug(subject) ? { subject: { slug: subject } } : {},
-    include: { subject: true, subtopic: { include: { topic: true } } },
-    orderBy: [{ subjectId: 'asc' }, { order: 'asc' }],
-  });
+  const [simulations, subjectsWithSims] = await Promise.all([
+    db.simulation.findMany({
+      where: isSubjectSlug(subject) ? { subject: { slug: subject } } : {},
+      include: { subject: true, subtopic: { include: { topic: true } } },
+      orderBy: [{ subjectId: 'asc' }, { order: 'asc' }],
+    }),
+    // Unfiltered, so the filter bar still lists every subject once one is picked.
+    db.simulation.findMany({ distinct: ['subjectId'], select: { subject: { select: { slug: true } } } }),
+  ]);
+  const simSubjectSlugs = new Set(subjectsWithSims.map((s) => s.subject.slug));
 
   const available = simulations.filter((s) => isSimulationAvailable(s.component));
   const planned = simulations.filter((s) => !isSimulationAvailable(s.component));
@@ -43,16 +49,26 @@ export default async function LabPage({
         </p>
       </header>
 
+      {/* Only subjects that actually have simulations, built from the catalogue
+          rather than hard-coded — the two fixed links here meant Biology, Maths
+          and ICT simulations could not be filtered to at all. */}
       <div className="mb-6 flex flex-wrap gap-2">
         <FilterLink href="/lab" label="All" active={!subject} />
-        <FilterLink href="/lab?subject=physics" label="Physics" active={subject === 'physics'} />
-        <FilterLink href="/lab?subject=chemistry" label="Chemistry" active={subject === 'chemistry'} />
+        {ALL_SUBJECTS.filter(({ slug }) => simSubjectSlugs.has(slug)).map(
+          ({ slug, display }) => (
+            <FilterLink
+              key={slug}
+              href={`/lab?subject=${slug}`}
+              label={display.name}
+              active={subject === slug}
+            />
+          ),
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {available.map((simulation) => {
           const concepts = parseList<string>(simulation.concepts);
-          const isPhysics = simulation.subject.slug === 'physics';
 
           return (
             <Card key={simulation.id} interactive className="p-0">

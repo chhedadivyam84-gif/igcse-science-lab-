@@ -14,7 +14,7 @@ type Card = {
   back: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   origin: string;
-  subtopic: { number: string; title: string; slug: string; topicSlug: string } | null;
+  subtopic: { number: string; title: string; slug: string; topicSlug: string; subjectSlug: string } | null;
   repetitions: number;
   isNew: boolean;
 };
@@ -247,7 +247,7 @@ export function FlashcardDeck({
         <p className="text-center text-sm text-ink-muted">
           From{' '}
           <Link
-            href={`/learn/${subject || 'physics'}/${card.subtopic.topicSlug}/${card.subtopic.slug}`}
+            href={`/learn/${card.subtopic.subjectSlug}/${card.subtopic.topicSlug}/${card.subtopic.slug}`}
             className="text-accent hover:underline"
           >
             {card.subtopic.number} {card.subtopic.title}

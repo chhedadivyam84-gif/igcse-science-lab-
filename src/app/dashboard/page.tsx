@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { subjectName, subjectTone } from '@/lib/subjects';
+import { ALL_SUBJECTS, subjectName, subjectTone } from '@/lib/subjects';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
@@ -75,11 +75,20 @@ export default async function DashboardPage() {
     ]),
   ) as Record<string, number>;
 
-  const physics = subjectMastery(progress, 'physics', totals.physics ?? 0);
-  const chemistry = subjectMastery(progress, 'chemistry', totals.chemistry ?? 0);
-  const overallTotal = (totals.physics ?? 0) + (totals.chemistry ?? 0);
+  // Only the subjects the student has actually started. This used to be the
+  // two sciences, which meant a Biology or Maths student saw no bars at all —
+  // and the overall figure summed mastery across every subject while dividing
+  // by the Physics and Chemistry subtopic count alone, so it was simply wrong.
+  const subjectCards = ALL_SUBJECTS.map(({ slug, display }) => ({
+    slug,
+    display,
+    data: subjectMastery(progress, slug, totals[slug] ?? 0),
+  })).filter((card) => card.data.studied > 0);
+
+  const overallTotal = subjectCards.reduce((n, card) => n + card.data.total, 0);
   const overall =
     overallTotal > 0 ? Math.round(progress.reduce((sum, p) => sum + p.mastery, 0) / overallTotal) : 0;
+  const topicsMastered = subjectCards.reduce((n, card) => n + card.data.mastered, 0);
 
   const level = levelFromXp(user.xp);
   const continueLearning = [...progress]
@@ -138,26 +147,20 @@ export default async function DashboardPage() {
             <span className="text-2xs uppercase tracking-wide text-ink-faint">overall</span>
           </ProgressRing>
           <div className="space-y-3">
-            <div>
-              <div className="flex items-baseline justify-between gap-6">
-                <span className="text-sm text-physics">Physics 0625</span>
-                <span className="font-mono text-sm text-ink">{physics.mastery}%</span>
+            {subjectCards.map(({ slug, display, data }) => (
+              <div key={slug}>
+                <div className="flex items-baseline justify-between gap-6">
+                  <span className={`text-sm ${display.textClass}`}>
+                    {display.name} {display.code}
+                  </span>
+                  <span className="font-mono text-sm text-ink">{data.mastery}%</span>
+                </div>
+                <ProgressBar value={data.mastery} tone={display.tone} className="mt-1.5 w-44" />
+                <p className="mt-1 text-xs text-ink-faint">
+                  {data.studied} of {data.total} subtopics started
+                </p>
               </div>
-              <ProgressBar value={physics.mastery} tone="physics" className="mt-1.5 w-44" />
-              <p className="mt-1 text-xs text-ink-faint">
-                {physics.studied} of {physics.total} subtopics started
-              </p>
-            </div>
-            <div>
-              <div className="flex items-baseline justify-between gap-6">
-                <span className="text-sm text-chemistry">Chemistry 0620</span>
-                <span className="font-mono text-sm text-ink">{chemistry.mastery}%</span>
-              </div>
-              <ProgressBar value={chemistry.mastery} tone="chemistry" className="mt-1.5 w-44" />
-              <p className="mt-1 text-xs text-ink-faint">
-                {chemistry.studied} of {chemistry.total} subtopics started
-              </p>
-            </div>
+            ))}
           </div>
         </Panel>
 
@@ -177,7 +180,7 @@ export default async function DashboardPage() {
           />
           <Stat
             label="Topics mastered"
-            value={physics.mastered + chemistry.mastered}
+            value={topicsMastered}
             sub="at 85% or above"
             tone="positive"
             icon={<Target className="h-3.5 w-3.5" />}

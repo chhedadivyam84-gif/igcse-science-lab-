@@ -35,7 +35,10 @@ export const GET = handleRoute('flashcards', async (request) => {
   const cards = await db.flashcard.findMany({
     where,
     include: {
-      subtopic: { include: { topic: true } },
+      // The subject comes along so the card can link back to its own lesson.
+      // Without it the client fell back to "physics", which 404s for every
+      // Biology, Maths and ICT card.
+      subtopic: { include: { topic: { include: { version: { include: { subject: true } } } } } },
       reviews: { where: { userId: user.id } },
     },
     take: 400,
@@ -59,7 +62,13 @@ export const GET = handleRoute('flashcards', async (request) => {
       difficulty: card.difficulty,
       origin: card.origin,
       subtopic: card.subtopic
-        ? { number: card.subtopic.number, title: card.subtopic.title, slug: card.subtopic.slug, topicSlug: card.subtopic.topic.slug }
+        ? {
+            number: card.subtopic.number,
+            title: card.subtopic.title,
+            slug: card.subtopic.slug,
+            topicSlug: card.subtopic.topic.slug,
+            subjectSlug: card.subtopic.topic.version.subject.slug,
+          }
         : null,
       repetitions: card.reviews[0]?.repetitions ?? 0,
       isNew: !card.reviews[0],

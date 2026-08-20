@@ -7,6 +7,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { levelFromXp, masteryBand, progressForUser, subjectMastery } from '@/lib/progress';
 import { percent, relativeTime } from '@/lib/utils';
 import { Badge, EmptyState, LinkButton, Panel, ProgressBar, ProgressRing, SectionHeader, Stat } from '@/components/ui';
+import { ALL_SUBJECTS } from '@/lib/subjects';
 
 export const metadata: Metadata = { title: 'Progress' };
 export const dynamic = 'force-dynamic';
@@ -53,8 +54,14 @@ export default async function ProgressPage() {
     ]),
   ) as Record<string, number>;
 
-  const physics = subjectMastery(progress, 'physics', totals.physics ?? 0);
-  const chemistry = subjectMastery(progress, 'chemistry', totals.chemistry ?? 0);
+  // Every subject the student has actually started. This used to compute
+  // Physics and Chemistry only, so a Biology, Maths or ICT student saw no
+  // progress at all for the subjects they were studying.
+  const subjectCards = ALL_SUBJECTS.map(({ slug, display }) => ({
+    slug,
+    display,
+    data: subjectMastery(progress, slug, totals[slug] ?? 0),
+  })).filter((card) => card.data.studied > 0);
 
   if (!progress.length) {
     return (
@@ -98,10 +105,9 @@ export default async function ProgressPage() {
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        {[
-          { data: physics, slug: 'physics' as const, name: 'Physics 0625', tone: 'physics' as const },
-          { data: chemistry, slug: 'chemistry' as const, name: 'Chemistry 0620', tone: 'chemistry' as const },
-        ].map(({ data, slug, name, tone }) => {
+        {subjectCards.map(({ data, slug, display }) => {
+          const tone = display.tone;
+          const name = `${display.name} ${display.code}`;
           const subject = subjects.find((s) => s.slug === slug);
           const topics = subject?.versions[0]?.topics ?? [];
 
