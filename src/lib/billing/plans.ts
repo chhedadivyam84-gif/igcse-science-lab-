@@ -13,12 +13,15 @@ export type Interval = 'MONTHLY' | 'YEARLY';
 export const TRIAL_DAYS = 30;
 
 export const PRICING: Record<Interval, { amountMinor: number; label: string; per: string; note?: string }> = {
-  MONTHLY: { amountMinor: 29900, label: '₹299', per: 'per month' },
+  MONTHLY: { amountMinor: 9900, label: '₹99', per: 'per month' },
   YEARLY: {
-    amountMinor: 249900,
-    label: '₹2,499',
+    amountMinor: 109900,
+    label: '₹1,099',
     per: 'per year',
-    note: 'Two months free compared with monthly',
+    // 12 × ₹99 = ₹1,188, so the year saves ₹89 — just under one month. Stated
+    // as the actual saving rather than a rounder-sounding claim, because the
+    // arithmetic is one sum away for anyone who cares to check.
+    note: 'Saves ₹89 against paying monthly',
   },
 };
 

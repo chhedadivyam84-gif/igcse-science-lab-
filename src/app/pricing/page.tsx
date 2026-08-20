@@ -13,7 +13,7 @@ import { Reveal } from '@/components/motion/Reveal';
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    'One month of everything, free. Then keep the whole syllabus, simulations and practice free forever — or add the AI tutor for ₹299 a month.',
+    'One month of everything, free. Then keep the whole syllabus, simulations and practice free forever — or add the AI tutor for ₹99 a month.',
 };
 export const dynamic = 'force-dynamic';
 
