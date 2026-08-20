@@ -6,6 +6,8 @@ import { getSessionUser } from '@/lib/auth';
 import { parseList } from '@/lib/json';
 import { progressForUser } from '@/lib/progress';
 import { KnowledgeMap, MapLegendBadges, type MapNode } from '@/components/map/KnowledgeMap';
+import { ALL_SUBJECTS } from '@/lib/subjects';
+import { SUBJECT_SLUGS, type SubjectSlug } from '@/lib/types';
 
 export const metadata: Metadata = {
   title: 'Knowledge map',
@@ -19,7 +21,11 @@ export default async function MapPage({
   searchParams: Promise<{ subject?: string }>;
 }) {
   const { subject: raw } = await searchParams;
-  const subject = raw === 'chemistry' ? 'chemistry' : 'physics';
+  // Any seeded subject, not a hardcoded pair. Previously anything other than
+  // "chemistry" silently fell back to physics, which made the map unreachable
+  // for Biology, the three maths syllabuses and ICT.
+  const subject: SubjectSlug =
+    raw && (SUBJECT_SLUGS as readonly string[]).includes(raw) ? (raw as SubjectSlug) : 'physics';
 
   const session = await getSessionUser();
   const [subtopics, progress] = await Promise.all([
@@ -65,25 +71,23 @@ export default async function MapPage({
           Each row is a topic, each box a subtopic. Arrows point from something you should understand
           first to what it unlocks — so before electric circuits, review charge and current.
         </p>
-        <div className="mt-4 flex gap-2">
-          <Link
-            href="/map?subject=physics"
-            className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
-              subject === 'physics' ? 'border-physics bg-physics/10 font-medium text-physics' : 'border-line text-ink-muted hover:text-ink'
-            }`}
-          >
-            Physics
-          </Link>
-          <Link
-            href="/map?subject=chemistry"
-            className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
-              subject === 'chemistry'
-                ? 'border-chemistry bg-chemistry/10 font-medium text-chemistry'
-                : 'border-line text-ink-muted hover:text-ink'
-            }`}
-          >
-            Chemistry
-          </Link>
+        {/* One chip per subject, generated from the subject list so a new
+            syllabus appears here without anyone remembering to add it. */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {ALL_SUBJECTS.map(({ slug, display }) => (
+            <Link
+              key={slug}
+              href={`/map?subject=${slug}`}
+              aria-current={subject === slug ? 'page' : undefined}
+              className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
+                subject === slug
+                  ? `border-current font-medium ${display.textClass}`
+                  : 'border-line text-ink-muted hover:text-ink'
+              }`}
+            >
+              {display.name}
+            </Link>
+          ))}
         </div>
       </header>
 

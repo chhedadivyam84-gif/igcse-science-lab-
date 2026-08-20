@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { subjectName, subjectTone } from '@/lib/subjects';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
@@ -216,9 +217,7 @@ export default async function DashboardPage() {
                       >
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <Badge tone={item.subject === 'physics' ? 'physics' : 'chemistry'}>
-                              {item.subject === 'physics' ? 'Physics' : 'Chemistry'}
-                            </Badge>
+                            <Badge tone={subjectTone(item.subject)}>{subjectName(item.subject)}</Badge>
                             <span className="font-mono text-xs text-ink-faint">{item.number}</span>
                           </div>
                           <p className="mt-1.5 truncate text-sm font-medium text-ink">{item.title}</p>
@@ -270,7 +269,7 @@ export default async function DashboardPage() {
                       <span className="min-w-0">
                         <span className="block truncate font-medium text-ink">{item.title}</span>
                         <span className="block text-xs text-ink-faint">
-                          {item.number} · {item.subject === 'physics' ? 'Physics' : 'Chemistry'}
+                          {item.number} · {subjectName(item.subject)}
                         </span>
                       </span>
                       <span className="font-mono text-sm text-negative">{item.mastery}%</span>

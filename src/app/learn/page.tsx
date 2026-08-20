@@ -1,15 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Atom, Info, Zap } from 'lucide-react';
+import { ArrowRight, Info } from 'lucide-react';
 
 import { db } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 import { progressForUser } from '@/lib/progress';
 import { Badge, Notice, Panel, ProgressBar } from '@/components/ui';
+import { NavIcon } from '@/components/layout/icons';
+import { DEFAULT_SUBJECT_STYLE, SUBJECT_STYLES } from '@/lib/nav';
+import { subjectTone } from '@/lib/subjects';
 
 export const metadata: Metadata = {
   title: 'Learn',
-  description: 'Browse the full Cambridge IGCSE Physics 0625 and Chemistry 0620 syllabus.',
+  description: 'Browse every Cambridge IGCSE syllabus on the platform, topic by topic.',
 };
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +52,7 @@ export default async function LearnPage() {
           Every topic, mapped
         </h1>
         <p className="mt-3 text-ink-muted">
-          Both specifications, broken into the same topic and subtopic structure the papers use. Open
+          Every specification, broken into the same topic and subtopic structure the papers use. Open
           any subtopic for objectives, lessons, formulae, misconceptions and practice.
         </p>
       </header>
@@ -58,20 +61,19 @@ export default async function LearnPage() {
         {subjects.map((subject) => {
           const version = subject.versions[0];
           if (!version) return null;
-          const isPhysics = subject.slug === 'physics';
+          // Every subject gets its own icon and colour. This was previously a
+          // physics-or-chemistry ternary, so Biology, the three maths
+          // syllabuses and ICT all appeared as Chemistry.
+          const style = SUBJECT_STYLES[subject.slug] ?? DEFAULT_SUBJECT_STYLE;
 
           return (
             <section key={subject.id}>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  {isPhysics ? (
-                    <Zap className="h-5 w-5 text-physics" />
-                  ) : (
-                    <Atom className="h-5 w-5 text-chemistry" />
-                  )}
+                  <NavIcon name={style.icon} className={`h-5 w-5 ${style.accentClass}`} />
                   <h2 className="text-xl font-semibold tracking-tight text-ink">
                     {subject.name}{' '}
-                    <span className={`font-mono text-base ${isPhysics ? 'text-physics' : 'text-chemistry'}`}>
+                    <span className={`font-mono text-base ${style.accentClass}`}>
                       {subject.code}
                     </span>
                   </h2>
@@ -143,7 +145,7 @@ export default async function LearnPage() {
                         </div>
                         <ProgressBar
                           value={(withLessons / Math.max(topic.subtopics.length, 1)) * 100}
-                          tone={isPhysics ? 'physics' : 'chemistry'}
+                          tone={subjectTone(subject.slug)}
                           className="mt-2"
                         />
                       </div>

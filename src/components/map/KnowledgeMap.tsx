@@ -1,6 +1,7 @@
 'use client';
 
 import type { SubjectSlug } from '@/lib/types';
+import { ALL_SUBJECTS, subjectNameWithCode, subjectTone } from '@/lib/subjects';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
@@ -85,7 +86,7 @@ export function KnowledgeMap({ nodes, subject }: { nodes: MapNode[]; subject: Su
     };
   }, [nodes]);
 
-  const accent = subject === 'physics' ? 'rgb(var(--physics))' : 'rgb(var(--chemistry))';
+  const accent = `rgb(var(--${subjectTone(subject)}))`;
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_18rem]">
@@ -246,13 +247,18 @@ export function KnowledgeMap({ nodes, subject }: { nodes: MapNode[]; subject: Su
         </Panel>
 
         <Panel className="p-4">
-          <p className="eyebrow mb-2">Other subject</p>
-          <Link
-            href={`/map?subject=${subject === 'physics' ? 'chemistry' : 'physics'}`}
-            className="text-sm text-accent hover:underline"
-          >
-            Switch to {subject === 'physics' ? 'Chemistry 0620' : 'Physics 0625'}
-          </Link>
+          <p className="eyebrow mb-2">Other subjects</p>
+          {/* Lists every other syllabus rather than toggling between two, which
+              left five subjects with no way to reach their map. */}
+          <ul className="space-y-1.5">
+            {ALL_SUBJECTS.filter((s) => s.slug !== subject).map(({ slug, display }) => (
+              <li key={slug}>
+                <Link href={`/map?subject=${slug}`} className="text-sm text-accent hover:underline">
+                  {display.name} {display.code}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Panel>
       </aside>
     </div>
@@ -260,9 +266,5 @@ export function KnowledgeMap({ nodes, subject }: { nodes: MapNode[]; subject: Su
 }
 
 export function MapLegendBadges({ subject }: { subject: SubjectSlug }) {
-  return (
-    <Badge tone={subject === 'physics' ? 'physics' : 'chemistry'}>
-      {subject === 'physics' ? 'Physics 0625' : 'Chemistry 0620'}
-    </Badge>
-  );
+  return <Badge tone={subjectTone(subject)}>{subjectNameWithCode(subject)}</Badge>;
 }

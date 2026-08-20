@@ -6,6 +6,7 @@ import { ArrowRight, Info } from 'lucide-react';
 import { db } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 import { masteryBand, progressForUser } from '@/lib/progress';
+import { subjectTextClass, subjectTone } from '@/lib/subjects';
 import { Badge, LinkButton, Notice, Panel, ProgressBar } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
@@ -52,8 +53,9 @@ export default async function SubjectPage({ params }: Params) {
   if (!version) notFound();
 
   const masteryByNumber = new Map(progress.filter((p) => p.subject === slug).map((p) => [p.number, p.mastery]));
-  const isPhysics = slug === 'physics';
-  const tone = isPhysics ? 'physics' : 'chemistry';
+  // Was `slug === 'physics' ? 'physics' : 'chemistry'`, which drew Biology,
+  // the maths syllabuses and ICT in Chemistry's colour.
+  const tone = subjectTone(slug);
   const subtopicTotal = version.topics.reduce((n, t) => n + t.subtopics.length, 0);
 
   return (
@@ -69,7 +71,7 @@ export default async function SubjectPage({ params }: Params) {
       <header className="mb-8">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">{subject.name}</h1>
-          <span className={`font-mono text-xl ${isPhysics ? 'text-physics' : 'text-chemistry'}`}>
+          <span className={`font-mono text-xl ${subjectTextClass(slug)}`}>
             {subject.code}
           </span>
         </div>
