@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowRight, ClipboardList } from 'lucide-react';
 
-import { getSessionUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { Badge, Card, Notice } from '@/components/ui';
-import { ALL_SUBJECTS } from '@/lib/subjects';
+import { ALL_SUBJECTS, parseStudentSubjects } from '@/lib/subjects';
 import { blueprintFor, buildablePapers } from '@/lib/exam/blueprints';
 
 export const metadata: Metadata = {
@@ -17,8 +17,17 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function PapersPage() {
-  const session = await getSessionUser();
-  if (!session) redirect('/signin');
+  const user = await getCurrentUser();
+  if (!user) redirect('/signin');
+
+  // The student's own subjects first, the rest still listed underneath —
+  // someone picking up a new subject should not have to change a setting to
+  // look at its papers.
+  const chosen = parseStudentSubjects(user.subjects);
+  const ordered = [
+    ...ALL_SUBJECTS.filter(({ slug }) => chosen.includes(slug)),
+    ...ALL_SUBJECTS.filter(({ slug }) => !chosen.includes(slug)),
+  ];
 
   // How many high-yield questions each subject actually has, so the cards
   // promise only what exists.
@@ -55,7 +64,7 @@ export default async function PapersPage() {
       </Notice>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {ALL_SUBJECTS.map(({ slug, display }) => {
+        {ordered.map(({ slug, display }) => {
           const blueprint = blueprintFor(slug);
           const papers = buildablePapers(slug);
           const highYield = highYieldBySlug.get(slug) ?? 0;

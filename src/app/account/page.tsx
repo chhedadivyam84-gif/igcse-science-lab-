@@ -11,6 +11,8 @@ import { FEATURES, FEATURE_META, PLAN_META, PRICING, formatPrice } from '@/lib/b
 import { UpgradeButton } from '@/components/billing/UpgradeButton';
 import { CancelSubscription } from '@/components/billing/CancelSubscription';
 import { Badge, LinkButton, Notice, Panel, SectionHeader } from '@/components/ui';
+import { SubjectPicker } from '@/components/account/SubjectPicker';
+import { parseStudentSubjects } from '@/lib/subjects';
 import { levelFromXp } from '@/lib/progress';
 
 export const metadata: Metadata = { title: 'Your account' };
@@ -149,6 +151,16 @@ export default async function AccountPage({
                 <CancelSubscription />
               </div>
             )}
+          </Panel>
+
+          {/* ---- Subjects ------------------------------------------------ */}
+          <Panel>
+            <SectionHeader
+              eyebrow="Your subjects"
+              title="Which subjects are you taking?"
+              description="Your dashboard, study plan and predicted papers lead with these. Change them whenever your entries change."
+            />
+            <SubjectPicker initial={parseStudentSubjects(user.subjects)} />
           </Panel>
 
           {/* ---- What you can use --------------------------------------- */}

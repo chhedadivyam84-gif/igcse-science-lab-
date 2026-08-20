@@ -30,6 +30,12 @@ model User {
   role         String   @default("STUDENT") // STUDENT | ADMIN
   targetGrade  String?
   examSeries   String?
+  /// JSON array of subject slugs the student is entered for, e.g.
+  /// ["physics","chemistry","maths"]. Empty means "not asked yet", which is
+  /// what the dashboard prompt keys off — a student who genuinely takes none of
+  /// these would not be here. Nothing is hidden on the strength of it: it sets
+  /// what is shown first, never what is reachable.
+  subjects     String   @default("[]")
   theme        String   @default("system") // system | dark | light
   xp           Int      @default(0)
   streakDays   Int      @default(0)

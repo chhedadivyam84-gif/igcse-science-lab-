@@ -10,8 +10,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   // Middleware records where the student was heading; send them back there.
+  // A brand-new account has nowhere in mind, so signing up goes to the subject
+  // picker first: the dashboard is far more useful once it knows which of the
+  // seven subjects this student actually sits.
   const nextPath = searchParams.get('next');
-  const destination = nextPath?.startsWith('/') && !nextPath.startsWith('//') ? nextPath : '/dashboard';
+  const fallback = mode === 'signup' ? '/onboarding/subjects' : '/dashboard';
+  const destination = nextPath?.startsWith('/') && !nextPath.startsWith('//') ? nextPath : fallback;
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});

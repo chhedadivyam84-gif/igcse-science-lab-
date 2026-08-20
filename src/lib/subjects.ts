@@ -102,6 +102,30 @@ export function calculatorFor(slug: string): string | null {
   return isSubjectSlug(slug) ? (CALCULATOR_BY_SUBJECT[slug] ?? null) : null;
 }
 
+/**
+ * The subjects a student says they are entered for.
+ *
+ * Stored as a JSON string on the user row. Falls back to every subject when
+ * nothing has been chosen, so a student who has not answered yet still sees a
+ * working app rather than an empty one.
+ */
+export function parseStudentSubjects(raw: string | null | undefined): SubjectSlug[] {
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return SUBJECT_SLUGS.filter((slug) => parsed.includes(slug));
+  } catch {
+    return [];
+  }
+}
+
+/** What to show, given the student's choice. Empty choice means show everything. */
+export function visibleSubjects(raw: string | null | undefined): SubjectSlug[] {
+  const chosen = parseStudentSubjects(raw);
+  return chosen.length ? chosen : [...SUBJECT_SLUGS];
+}
+
 /** Every subject, in teaching order — for filters and switchers. */
 export const ALL_SUBJECTS: { slug: SubjectSlug; display: SubjectDisplay }[] = SUBJECT_SLUGS.map(
   (slug) => ({ slug, display: DISPLAY[slug] }),

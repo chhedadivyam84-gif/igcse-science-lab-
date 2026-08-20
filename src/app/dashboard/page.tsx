@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ALL_SUBJECTS, subjectName, subjectTone } from '@/lib/subjects';
+import { ALL_SUBJECTS, parseStudentSubjects, subjectName, subjectTone } from '@/lib/subjects';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
@@ -75,15 +75,18 @@ export default async function DashboardPage() {
     ]),
   ) as Record<string, number>;
 
-  // Only the subjects the student has actually started. This used to be the
-  // two sciences, which meant a Biology or Maths student saw no bars at all —
-  // and the overall figure summed mastery across every subject while dividing
-  // by the Physics and Chemistry subtopic count alone, so it was simply wrong.
+  // The subjects the student says they take, plus any they have started
+  // anyway. This used to be the two sciences by name, which meant a Biology or
+  // Maths student saw no bars at all — and the overall figure summed mastery
+  // across every subject while dividing by the Physics and Chemistry subtopic
+  // count alone, so it was simply wrong.
+  const chosenSubjects = parseStudentSubjects(user.subjects);
+  const hasChosenSubjects = chosenSubjects.length > 0;
   const subjectCards = ALL_SUBJECTS.map(({ slug, display }) => ({
     slug,
     display,
     data: subjectMastery(progress, slug, totals[slug] ?? 0),
-  })).filter((card) => card.data.studied > 0);
+  })).filter((card) => chosenSubjects.includes(card.slug) || card.data.studied > 0);
 
   const overallTotal = subjectCards.reduce((n, card) => n + card.data.total, 0);
   const overall =
@@ -121,6 +124,25 @@ export default async function DashboardPage() {
           </p>
         )}
       </header>
+
+      {/* Existing accounts predate the question, so ask them here rather than
+          leaving them with a dashboard tuned to subjects they may not sit. */}
+      {!hasChosenSubjects && (
+        <Panel className="mb-8 border-accent/25">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-base font-semibold text-ink">Which subjects are you taking?</h2>
+              <p className="mt-1 max-w-2xl text-sm text-ink-muted">
+                Tell us and your dashboard, study plan and predicted papers will follow your subjects
+                instead of showing all seven. It takes a few seconds and you can change it any time.
+              </p>
+            </div>
+            <LinkButton href="/onboarding/subjects" variant="primary">
+              Choose my subjects <ArrowRight className="h-4 w-4" />
+            </LinkButton>
+          </div>
+        </Panel>
+      )}
 
       {isNew && (
         <Panel className="mb-8 border-accent/25">
