@@ -332,17 +332,19 @@ export default async function HomePage() {
           </p>
           {/* Payment providers require these to be reachable from every page a
               student can pay from, so they live in the shared footer. */}
-          <nav className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-5">
-            <Link href="/legal/terms" className="hover:text-ink">
+          {/* Padded to a comfortable thumb target on a phone — as plain text
+              links these were 16px tall, which is a miss more often than a hit. */}
+          <nav className="mt-3 flex flex-wrap gap-x-2 border-t border-line pt-2">
+            <Link href="/legal/terms" className="-mx-1 rounded px-1 py-2.5 hover:text-ink">
               Terms
             </Link>
-            <Link href="/legal/privacy" className="hover:text-ink">
+            <Link href="/legal/privacy" className="-mx-1 rounded px-1 py-2.5 hover:text-ink">
               Privacy
             </Link>
-            <Link href="/legal/refunds" className="hover:text-ink">
+            <Link href="/legal/refunds" className="-mx-1 rounded px-1 py-2.5 hover:text-ink">
               Refunds &amp; cancellation
             </Link>
-            <Link href="/legal/contact" className="hover:text-ink">
+            <Link href="/legal/contact" className="-mx-1 rounded px-1 py-2.5 hover:text-ink">
               Contact
             </Link>
           </nav>

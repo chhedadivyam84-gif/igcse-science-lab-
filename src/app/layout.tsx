@@ -41,11 +41,11 @@ import { getSessionUser } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: {
-    default: 'IGCSE Science Lab — Master Physics 0625 & Chemistry 0620',
+    default: 'IGCSE Science Lab — Physics, Chemistry, Biology, Maths & ICT',
     template: '%s · IGCSE Science Lab',
   },
   description:
-    'Understand the concept. Visualise it. Practise it. Master it. An AI-assisted learning platform built around Cambridge IGCSE Physics 0625 and Chemistry 0620.',
+    'Understand the concept. Visualise it. Practise it. Master it. An AI-assisted learning platform covering Cambridge IGCSE Physics 0625, Chemistry 0620, Biology 0610, Mathematics 0580, Additional Mathematics 0606, International Mathematics 0607 and ICT 0417.',
   applicationName: 'IGCSE Science Lab',
   formatDetection: { telephone: false },
 };

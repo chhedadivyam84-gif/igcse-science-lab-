@@ -206,17 +206,19 @@ export default async function PricingPage() {
 
       {/* Anyone about to pay should be one click from the refund terms. */}
       <Reveal delay={0.05}>
-        <nav className="mt-14 flex flex-wrap justify-center gap-x-5 gap-y-2 border-t border-line pt-6 text-xs text-ink-faint">
-          <Link href="/legal/terms" className="hover:text-ink">
+        {/* Padded for thumbs — these sit directly under the payment buttons,
+            so they are the last thing someone taps before deciding to pay. */}
+        <nav className="mt-14 flex flex-wrap justify-center gap-x-2 border-t border-line pt-4 text-xs text-ink-faint">
+          <Link href="/legal/terms" className="rounded px-2 py-2.5 hover:text-ink">
             Terms
           </Link>
-          <Link href="/legal/privacy" className="hover:text-ink">
+          <Link href="/legal/privacy" className="rounded px-2 py-2.5 hover:text-ink">
             Privacy
           </Link>
-          <Link href="/legal/refunds" className="hover:text-ink">
+          <Link href="/legal/refunds" className="rounded px-2 py-2.5 hover:text-ink">
             Refunds &amp; cancellation
           </Link>
-          <Link href="/legal/contact" className="hover:text-ink">
+          <Link href="/legal/contact" className="rounded px-2 py-2.5 hover:text-ink">
             Contact
           </Link>
         </nav>
