@@ -772,6 +772,499 @@ Note the distinction candidates most often miss: **freeware is free but closed**
       ],
     },
     {
+      number: '10',
+      slug: 'communication',
+      title: 'Communication',
+      summary: 'Email, its etiquette and constraints, and how the internet carries it.',
+      subtopics: [
+        {
+          number: '10.1',
+          slug: 'communication',
+          title: 'Email and online communication',
+          summary: 'Using email properly, and the rules and risks that come with it.',
+          prerequisites: ['4.1'],
+          objectives: [
+            { code: '10.1.1', statement: 'Use email effectively, including cc, bcc, attachments and groups.', tier: 'CORE' },
+            { code: '10.1.2', statement: 'Describe constraints on email use, including law, acceptable use and security.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'communication',
+              title: 'Email and online communication',
+              readingMinutes: 5,
+              body: `### The address fields, and why bcc matters
+- **To** — the person who must act on the message.
+- **Cc** (carbon copy) — people who need to know but need not act. Every recipient can see these addresses.
+- **Bcc** (blind carbon copy) — copies where the addresses are **hidden from everyone else**.
+Use **bcc** when emailing a group who do not know each other. Putting fifty parents in **cc** hands every one of them the other forty-nine addresses — a genuine data-protection failure, and the single most common real-world email mistake.
+### Groups
+A **group** (distribution list) stores many addresses under one name. It saves time and prevents the error of missing someone, but makes it easy to send to more people than you intended.
+### Attachments
+Large attachments may be rejected by the recipient's mail server, which usually has a **file size limit**. Compressing the file, or sending a link to cloud storage instead, avoids the bounce. Attachments are also the classic carrier of **malware**, which is why unexpected ones should not be opened.
+### Constraints on email use
+- **Copyright** — forwarding material you do not own can infringe it.
+- **Acceptable use policy** — a school or employer sets rules on what may be sent from its system, and can monitor it.
+- **Data protection law** — personal data must not be disclosed carelessly, which is exactly what cc-ing a large group does.
+- **Security** — phishing arrives by email; passwords should never be sent by it.
+- **Netiquette** — a clear subject line, no shouting in capitals, no spam, and a tone suited to the reader.
+### Spam
+Unsolicited bulk email. It wastes time and bandwidth and often carries phishing links. Filters help, but the reliable defence is not publishing your address carelessly and never replying to it.`,
+              analogy: 'Cc is a noticeboard and bcc is a sealed envelope to each person. Choosing the wrong one is not a style preference — it decides whether fifty strangers can read each other\'s addresses.',
+              misconceptions: [
+                'Thinking bcc is only for secrecy. Its everyday purpose is protecting the addresses of people who do not know each other.',
+                'Assuming any file can be attached. Mail servers impose size limits and the message will bounce.',
+                'Believing deleting an email removes it everywhere. Copies exist on servers and in recipients\' mailboxes.',
+              ],
+              examTips: [
+                'If a question involves emailing a group of unrelated people, the expected answer names **bcc** and gives the reason — the addresses stay private.',
+                'For "constraints on email use", give a spread: law, acceptable use policy, security and netiquette, rather than four versions of "be polite".',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A school wants to email the same newsletter to 200 parents. Explain which address field should be used and why.',
+                  steps: ['The parents do not know one another, so their addresses are personal data.', 'Using To or Cc would show every address to all 200 recipients.', 'Bcc hides the addresses from everyone, so each parent sees only their own.'],
+                  answer: 'Bcc — it keeps each parent\'s address hidden from the other recipients, avoiding disclosure of personal data.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What is the difference between cc and bcc?', back: 'Cc addresses are visible to every recipient; bcc addresses are hidden from everyone.', difficulty: 'MEDIUM' },
+            { front: 'When should bcc be used?', back: 'When emailing a group of people who do not know each other, to keep their addresses private.', difficulty: 'MEDIUM' },
+            { front: 'Why might a large attachment fail to arrive?', back: 'The recipient\'s mail server enforces a maximum file size and rejects it.', difficulty: 'MEDIUM' },
+            { front: 'Name three constraints on email use.', back: 'Copyright, an acceptable use policy, data protection law, security and netiquette.', difficulty: 'HARD' },
+            { front: 'What is spam?', back: 'Unsolicited bulk email, which wastes bandwidth and often carries phishing links.', difficulty: 'EASY' },
+          ],
+          questions: [
+            {
+              type: 'MCQ',
+              difficulty: 'STANDARD',
+              stem: 'A club secretary emails 80 members who do not know each other. Which field should hold the members\' addresses?',
+              options: [
+                { id: 'a', text: 'Bcc', why: '' },
+                { id: 'b', text: 'To', why: 'Every recipient would see all 80 addresses.' },
+                { id: 'c', text: 'Cc', why: 'Cc also reveals every address to every recipient.' },
+                { id: 'd', text: 'Subject', why: 'The subject line is for the topic of the message, not addresses.' },
+              ],
+              answer: 'a',
+              markScheme: ['Bcc (1)'],
+              marks: 1,
+              explanation:
+                'Bcc keeps each address hidden. Using To or Cc would disclose 80 people\'s personal data to one another — a data-protection failure, not merely bad manners.',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      number: '11',
+      slug: 'file-management',
+      title: 'File management',
+      summary: 'File types, sensible naming, compression and folder structure.',
+      subtopics: [
+        {
+          number: '11.1',
+          slug: 'file-management',
+          title: 'File types, naming and compression',
+          summary: 'Choosing a format, organising files and reducing their size.',
+          prerequisites: ['3.1'],
+          objectives: [
+            { code: '11.1.1', statement: 'Identify common file types and select an appropriate format.', tier: 'CORE' },
+            { code: '11.1.2', statement: 'Manage files using sensible names, folders and compression.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'file-management',
+              title: 'File types, naming and compression',
+              readingMinutes: 5,
+              body: `### Generic file types
+- **.css** — a stylesheet, holding presentation for web pages.
+- **.htm / .html** — a web page's structure and content.
+- **.csv** — comma separated values: plain text data that any spreadsheet or database can import.
+- **.txt / .rtf** — text, with rtf keeping basic formatting.
+- **.pdf** — a fixed layout that looks identical everywhere and cannot easily be edited.
+- **.zip / .rar** — compressed archives holding one or more files.
+- **.jpg** — photographs, **lossy** compression.
+- **.png** — images needing transparency or sharp edges, **lossless**.
+- **.gif** — few colours, supports simple animation.
+- **.mp3 / .mp4** — compressed audio and video.
+### Choosing a format
+Match the format to the job: a **pdf** to send a document that must not be altered and must print identically; a **csv** to move data between systems; a **png** for a logo with a transparent background; a **jpg** for a photograph, where the file is far smaller and the quality loss is invisible.
+### Lossy and lossless
+**Lossy** compression permanently discards detail the eye or ear is unlikely to notice, giving much smaller files — jpg and mp3. **Lossless** compression rebuilds the original exactly — png and zip. Lossy is not "worse"; it is a trade of quality for size, and saving a jpg repeatedly degrades it a little each time.
+### File names and folders
+A good name says what the file is and, where it matters, when: \`year11-physics-report-2026-03.pdf\`. Avoid \`final.doc\`, \`final2.doc\`, \`finalREAL.doc\` — you cannot tell which is current, and neither can anyone else.
+Folders should group by purpose, and the structure should be shallow enough that nothing is buried.
+### Why compress
+Smaller files upload and download faster, use less storage, and can be sent as one archive rather than thirty attachments.`,
+              analogy: 'Lossy compression is summarising a book; lossless is photocopying it. The summary is far smaller and fine for most purposes, but you can never recover the exact original wording.',
+              misconceptions: [
+                'Thinking compression always loses quality. Zip and png are lossless — the original is restored exactly.',
+                'Believing a pdf cannot be edited at all. It resists casual editing and preserves layout, which is the point; it is not security.',
+                'Repeatedly editing and re-saving a jpg without realising that each save discards a little more detail.',
+              ],
+              examTips: [
+                'File-format questions want the format **and** the reason: "pdf, because the layout stays identical and it cannot easily be altered".',
+                'Use csv as the answer whenever data must move between different pieces of software — it is the format everything can read.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A school must send a report that every parent will see identically and that should not be easily altered. Name a suitable file format and justify it.',
+                  steps: ['The layout must survive different devices and software.', 'It should resist casual editing.', 'A pdf fixes the layout and is not readily editable, while opening on almost any device.'],
+                  answer: 'PDF — the layout appears identical everywhere and it cannot easily be edited.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What is a .csv file used for?', back: 'Plain-text comma separated data, so it can be moved between spreadsheets and databases.', difficulty: 'MEDIUM' },
+            { front: 'Difference between lossy and lossless compression?', back: 'Lossy permanently discards detail for a smaller file (jpg, mp3); lossless restores the original exactly (png, zip).', difficulty: 'HARD' },
+            { front: 'When would you choose png over jpg?', back: 'When transparency or sharp edges matter, such as a logo — png is lossless.', difficulty: 'MEDIUM' },
+            { front: 'Why send a document as a pdf?', back: 'The layout looks identical on any device and it cannot easily be edited.', difficulty: 'EASY' },
+            { front: 'Give two benefits of compressing files.', back: 'Faster transfer and less storage used; several files can also be sent as one archive.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'Explain the difference between lossy and lossless compression, giving an example file type for each. [2]',
+              answer:
+                'Lossy compression permanently removes some data that is unlikely to be noticed, producing a much smaller file that cannot be restored to the original — for example a jpg image. Lossless compression reduces the file size without discarding any data, so the original can be reconstructed exactly — for example a zip archive or a png image.',
+              markScheme: [
+                'Lossy discards data permanently, cannot restore the original, e.g. jpg/mp3 (1)',
+                'Lossless keeps all data and restores the original exactly, e.g. zip/png (1)',
+              ],
+              marks: 2,
+              explanation:
+                'The examples carry half the marks, so name one for each rather than describing the concepts alone.',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      number: '12',
+      slug: 'images',
+      title: 'Images',
+      summary: 'Placing, resizing and editing images without wrecking them.',
+      subtopics: [
+        {
+          number: '12.1',
+          slug: 'images',
+          title: 'Working with images',
+          summary: 'Aspect ratio, cropping, resolution and text wrapping.',
+          prerequisites: ['11.1'],
+          objectives: [
+            { code: '12.1.1', statement: 'Place, resize, crop and adjust images appropriately within a document.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'images',
+              title: 'Working with images',
+              readingMinutes: 5,
+              body: `### Aspect ratio — the one that costs marks
+The **aspect ratio** is the ratio of width to height. Resizing an image must keep it, or the picture is **distorted** — people look stretched or squashed, and examiners mark it as an error every time.
+Drag a **corner** handle, not a side handle, or tick "maintain/lock aspect ratio". If a question says the image must fit a fixed width, scale to that width and let the height follow.
+### Cropping versus resizing
+- **Cropping** removes part of the image, keeping the rest at its original size.
+- **Resizing** changes the dimensions of the whole image.
+To show only someone's face from a group photo you **crop**; to make that photo fit a column you **resize**.
+### Resolution
+Measured in **dpi** (dots per inch) or by pixel dimensions. Too low and the image looks blocky or pixelated when enlarged; too high and the file is needlessly large, slowing a page or bloating a document. Print generally needs higher resolution than a screen.
+Enlarging a small image cannot add detail that was never captured — it only makes the existing pixels bigger.
+### Text wrapping
+Controls how text flows around a picture: **in line with text** (the image sits like a large character), **square/tight** (text flows around it), **behind/in front of text**. Choosing badly is what produces a document with a picture stranded on its own page.
+### Other adjustments
+Rotating, flipping, adjusting **brightness and contrast**, and removing a background. Keep an original copy before editing — most of these are destructive once saved.`,
+              analogy: 'Enlarging a low-resolution image is like scaling up a newspaper photo on a photocopier: the dots simply get bigger. The detail was never there to recover.',
+              misconceptions: [
+                'Dragging a side handle to resize, which distorts the image. Corner handles preserve the aspect ratio.',
+                'Confusing cropping with resizing — cropping cuts part away, resizing changes the whole image\'s dimensions.',
+                'Believing enlarging adds detail. It only enlarges existing pixels, so the image looks worse.',
+              ],
+              examTips: [
+                'Practical papers explicitly check that images are not distorted. Always resize from a corner or lock the ratio.',
+                'If told an image must fit a column width, set the width and let the height adjust itself — never type both.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A student resizes a photograph by dragging its right-hand edge and the people in it look too wide. Explain what went wrong and how to fix it.',
+                  steps: ['Dragging a side handle changes the width without changing the height.', 'This alters the ratio of width to height — the aspect ratio.', 'The image is therefore distorted.', 'Resizing from a corner handle, or locking the aspect ratio, changes both dimensions together.'],
+                  answer: 'The aspect ratio was not maintained, distorting the image. Resize using a corner handle or lock the aspect ratio so width and height change in proportion.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What is aspect ratio?', back: 'The ratio of an image\'s width to its height, which must be kept when resizing to avoid distortion.', difficulty: 'MEDIUM' },
+            { front: 'How do you resize without distorting?', back: 'Drag a corner handle, or lock/maintain the aspect ratio.', difficulty: 'MEDIUM' },
+            { front: 'Difference between cropping and resizing?', back: 'Cropping cuts away part of the image; resizing changes the dimensions of the whole image.', difficulty: 'MEDIUM' },
+            { front: 'What happens if resolution is too low?', back: 'The image looks pixelated or blocky, especially when enlarged.', difficulty: 'EASY' },
+            { front: 'Does enlarging an image add detail?', back: 'No — it only makes the existing pixels larger, so quality appears worse.', difficulty: 'HARD' },
+          ],
+          questions: [
+            {
+              type: 'MCQ',
+              difficulty: 'FOUNDATION',
+              stem: 'Which action keeps an image from becoming distorted when it is made smaller?',
+              options: [
+                { id: 'a', text: 'Dragging a corner handle so the aspect ratio is maintained', why: '' },
+                { id: 'b', text: 'Dragging the bottom edge upwards', why: 'This changes the height only, altering the aspect ratio and squashing the image.' },
+                { id: 'c', text: 'Cropping the image', why: 'Cropping removes part of the image rather than resizing it.' },
+                { id: 'd', text: 'Reducing the brightness', why: 'Brightness has no effect on the image\'s dimensions.' },
+              ],
+              answer: 'a',
+              markScheme: ['Drag a corner handle / maintain aspect ratio (1)'],
+              marks: 1,
+              explanation:
+                'Width and height must change in the same proportion. Corner handles do this automatically; edge handles change one dimension only.',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      number: '13',
+      slug: 'layout',
+      title: 'Layout',
+      summary: 'Arranging a page with tables, columns, headers and page breaks.',
+      subtopics: [
+        {
+          number: '13.1',
+          slug: 'layout',
+          title: 'Page and document layout',
+          summary: 'Margins, columns, tables, headers and controlling where pages break.',
+          objectives: [
+            { code: '13.1.1', statement: 'Set page layout including margins, orientation, columns and page breaks.', tier: 'CORE' },
+            { code: '13.1.2', statement: 'Use tables, headers and footers to structure a document.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'layout',
+              title: 'Page and document layout',
+              readingMinutes: 5,
+              body: `### Page setup
+- **Margins** — the white space around the content. Widen the left margin if the document will be bound.
+- **Orientation** — **portrait** (tall) suits text; **landscape** (wide) suits wide tables and charts.
+- **Page size** — A4 for most documents.
+### Columns
+Newspapers and newsletters use columns because short lines are easier to read. Set the **number of columns** and the **gutter** — the space between them. Without a gutter the two columns run together and become unreadable.
+### Tables
+Tables organise information in rows and columns, and are also used invisibly to align content on a page. Control **borders** and **shading** separately from the data: a table used purely for alignment usually has its borders switched off.
+**Merging** cells joins them into one — used for a heading spanning several columns.
+### Headers and footers
+Repeating areas at the top and bottom of every page, holding page numbers, the document title, a filename or a date. Because they repeat automatically, a page number in a footer stays correct when the document grows — typing numbers by hand does not.
+### Controlling page breaks
+A **page break** forces the next content onto a new page. Use one rather than pressing Enter twenty times, which collapses the moment anything above it changes.
+**Widow and orphan control** prevents a single line of a paragraph being stranded alone at the top or bottom of a page, and **keep with next** stops a heading being separated from the text it introduces.
+### Why this matters
+Layout is judged on consistency. Pressing Enter and Space to position things looks fine until the document is edited once, and then everything moves.`,
+              analogy: 'Positioning text with repeated Enter presses is like propping up a shelf with books: it holds until someone moves one. Page breaks and styles are the brackets that survive being edited.',
+              misconceptions: [
+                'Using repeated blank lines instead of a page break — the layout collapses as soon as anything above changes.',
+                'Typing page numbers manually rather than inserting a field in the footer, which then updates itself.',
+                'Setting columns with no gutter, so the text of adjacent columns visually merges.',
+              ],
+              examTips: [
+                'When a task says content must start on a new page, insert an actual page break — examiners can see the difference.',
+                'Widow/orphan control and "keep with next" are specific named features; naming them earns more than "make it look tidy".',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A report must show the page number on every page and always start each chapter on a new page. Describe the features to use.',
+                  steps: ['Insert a page-number field into the footer so it repeats on every page and updates automatically.', 'Insert a page break before each chapter heading so it always begins a new page.', 'Optionally apply "keep with next" so a heading is never left at the foot of a page.'],
+                  answer: 'A page-number field in the footer, and a page break before each chapter heading.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'When is landscape orientation appropriate?', back: 'For wide content such as large tables or charts.', difficulty: 'EASY' },
+            { front: 'What is a gutter?', back: 'The space between columns, which stops adjacent columns of text running together.', difficulty: 'MEDIUM' },
+            { front: 'Why insert a page break rather than blank lines?', back: 'A page break holds when the document is edited; blank lines shift and break the layout.', difficulty: 'MEDIUM' },
+            { front: 'What goes in a header or footer?', back: 'Repeating information such as page numbers, title, filename or date.', difficulty: 'EASY' },
+            { front: 'What does widow/orphan control do?', back: 'Prevents a single line of a paragraph being stranded alone at the top or bottom of a page.', difficulty: 'HARD' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'Explain why page numbers should be inserted as a field in the footer rather than typed on each page. [2]',
+              answer:
+                'A field in the footer repeats automatically on every page and renumbers itself, so the numbers stay correct when pages are added or removed. Numbers typed by hand appear only on the page they were typed on and become wrong as soon as the document changes length.',
+              markScheme: [
+                'The footer field repeats on every page automatically (1)',
+                'It updates when pages are added or removed, so numbering stays correct (1)',
+              ],
+              marks: 2,
+              explanation:
+                'The value is in the automation. Both marks reward understanding that the document will change after it is written.',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      number: '14',
+      slug: 'styles',
+      title: 'Styles',
+      summary: 'Consistent formatting through named styles rather than by hand.',
+      subtopics: [
+        {
+          number: '14.1',
+          slug: 'styles',
+          title: 'Using and editing styles',
+          summary: 'Why styles beat manual formatting, and what they make possible.',
+          prerequisites: ['13.1'],
+          objectives: [
+            { code: '14.1.1', statement: 'Create, apply and edit styles to format a document consistently.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'styles',
+              title: 'Using and editing styles',
+              readingMinutes: 5,
+              body: `A **style** is a named set of formatting — font, size, colour, alignment, spacing — that can be applied to text in one action.
+### Why styles rather than manual formatting
+- **Consistency.** Every heading formatted with "Heading 1" is identical, across the document and across documents.
+- **One edit changes everything.** Change the style and every piece of text using it updates at once. Formatting two hundred headings by hand and then being asked to change the font is the situation styles exist to prevent.
+- **Structure.** Heading styles let the software build an automatic **table of contents** and let a **screen reader** announce the document's structure, which manual bold text cannot do.
+- **Speed and fewer mistakes** — one click instead of five, with nothing forgotten.
+### House style
+Organisations define a **house style** so every document looks like it came from the same place. Styles are how that is enforced in practice rather than hoped for.
+### Applying and editing
+Select the text and click the style to apply it. To change it everywhere, **edit the style itself** rather than reformatting text — editing the text directly creates an override that will not update next time.
+### Which styles to use
+- **Heading 1, 2, 3** for the document's hierarchy, in order — do not skip a level to get a smaller size, because the structure is what the table of contents and screen readers read.
+- **Body text** for paragraphs.
+- **Caption** for text under images and tables.`,
+              analogy: 'A style is a uniform, not an outfit chosen each morning. When the uniform changes, everyone changes at once — which is why one style edit beats two hundred manual ones.',
+              misconceptions: [
+                'Formatting each heading by hand and calling it a style. A style is a named, reusable definition.',
+                'Choosing a heading level by how big it looks. Levels convey structure; size is a property of the style.',
+                'Editing text directly to "fix" a style, which creates an override that stops updating with the style.',
+              ],
+              examTips: [
+                'Asked why styles are used, give consistency **and** the ability to update every instance at once — the second is the stronger technical point.',
+                'Mention the automatic table of contents and accessibility if the question is worth more than two marks.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A 90-page report uses the Heading 1 style for every chapter title. The publisher asks for all chapter titles to change from Arial to Times New Roman. Describe the quickest correct method.',
+                  steps: ['Do not reformat each heading individually.', 'Edit the definition of the Heading 1 style, changing its font to Times New Roman.', 'Every piece of text using that style updates immediately throughout the document.'],
+                  answer: 'Edit the Heading 1 style itself and change its font; all chapter titles update at once.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What is a style?', back: 'A named set of formatting that can be applied to text in one action and edited centrally.', difficulty: 'EASY' },
+            { front: 'Give the strongest advantage of styles.', back: 'Editing the style updates every instance at once, instead of reformatting text by hand.', difficulty: 'MEDIUM' },
+            { front: 'What do heading styles make possible?', back: 'An automatic table of contents, and structure that screen readers can announce.', difficulty: 'HARD' },
+            { front: 'Why not skip heading levels?', back: 'Levels convey document structure, which the contents page and screen readers rely on.', difficulty: 'HARD' },
+            { front: 'What is a house style?', back: 'An organisation\'s defined formatting so all its documents look consistent.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'Give two advantages of using styles rather than formatting each heading manually. [2]',
+              answer:
+                'Every heading formatted with the same style is identical, so the document and all others using that style look consistent. If the formatting must change, editing the style once updates every heading in the document automatically, rather than requiring each one to be reformatted by hand.',
+              markScheme: [
+                'Consistent formatting throughout the document (1)',
+                'One edit to the style updates every instance automatically (1)',
+              ],
+              marks: 2,
+              explanation:
+                'Accessibility and automatic contents pages are equally valid second answers, since both depend on styles carrying structure rather than just appearance.',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      number: '15',
+      slug: 'proofing',
+      title: 'Proofing',
+      summary: 'Spell check, grammar check, and why proofreading is still needed.',
+      subtopics: [
+        {
+          number: '15.1',
+          slug: 'proofing',
+          title: 'Proofing techniques',
+          summary: 'Automated checks, their limits, and proofreading marks.',
+          prerequisites: ['13.1'],
+          objectives: [
+            { code: '15.1.1', statement: 'Use software proofing tools and explain why manual proofreading is still required.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'proofing',
+              title: 'Proofing techniques',
+              readingMinutes: 4,
+              body: `### The automated tools
+- **Spell check** compares each word against a dictionary and flags anything not found. It can suggest replacements and correct as you type.
+- **Grammar check** flags likely grammatical problems — a missing verb, disagreement between subject and verb. It is unreliable and sometimes objects to correct writing.
+- **Find and replace** corrects a repeated error everywhere in one action. Use "replace all" carefully: replacing "cat" with "dog" also turns "category" into "dogegory".
+### What a spell check cannot catch
+This is the examined point. A spell check only knows whether a word **exists**, not whether it is the **right** word:
+- "their" for "there"
+- "form" for "from"
+- "defiantly" for "definitely"
+- a correctly spelt name that is the wrong person
+It also cannot detect a wrong fact, a missing sentence, or clumsy phrasing.
+### Why the dictionary matters
+Technical terms and proper nouns are often absent from the dictionary and get flagged wrongly. Adding them to a **custom dictionary** stops the false alarms — but accepting every suggestion blindly is how "Cavendish" becomes "Cavemen".
+### Proofreading
+A human reads the document against its purpose and, where one exists, against the **original source**. Standard **proofreading marks** are used to annotate a printed draft — for example marks for delete, insert, new paragraph and transpose.
+Reading aloud, or reading backwards a line at a time, catches errors the eye otherwise skips.`,
+              analogy: 'A spell check is a metal detector on a beach: it reliably finds one kind of thing and walks straight past everything else. Only a person reading the page notices that the sentence means the wrong thing.',
+              misconceptions: [
+                'Believing a clean spell check means an error-free document. It cannot detect a correctly spelt wrong word.',
+                'Accepting every autocorrect suggestion, which changes names and technical terms into something else entirely.',
+                'Using "replace all" without checking, which corrupts words that merely contain the search text.',
+              ],
+              examTips: [
+                'Always give a concrete example of an error a spell check misses — "their" for "there" makes the point in three words.',
+                'If asked how to proof accurately, mention checking against the **original source document**, not just re-reading.',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A document passes the spell check but the teacher still finds errors. Give two types of error the spell check could not detect.',
+                  steps: ['A spell check only flags words absent from its dictionary.', 'A correctly spelt word used in the wrong place, such as "form" for "from", is in the dictionary and passes.', 'Factual errors and missing content are not spelling at all, so they are invisible to it.'],
+                  answer: 'Correctly spelt but wrongly used words (e.g. "their" for "there"), and factual or content errors such as a wrong date or a missing sentence.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What can a spell check not detect?', back: 'A correctly spelt word used in the wrong context, e.g. "their" for "there".', difficulty: 'MEDIUM' },
+            { front: 'Why is grammar check unreliable?', back: 'It flags likely problems by pattern and sometimes objects to writing that is correct.', difficulty: 'MEDIUM' },
+            { front: 'What is the risk of "replace all"?', back: 'It changes text inside longer words too, corrupting words that merely contain the search term.', difficulty: 'HARD' },
+            { front: 'What is a custom dictionary for?', back: 'Storing technical terms and proper nouns so they are not flagged as misspellings.', difficulty: 'MEDIUM' },
+            { front: 'What should a proofreader compare the document against?', back: 'The original source document, as well as reading it for sense.', difficulty: 'MEDIUM' },
+          ],
+          questions: [
+            {
+              type: 'STRUCTURED',
+              difficulty: 'STANDARD',
+              stem: 'Explain why a document should be proofread by a person even after the spell check reports no errors. [2]',
+              answer:
+                'A spell check only compares each word with a dictionary, so a word that is spelt correctly but used wrongly — such as "form" instead of "from" — is not flagged. A person reading the document can also detect factual mistakes, missing content and confusing phrasing, none of which are spelling errors at all.',
+              markScheme: [
+                'Spell check cannot detect correctly spelt but wrongly used words, with an example (1)',
+                'A human also catches factual errors, omissions or unclear meaning (1)',
+              ],
+              marks: 2,
+              explanation:
+                'The example is what secures the first mark — "it can miss things" without one is too vague to credit.',
+            },
+          ],
+        },
+      ],
+    },
+    {
       number: '16',
       slug: 'graphs-and-charts',
       title: 'Graphs and charts',
@@ -1093,6 +1586,91 @@ So: **validation asks "is this sensible?"; verification asks "is this what was o
               explanation:
                 'The final two marks are for the reasoning, not the checks. This is the question that separates candidates who have memorised the list from those who understand what each type of check can and cannot do.',
               hint: 'Think of a wrong age that would still pass every automatic check.',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      number: '19',
+      slug: 'presentations',
+      title: 'Presentations',
+      summary: 'Slides, masters, speaker notes and presenting to an audience.',
+      subtopics: [
+        {
+          number: '19.1',
+          slug: 'presentations',
+          title: 'Creating and delivering presentations',
+          summary: 'Master slides, transitions, speaker notes and audience-appropriate design.',
+          prerequisites: ['9.1'],
+          objectives: [
+            { code: '19.1.1', statement: 'Create presentations using master slides, transitions and animations appropriately.', tier: 'CORE' },
+            { code: '19.1.2', statement: 'Use speaker notes and handouts and design slides for the audience.', tier: 'CORE' },
+          ],
+          lessons: [
+            {
+              slug: 'presentations',
+              title: 'Creating and delivering presentations',
+              readingMinutes: 5,
+              body: `### The master slide
+A **master slide** holds formatting applied to every slide: background, fonts, colours, and any logo or footer that should repeat.
+Editing the master changes **every slide at once** — the same argument as styles in a document. Formatting each slide by hand produces a deck that drifts, and cannot be re-branded without redoing all of it.
+### Designing slides for an audience
+Slides support the speaker; they are not the speech.
+- A few **bullet points**, not paragraphs. If a slide is read aloud word for word, it should have been a handout.
+- Text large enough to read from the back — around **24pt minimum**.
+- **Strong contrast** between text and background. Pale grey on white fails in a bright room.
+- Consistent colours and fonts, set on the master.
+- Images that add meaning rather than decoration, each with **alt text** for accessibility.
+### Transitions and animations
+A **transition** is the effect moving between slides; an **animation** affects an element on a slide. Both should be **consistent and restrained** — the point is to reveal information in order, not to entertain. A different spinning transition on every slide is the classic mark of a weak presentation.
+### Speaker notes and handouts
+**Speaker notes** are attached to each slide and visible only to the presenter, holding what to say, reminders and figures. **Handouts** print several slides per page, optionally with space for the audience to write.
+This separation is the useful idea: detail lives in the notes and the handout, not crammed onto the slide.
+### Delivering
+Check the presentation on the actual equipment, know how to move between slides, and face the audience rather than the screen.`,
+              analogy: 'Slides are captions, not the film. If the audience is reading a wall of text they have stopped listening to you — which makes a dense slide worse than no slide.',
+              misconceptions: [
+                'Formatting each slide individually instead of using the master, so the deck cannot be changed consistently later.',
+                'Treating slides as the script. Detail belongs in speaker notes; slides carry the headline.',
+                'Adding a different transition to every slide, which distracts rather than helps.',
+              ],
+              examTips: [
+                'When asked how to make a presentation consistent, name the **master slide** — that specific term is the marking point.',
+                'For audience questions, tie each design choice to the audience: "large text because it must be readable from the back of a hall".',
+              ],
+              workedExamples: [
+                {
+                  prompt: 'A company wants its logo and the same colour scheme on all 40 slides, and may rebrand later. Describe how to set this up.',
+                  steps: ['Place the logo and set the background, fonts and colours on the master slide.', 'Every slide inherits them, so the deck is consistent without formatting each slide.', 'If the branding changes, editing the master updates all 40 slides at once.'],
+                  answer: 'Put the logo and colour scheme on the master slide — all slides inherit it, and a rebrand needs only the master to be edited.',
+                },
+              ],
+            },
+          ],
+          flashcards: [
+            { front: 'What is a master slide?', back: 'A slide holding formatting applied to every slide, so editing it changes them all at once.', difficulty: 'MEDIUM' },
+            { front: 'Difference between a transition and an animation?', back: 'A transition is the effect between slides; an animation affects an element on a slide.', difficulty: 'MEDIUM' },
+            { front: 'What are speaker notes for?', back: 'Notes visible only to the presenter, holding what to say and any detail kept off the slide.', difficulty: 'EASY' },
+            { front: 'Why keep slides to a few bullet points?', back: 'Slides support the speaker; a wall of text means the audience reads instead of listening.', difficulty: 'MEDIUM' },
+            { front: 'Give two accessibility considerations for slides.', back: 'Large text with strong contrast, and alt text on images.', difficulty: 'HARD' },
+          ],
+          questions: [
+            {
+              type: 'MCQ',
+              difficulty: 'STANDARD',
+              stem: 'A 50-slide presentation must carry the same background and logo throughout, and the branding may change next year. What is the correct approach?',
+              options: [
+                { id: 'a', text: 'Set the background and logo on the master slide', why: '' },
+                { id: 'b', text: 'Copy and paste the logo onto each slide', why: 'It would have to be changed 50 times at the rebrand, and slides drift out of alignment.' },
+                { id: 'c', text: 'Add a transition to every slide', why: 'Transitions affect movement between slides, not consistent formatting.' },
+                { id: 'd', text: 'Put the logo in the speaker notes', why: 'Speaker notes are visible only to the presenter and never appear on the slides.' },
+              ],
+              answer: 'a',
+              markScheme: ['Use the master slide (1)'],
+              marks: 1,
+              explanation:
+                'The master is to a presentation what a style is to a document: define once, apply everywhere, and change it in a single place later.',
             },
           ],
         },
