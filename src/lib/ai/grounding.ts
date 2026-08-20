@@ -124,33 +124,39 @@ export async function searchCurriculum(
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 
-  const definitionRows = words.length
-    ? await db.definition.findMany({
-        where: {
-          OR: [
-            ...words.map((w) => ({ term: { contains: w } })),
-            ...words.map((w) => ({ statement: { contains: w } })),
-          ],
-          ...(options.subject ? { subject: { slug: options.subject } } : {}),
-        },
-        include: { subject: true },
-        take: 6,
-      })
-    : [];
+  /* Definitions and formulas do not depend on each other, so they go together.
+     Awaiting them in turn cost a whole extra database round trip on every AI
+     request, which is money the assistant does not have to spend when the
+     database is on another continent from the server. */
+  const [definitionRows, formulaRows] = await Promise.all([
+    words.length
+      ? db.definition.findMany({
+          where: {
+            OR: [
+              ...words.map((w) => ({ term: { contains: w } })),
+              ...words.map((w) => ({ statement: { contains: w } })),
+            ],
+            ...(options.subject ? { subject: { slug: options.subject } } : {}),
+          },
+          include: { subject: true },
+          take: 6,
+        })
+      : Promise.resolve([]),
 
-  const formulaRows = words.length
-    ? await db.formula.findMany({
-        where: {
-          OR: [
-            ...words.map((w) => ({ name: { contains: w } })),
-            ...words.map((w) => ({ expression: { contains: w } })),
-          ],
-          ...(options.subject ? { subject: { slug: options.subject } } : {}),
-        },
-        include: { subject: true },
-        take: 6,
-      })
-    : [];
+    words.length
+      ? db.formula.findMany({
+          where: {
+            OR: [
+              ...words.map((w) => ({ name: { contains: w } })),
+              ...words.map((w) => ({ expression: { contains: w } })),
+            ],
+            ...(options.subject ? { subject: { slug: options.subject } } : {}),
+          },
+          include: { subject: true },
+          take: 6,
+        })
+      : Promise.resolve([]),
+  ]);
 
   return {
     subtopics: scored,
