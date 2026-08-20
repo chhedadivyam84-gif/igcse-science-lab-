@@ -5,6 +5,7 @@
  * to re-run after editing the curriculum files.
  */
 import { PrismaClient } from '@prisma/client';
+import { assertNotProductionDatabase } from '../src/lib/db-guard';
 import bcrypt from 'bcryptjs';
 
 import { definitions } from '../src/lib/curriculum/definitions';
@@ -12,6 +13,7 @@ import { formulas } from '../src/lib/curriculum/formulas';
 import { simulations } from '../src/lib/curriculum/simulations';
 import { syllabuses } from '../src/lib/curriculum';
 
+assertNotProductionDatabase();
 const db = new PrismaClient();
 
 const ACHIEVEMENTS = [

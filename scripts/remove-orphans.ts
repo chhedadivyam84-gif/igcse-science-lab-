@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
+import { assertNotProductionDatabase } from '../src/lib/db-guard';
 import { syllabuses } from '../src/lib/curriculum';
+assertNotProductionDatabase();
 const db = new PrismaClient();
 
 /** Deletes only topics/subtopics whose number no longer appears in the seed.

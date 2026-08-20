@@ -1,4 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+import { assertNotProductionDatabase } from './db-guard';
+
+// A development server must never open a connection to the live database.
+assertNotProductionDatabase();
 
 // Next's dev server re-evaluates modules on every hot reload; without the global
 // cache that would open a new connection pool each time.
