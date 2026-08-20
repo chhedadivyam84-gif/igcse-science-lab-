@@ -35,44 +35,44 @@ export const GET = handleRoute('search', async (request) => {
     db.topic.findMany({
       where: {
         version: { isActive: true },
-        OR: [...terms.map((t) => ({ title: { contains: t } })), ...terms.map((t) => ({ summary: { contains: t } }))],
+        OR: [...terms.map((t) => ({ title: { contains: t, mode: 'insensitive' as const } })), ...terms.map((t) => ({ summary: { contains: t, mode: 'insensitive' as const } }))],
       },
       include: { version: { include: { subject: true } } },
       take: 6,
     }),
     db.subtopic.findMany({
-      where: { OR: [...terms.map((t) => ({ title: { contains: t } })), ...terms.map((t) => ({ summary: { contains: t } }))] },
+      where: { OR: [...terms.map((t) => ({ title: { contains: t, mode: 'insensitive' as const } })), ...terms.map((t) => ({ summary: { contains: t, mode: 'insensitive' as const } }))] },
       include: { topic: { include: { version: { include: { subject: true } } } } },
       take: params.limit,
     }),
     db.lesson.findMany({
-      where: { OR: terms.map((t) => ({ title: { contains: t } })) },
+      where: { OR: terms.map((t) => ({ title: { contains: t, mode: 'insensitive' as const } })) },
       include: { subtopic: { include: { topic: { include: { version: { include: { subject: true } } } } } } },
       take: params.limit,
     }),
     db.definition.findMany({
-      where: { OR: [...terms.map((t) => ({ term: { contains: t } })), ...terms.map((t) => ({ statement: { contains: t } }))] },
+      where: { OR: [...terms.map((t) => ({ term: { contains: t, mode: 'insensitive' as const } })), ...terms.map((t) => ({ statement: { contains: t, mode: 'insensitive' as const } }))] },
       include: { subject: true },
       take: params.limit,
     }),
     db.formula.findMany({
-      where: { OR: [...terms.map((t) => ({ name: { contains: t } })), ...terms.map((t) => ({ expression: { contains: t } }))] },
+      where: { OR: [...terms.map((t) => ({ name: { contains: t, mode: 'insensitive' as const } })), ...terms.map((t) => ({ expression: { contains: t, mode: 'insensitive' as const } }))] },
       include: { subject: true },
       take: params.limit,
     }),
     db.simulation.findMany({
-      where: { OR: [...terms.map((t) => ({ title: { contains: t } })), ...terms.map((t) => ({ description: { contains: t } }))] },
+      where: { OR: [...terms.map((t) => ({ title: { contains: t, mode: 'insensitive' as const } })), ...terms.map((t) => ({ description: { contains: t, mode: 'insensitive' as const } }))] },
       include: { subject: true },
       take: params.limit,
     }),
     db.question.findMany({
-      where: { reviewStatus: 'APPROVED', OR: terms.map((t) => ({ stem: { contains: t } })) },
+      where: { reviewStatus: 'APPROVED', OR: terms.map((t) => ({ stem: { contains: t, mode: 'insensitive' as const } })) },
       include: { subject: true, subtopic: true },
       take: params.limit,
     }),
     user
       ? db.note.findMany({
-          where: { userId: user.id, OR: terms.map((t) => ({ title: { contains: t } })) },
+          where: { userId: user.id, OR: terms.map((t) => ({ title: { contains: t, mode: 'insensitive' as const } })) },
           take: params.limit,
         })
       : Promise.resolve([]),

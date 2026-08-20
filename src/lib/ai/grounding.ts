@@ -72,9 +72,9 @@ export async function searchCurriculum(
         : words.length
           ? {
               OR: [
-                ...words.map((w) => ({ title: { contains: w } })),
-                ...words.map((w) => ({ summary: { contains: w } })),
-                ...words.map((w) => ({ lessons: { some: { body: { contains: w } } } })),
+                ...words.map((w) => ({ title: { contains: w, mode: 'insensitive' as const } })),
+                ...words.map((w) => ({ summary: { contains: w, mode: 'insensitive' as const } })),
+                ...words.map((w) => ({ lessons: { some: { body: { contains: w, mode: 'insensitive' as const } } } })),
               ],
             }
           : {}),
@@ -133,8 +133,8 @@ export async function searchCurriculum(
       ? db.definition.findMany({
           where: {
             OR: [
-              ...words.map((w) => ({ term: { contains: w } })),
-              ...words.map((w) => ({ statement: { contains: w } })),
+              ...words.map((w) => ({ term: { contains: w, mode: 'insensitive' as const } })),
+              ...words.map((w) => ({ statement: { contains: w, mode: 'insensitive' as const } })),
             ],
             ...(options.subject ? { subject: { slug: options.subject } } : {}),
           },
@@ -147,8 +147,8 @@ export async function searchCurriculum(
       ? db.formula.findMany({
           where: {
             OR: [
-              ...words.map((w) => ({ name: { contains: w } })),
-              ...words.map((w) => ({ expression: { contains: w } })),
+              ...words.map((w) => ({ name: { contains: w, mode: 'insensitive' as const } })),
+              ...words.map((w) => ({ expression: { contains: w, mode: 'insensitive' as const } })),
             ],
             ...(options.subject ? { subject: { slug: options.subject } } : {}),
           },
