@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Check, Lightbulb, RotateCcw, X } from 'lucide-react';
+import { ArrowRight, Check, Keyboard, Lightbulb, PenLine, RotateCcw, X } from 'lucide-react';
 
 import { Badge, Button, EmptyState, ErrorState, Panel, ProgressBar, Skeleton, Textarea } from '@/components/ui';
 import { MISTAKE_META, type MistakeCategory, type PracticeMode } from '@/lib/types';
 import { cn, percent } from '@/lib/utils';
+import { HandwritingPad } from '@/components/input/HandwritingPad';
 
 type Question = {
   id: string;
@@ -57,6 +58,8 @@ export function QuizRunner({
   const [marked, setMarked] = useState<Marked | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  /** Typed or handwritten. Remembered across questions so the choice sticks. */
+  const [inputMode, setInputMode] = useState<'type' | 'write'>('type');
   const [results, setResults] = useState<{ correct: boolean; marks: number; total: number }[]>([]);
   const startedAt = useRef(Date.now());
 
@@ -197,6 +200,8 @@ export function QuizRunner({
   if (!question) return null;
 
   const isMcq = question.type === 'MCQ';
+  /** Marked by comparing the typed text, so it always needs a typed answer. */
+  const autoMarked = question.type === 'NUMERICAL';
 
   return (
     <div className="space-y-4">
@@ -280,18 +285,87 @@ export function QuizRunner({
               })}
             </div>
           ) : (
-            <Textarea
-              value={response}
-              onChange={(event) => setResponse(event.target.value)}
-              rows={question.type === 'NUMERICAL' ? 2 : 5}
-              disabled={Boolean(marked)}
-              placeholder={
-                question.type === 'NUMERICAL'
-                  ? 'Your answer, including the unit'
-                  : 'Write your full answer here'
-              }
-              aria-label="Your answer"
-            />
+            <div>
+              {/* Written papers are handwritten, so practice should allow it:
+                  working, diagrams and "½mv²" are all faster by hand than by
+                  keyboard. Marking is unchanged — these questions are marked by
+                  the student against the expected answer either way. */}
+              <div className="mb-2 flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setInputMode('type')}
+                  aria-pressed={inputMode === 'type'}
+                  disabled={Boolean(marked)}
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-colors disabled:opacity-50 ${
+                    inputMode === 'type'
+                      ? 'bg-accent/12 text-accent'
+                      : 'text-ink-muted hover:bg-surface-raised'
+                  }`}
+                >
+                  <Keyboard className="h-3.5 w-3.5" /> Type
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode('write')}
+                  aria-pressed={inputMode === 'write'}
+                  disabled={Boolean(marked)}
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs transition-colors disabled:opacity-50 ${
+                    inputMode === 'write'
+                      ? 'bg-accent/12 text-accent'
+                      : 'text-ink-muted hover:bg-surface-raised'
+                  }`}
+                >
+                  <PenLine className="h-3.5 w-3.5" /> Write by hand
+                </button>
+              </div>
+
+              {inputMode === 'type' ? (
+                <Textarea
+                  value={response}
+                  onChange={(event) => setResponse(event.target.value)}
+                  rows={question.type === 'NUMERICAL' ? 2 : 5}
+                  disabled={Boolean(marked)}
+                  placeholder={
+                    question.type === 'NUMERICAL'
+                      ? 'Your answer, including the unit'
+                      : 'Write your full answer here'
+                  }
+                  aria-label="Your answer"
+                />
+              ) : (
+                <div className="space-y-2">
+                  <HandwritingPad
+                    // Keyed on the question: without this React reuses the same
+                    // canvas and the previous answer's writing is still on it.
+                    key={question.id}
+                    height={autoMarked ? 200 : 280}
+                    disabled={Boolean(marked)}
+                    ariaLabel={autoMarked ? 'Your working' : 'Write your answer by hand'}
+                    // A numerical answer is auto-marked by comparing text, which
+                    // no drawing can satisfy — so there the pad holds the working
+                    // and the marked answer is typed on the line below, exactly
+                    // as the paper is laid out. A written answer is self-marked
+                    // against the scheme, so the drawing is the whole answer and
+                    // the recorded response only has to show one was given.
+                    onChange={
+                      autoMarked
+                        ? undefined
+                        : ({ isEmpty }) => setResponse(isEmpty ? '' : '[handwritten answer]')
+                    }
+                  />
+                  {autoMarked && (
+                    <Textarea
+                      value={response}
+                      onChange={(event) => setResponse(event.target.value)}
+                      rows={1}
+                      disabled={Boolean(marked)}
+                      placeholder="Final answer, including the unit"
+                      aria-label="Final answer"
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
