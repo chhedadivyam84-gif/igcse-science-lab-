@@ -38,6 +38,14 @@ export const SIMULATIONS: Record<string, ComponentType> = {
     ssr: false,
     loading,
   }),
+  'osmosis-lab': dynamic(() => import('./biology-sims').then((m) => m.OsmosisLab), { loading }),
+  'enzyme-lab': dynamic(() => import('./biology-sims').then((m) => m.EnzymeLab), { loading }),
+  'photosynthesis-lab': dynamic(() => import('./biology-sims').then((m) => m.PhotosynthesisLab), { loading }),
+  'quadratic-explorer': dynamic(() => import('./maths-sims').then((m) => m.QuadraticExplorer), { loading }),
+  'circle-theorems': dynamic(() => import('./maths-sims').then((m) => m.CircleTheorems), { loading }),
+  transformations: dynamic(() => import('./maths-sims').then((m) => m.Transformations), { loading }),
+  'validation-checker': dynamic(() => import('./ict-sims').then((m) => m.ValidationChecker), { loading }),
+  'spreadsheet-references': dynamic(() => import('./ict-sims').then((m) => m.SpreadsheetReferences), { loading }),
 };
 
 // Guard against the catalogue promising a simulation the registry cannot render.

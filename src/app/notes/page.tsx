@@ -6,6 +6,7 @@ import { entitlementsFor } from '@/lib/billing/entitlements';
 import { Paywall, TrialBanner } from '@/components/billing/Paywall';
 import { aiStatus } from '@/lib/ai';
 import { NotesWorkbench } from '@/components/notes/NotesWorkbench';
+import { asSubjectSlug } from '@/lib/subjects';
 
 export const metadata: Metadata = {
   title: 'AI handwritten notes',
@@ -48,7 +49,7 @@ export default async function NotesPage({
       ) : (
         <NotesWorkbench
           initialTopic={topic}
-          initialSubject={subject === 'physics' || subject === 'chemistry' ? subject : undefined}
+          initialSubject={asSubjectSlug(subject)}
           aiConfigured={aiStatus().configured}
         />
       )}

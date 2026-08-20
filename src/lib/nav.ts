@@ -22,6 +22,7 @@ export const PRIMARY_NAV: NavItem[] = [
 ];
 
 export const SECONDARY_NAV: NavItem[] = [
+  { href: '/papers', label: 'Predicted papers', icon: 'ClipboardList', description: 'The questions that come up most, and a full paper', requiresAuth: true },
   { href: '/voice', label: 'Talk to NOVA', icon: 'Mic', description: 'Hands-free spoken tutoring', requiresAuth: true },
   { href: '/explain', label: 'Explain Anything', icon: 'Lightbulb', description: 'One question in, a full mini-lesson out' },
   { href: '/photo', label: 'Ask with a photo', icon: 'Camera', description: 'Upload your working and get the method', requiresAuth: true },

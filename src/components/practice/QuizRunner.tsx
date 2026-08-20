@@ -8,6 +8,7 @@ import { Badge, Button, EmptyState, ErrorState, Panel, ProgressBar, Skeleton, Te
 import { MISTAKE_META, type MistakeCategory, type PracticeMode } from '@/lib/types';
 import { cn, percent } from '@/lib/utils';
 import { HandwritingPad } from '@/components/input/HandwritingPad';
+import { subjectTone, subjectName } from '@/lib/subjects';
 
 type Question = {
   id: string;
@@ -220,9 +221,7 @@ export function QuizRunner({
 
       <Panel>
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <Badge tone={question.subject === 'physics' ? 'physics' : 'chemistry'}>
-            {question.subject === 'physics' ? 'Physics' : 'Chemistry'}
-          </Badge>
+          <Badge tone={subjectTone(question.subject)}>{subjectName(question.subject)}</Badge>
           <Badge tone="neutral">{question.type}</Badge>
           <Badge
             tone={

@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { isoDate } from '@/lib/utils';
 import { progressForUser } from '@/lib/progress';
 import type { PlanItem } from '@/lib/types';
+import { subjectName } from '@/lib/subjects';
 
 /**
  * Builds a study plan for today from what the student has actually done:
@@ -34,7 +35,7 @@ export async function buildDailyPlan(userId: string): Promise<PlanItem[]> {
   for (const subtopic of weak.slice(0, 2)) {
     items.push({
       id: `learn-${subtopic.subtopicId}`,
-      label: `${subtopic.subject === 'physics' ? 'Physics' : 'Chemistry'}: ${subtopic.title}`,
+      label: `${subjectName(subtopic.subject)}: ${subtopic.title}`,
       subject: subtopic.subject,
       subtopicNumber: subtopic.number,
       href: `/learn/${subtopic.subject}/${subtopic.topicSlug}/${subtopic.slug}`,

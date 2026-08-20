@@ -8,6 +8,7 @@ import { getSessionUser } from '@/lib/auth';
 import { masteryBand, progressForUser } from '@/lib/progress';
 import { parseList } from '@/lib/json';
 import { Badge, Card, ProgressBar } from '@/components/ui';
+import { subjectTone } from '@/lib/subjects';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,7 @@ export default async function TopicPage({ params }: Params) {
       </nav>
 
       <header className="mb-8">
-        <Badge tone={isPhysics ? 'physics' : 'chemistry'}>
+        <Badge tone={subjectTone(topic.version.subject.slug)}>
           {topic.version.subject.name} {topic.version.subject.code}
         </Badge>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">

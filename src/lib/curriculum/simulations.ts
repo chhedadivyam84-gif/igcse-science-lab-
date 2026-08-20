@@ -248,4 +248,98 @@ export const simulations: SimulationSeed[] = [
     concepts: ['Neutralisation', 'pH scale', 'Titration curves'],
     order: 8,
   },
+
+  // --- Biology -------------------------------------------------------------
+  {
+    slug: 'osmosis-lab',
+    subject: 'biology',
+    subtopicNumber: '3.1',
+    title: 'Osmosis in potato cylinders',
+    description:
+      'Change the sucrose concentration outside the cells and watch water move in or out. Find the concentration at which nothing changes.',
+    component: 'osmosis-lab',
+    concepts: ['Osmosis', 'Partially permeable membranes', 'Turgid and flaccid cells'],
+    order: 1,
+  },
+  {
+    slug: 'enzyme-lab',
+    subject: 'biology',
+    subtopicNumber: '5.1',
+    title: 'Enzyme activity',
+    description:
+      'Vary temperature and pH and watch the active site distort as the enzyme denatures — and why cooling it down again does not help.',
+    component: 'enzyme-lab',
+    concepts: ['Lock-and-key model', 'Optimum temperature and pH', 'Denaturation'],
+    order: 2,
+  },
+  {
+    slug: 'photosynthesis-lab',
+    subject: 'biology',
+    subtopicNumber: '6.1',
+    title: 'Limiting factors',
+    description:
+      'Change light, carbon dioxide and temperature, and see which one is actually holding the rate back at any moment.',
+    component: 'photosynthesis-lab',
+    concepts: ['Limiting factors', 'Rate graphs and plateaus', 'Photosynthesis'],
+    order: 3,
+  },
+
+  // --- Mathematics ---------------------------------------------------------
+  {
+    slug: 'quadratic-explorer',
+    subject: 'maths',
+    subtopicNumber: '2.5',
+    title: 'Quadratic explorer',
+    description:
+      'Move a, b and c and watch the roots appear and disappear exactly as the sign of the discriminant changes.',
+    component: 'quadratic-explorer',
+    concepts: ['Solving quadratics', 'The discriminant', 'Roots, vertex and intercepts'],
+    order: 1,
+  },
+  {
+    slug: 'circle-theorems',
+    subject: 'maths',
+    subtopicNumber: '4.2',
+    title: 'Circle theorems',
+    description:
+      'Move a point around the circle and watch the angle at the circumference refuse to change while the centre angle stays exactly double.',
+    component: 'circle-theorems',
+    concepts: ['Angle at the centre', 'Angles in the same segment', 'Angle in a semicircle'],
+    order: 2,
+  },
+  {
+    slug: 'transformations',
+    subject: 'maths',
+    subtopicNumber: '7.1',
+    title: 'Transformations',
+    description:
+      'Translate, reflect, rotate and enlarge a shape, with the full description an examiner wants shown alongside.',
+    component: 'transformations',
+    concepts: ['Translation vectors', 'Mirror lines', 'Centre and angle of rotation', 'Scale factor'],
+    order: 3,
+  },
+
+  // --- ICT -----------------------------------------------------------------
+  {
+    slug: 'validation-checker',
+    subject: 'ict',
+    subtopicNumber: '18.2',
+    title: 'Validation checker',
+    description:
+      'Type a value and see which validation checks it passes — then find the wrong-but-valid entry that every check lets through.',
+    component: 'validation-checker',
+    concepts: ['Validation checks', 'Verification', 'Why the two are different'],
+    order: 1,
+  },
+  {
+    slug: 'spreadsheet-references',
+    subject: 'ict',
+    subtopicNumber: '20.1',
+    title: 'Spreadsheet references',
+    description:
+      'Replicate a formula down a column with and without dollar signs, and watch the tax rate silently walk off into empty cells.',
+    component: 'spreadsheet-references',
+    concepts: ['Relative references', 'Absolute references', 'Replicating formulae'],
+    order: 2,
+  },
 ];

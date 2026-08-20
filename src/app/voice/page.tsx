@@ -7,10 +7,11 @@ import { entitlementsFor } from '@/lib/billing/entitlements';
 import { Paywall } from '@/components/billing/Paywall';
 import { VoiceTutor } from '@/components/voice/VoiceTutor';
 import { Badge, Notice } from '@/components/ui';
+import { asSubjectSlug } from '@/lib/subjects';
 
 export const metadata: Metadata = {
   title: 'Talk to NOVA',
-  description: 'A spoken science tutor for Cambridge IGCSE Physics and Chemistry. Ask out loud, get answers out loud.',
+  description: 'A spoken tutor for Cambridge IGCSE Physics, Chemistry, Biology, Maths and ICT. Ask out loud, get answers out loud.',
 };
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,7 @@ export default async function VoicePage({
       ) : (
         <>
           <VoiceTutor
-            subject={subject === 'physics' || subject === 'chemistry' ? subject : undefined}
+            subject={asSubjectSlug(subject)}
             topicHint={topic}
           />
 

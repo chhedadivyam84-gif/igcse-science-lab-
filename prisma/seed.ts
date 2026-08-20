@@ -12,6 +12,7 @@ import { definitions } from '../src/lib/curriculum/definitions';
 import { formulas } from '../src/lib/curriculum/formulas';
 import { simulations } from '../src/lib/curriculum/simulations';
 import { syllabuses } from '../src/lib/curriculum';
+import { highYieldSeeds } from '../src/lib/curriculum/high-yield';
 
 assertNotProductionDatabase();
 const db = new PrismaClient();
@@ -31,8 +32,12 @@ async function main() {
   console.log('Seeding IGCSE Science Lab…\n');
 
   // --- Subjects, syllabus versions and the topic tree ----------------------
+  // Keyed "subject:number", because every subject has a subtopic 1.1 and a map
+  // keyed on the number alone silently hands Physics 1.1 to whichever subject
+  // happened to be seeded last.
   const subtopicIdByNumber = new Map<string, string>();
   const subjectIdBySlug = new Map<string, string>();
+  const subtopicKey = (subject: string, number: string) => `${subject}:${number}`;
 
   for (const seed of syllabuses) {
     const subject = await db.subject.upsert({
@@ -118,7 +123,7 @@ async function main() {
           },
         });
         subOrder++;
-        subtopicIdByNumber.set(subSeed.number, subtopic.id);
+        subtopicIdByNumber.set(subtopicKey(seed.subject.slug, subSeed.number), subtopic.id);
 
         // Objectives — replaced wholesale so edits to the seed always win.
         await db.learningObjective.deleteMany({ where: { subtopicId: subtopic.id } });
@@ -222,12 +227,58 @@ async function main() {
     );
   }
 
+  // --- High-yield questions -------------------------------------------------
+  // Attached by subtopic number rather than nested in the syllabus files, so
+  // the list can be revised each year without touching syllabus structure.
+  let highYieldSeeded = 0;
+  const unmatchedHighYield: string[] = [];
+  for (const hy of highYieldSeeds) {
+    const subjectId = subjectIdBySlug.get(hy.subject);
+    const subtopicId = subtopicIdByNumber.get(subtopicKey(hy.subject, hy.subtopic));
+    if (!subjectId || !subtopicId) {
+      // Loud rather than silent: a mistyped subtopic number would otherwise
+      // drop the question on the floor and nobody would notice.
+      unmatchedHighYield.push(`${hy.subject} ${hy.subtopic} (rank ${hy.rank})`);
+      continue;
+    }
+    const q = hy.question;
+    const existing = await db.question.findFirst({ where: { subtopicId, stem: q.stem } });
+    const data = {
+      subjectId,
+      subtopicId,
+      type: q.type,
+      difficulty: q.difficulty,
+      stem: q.stem,
+      options: JSON.stringify(q.options ?? []),
+      answer: q.answer,
+      markScheme: JSON.stringify(q.markScheme),
+      marks: q.marks,
+      explanation: q.explanation,
+      hint: q.hint ?? null,
+      origin: 'AUTHORED',
+      reviewStatus: 'APPROVED',
+      highYield: true,
+      examRank: hy.rank,
+      trap: hy.trap,
+    };
+    if (existing) await db.question.update({ where: { id: existing.id }, data });
+    else await db.question.create({ data });
+    highYieldSeeded++;
+  }
+  console.log(`  ${highYieldSeeded} high-yield questions`);
+  if (unmatchedHighYield.length) {
+    console.warn(
+      `  WARNING: ${unmatchedHighYield.length} high-yield questions could not be attached:\n` +
+        unmatchedHighYield.map((s) => `    - ${s}`).join('\n'),
+    );
+  }
+
   // --- Formulas ------------------------------------------------------------
   for (const f of formulas) {
     const subjectId = subjectIdBySlug.get(f.subject)!;
     const data = {
       subjectId,
-      subtopicId: f.subtopicNumber ? (subtopicIdByNumber.get(f.subtopicNumber) ?? null) : null,
+      subtopicId: f.subtopicNumber ? (subtopicIdByNumber.get(subtopicKey(f.subject, f.subtopicNumber)) ?? null) : null,
       name: f.name,
       expression: f.expression,
       variables: JSON.stringify(f.variables),
@@ -245,7 +296,7 @@ async function main() {
     const existing = await db.definition.findFirst({ where: { subjectId, term: d.term } });
     const data = {
       subjectId,
-      subtopicId: d.subtopicNumber ? (subtopicIdByNumber.get(d.subtopicNumber) ?? null) : null,
+      subtopicId: d.subtopicNumber ? (subtopicIdByNumber.get(subtopicKey(d.subject, d.subtopicNumber)) ?? null) : null,
       term: d.term,
       statement: d.statement,
       examWording: d.examWording ?? null,
@@ -261,7 +312,7 @@ async function main() {
     const subjectId = subjectIdBySlug.get(s.subject)!;
     const data = {
       subjectId,
-      subtopicId: s.subtopicNumber ? (subtopicIdByNumber.get(s.subtopicNumber) ?? null) : null,
+      subtopicId: s.subtopicNumber ? (subtopicIdByNumber.get(subtopicKey(s.subject, s.subtopicNumber)) ?? null) : null,
       title: s.title,
       description: s.description,
       component: s.component,

@@ -6,6 +6,7 @@ import { Layers, RotateCcw } from 'lucide-react';
 
 import { Badge, Button, EmptyState, ErrorState, Panel, ProgressBar, Select, Skeleton } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { ALL_SUBJECTS } from '@/lib/subjects';
 
 type Card = {
   id: string;
@@ -159,9 +160,14 @@ export function FlashcardDeck({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <Select value={subject} onChange={(event) => setSubject(event.target.value)} aria-label="Subject" className="w-40">
-          <option value="">Both subjects</option>
-          <option value="physics">Physics</option>
-          <option value="chemistry">Chemistry</option>
+          {/* Listed from ALL_SUBJECTS: hard-coding the two science options left
+              Biology, Maths and ICT students unable to filter their own cards. */}
+          <option value="">All subjects</option>
+          {ALL_SUBJECTS.map(({ slug, display }) => (
+            <option key={slug} value={slug}>
+              {display.name}
+            </option>
+          ))}
         </Select>
         <Select
           value={difficulty}

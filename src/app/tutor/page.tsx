@@ -8,10 +8,11 @@ import { Paywall, TrialBanner } from '@/components/billing/Paywall';
 import { aiStatus } from '@/lib/ai';
 import { parseList } from '@/lib/json';
 import { TutorChat } from '@/components/tutor/TutorChat';
+import { asSubjectSlug } from '@/lib/subjects';
 
 export const metadata: Metadata = {
   title: 'Ask NOVA',
-  description: 'An AI science tutor for Cambridge IGCSE Physics and Chemistry, with five explanation modes.',
+  description: 'An AI tutor for Cambridge IGCSE Physics, Chemistry, Biology, Maths and ICT, with five explanation modes.',
 };
 export const dynamic = 'force-dynamic';
 
@@ -63,7 +64,7 @@ export default async function TutorPage({ searchParams }: Props) {
           initialMessages={initialMessages}
           conversationId={conversation?.id}
           topicHint={topic}
-          subject={subject === 'physics' || subject === 'chemistry' ? subject : undefined}
+          subject={asSubjectSlug(subject)}
           aiConfigured={ai.configured}
         />
       )}

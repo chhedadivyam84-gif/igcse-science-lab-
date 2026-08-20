@@ -56,6 +56,31 @@ export type QuestionSeed = {
   hint?: string;
 };
 
+/**
+ * A question form that recurs across series — what a student means by "the ones
+ * that always come up".
+ *
+ * These are attached to a subtopic by number rather than nested in the syllabus
+ * files, so the high-yield list can be revised each year without touching the
+ * syllabus structure, and so the basis for the claim stays in one reviewable
+ * place.
+ *
+ * The claim being made is deliberately narrow: this is teaching judgement about
+ * which *forms* of question recur, drawn from the published syllabus and its
+ * assessment objectives. It is not a Cambridge statistic, and no question here
+ * reproduces past-paper text.
+ */
+export type HighYieldSeed = {
+  subject: SubjectSlug;
+  /** Subtopic number this belongs to, e.g. "1.4". */
+  subtopic: string;
+  /** 1 comes up most often. Unique within a subject. */
+  rank: number;
+  /** The single commonest way marks are dropped on this question form. */
+  trap: string;
+  question: QuestionSeed;
+};
+
 export type SubtopicSeed = {
   number: string;
   slug: string;

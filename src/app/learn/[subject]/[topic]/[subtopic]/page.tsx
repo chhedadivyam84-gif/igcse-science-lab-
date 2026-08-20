@@ -10,6 +10,7 @@ import { parseList } from '@/lib/json';
 import { RichText } from '@/components/content/RichText';
 import { Badge, Card, LinkButton, Notice, Panel, ProgressBar, SectionHeader } from '@/components/ui';
 import type { WorkedExample } from '@/lib/curriculum/types';
+import { calculatorFor, subjectTone } from '@/lib/subjects';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,8 +50,8 @@ export default async function SubtopicPage({ params }: Params) {
   const progress = session ? await progressForUser(session.id) : [];
   const mine = progress.find((p) => p.number === subtopic.number);
   const band = mine ? masteryBand(mine.mastery) : null;
-  const isPhysics = slug === 'physics';
-  const tone = isPhysics ? 'physics' : 'chemistry';
+  const tone = subjectTone(slug);
+  const calculatorHref = calculatorFor(slug);
 
   const prerequisiteNumbers = parseList<string>(subtopic.prerequisites);
   const prerequisites = prerequisiteNumbers.length
@@ -321,12 +322,17 @@ export default async function SubtopicPage({ params }: Params) {
                   </li>
                 ))}
               </ul>
-              <Link
-                href={isPhysics ? '/tools/physics' : '/tools/mole'}
-                className="mt-3 flex items-center gap-1 text-xs text-accent hover:underline"
-              >
-                Open calculator <ArrowRight className="h-3 w-3" />
-              </Link>
+              {/* Only Physics and Chemistry have a calculator. This used to be a
+                  two-way ternary, which sent every Maths and Biology student to
+                  the mole calculator. */}
+              {calculatorHref && (
+                <Link
+                  href={calculatorHref}
+                  className="mt-3 flex items-center gap-1 text-xs text-accent hover:underline"
+                >
+                  Open calculator <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
             </Panel>
           )}
 

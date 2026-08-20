@@ -251,6 +251,15 @@ model Question {
   /// AUTHORED (written by a person) | AI_GENERATED (must be labelled in the UI)
   origin     String  @default("AUTHORED")
   reviewStatus String @default("APPROVED") // PENDING | APPROVED | REJECTED
+  /// True for a question form that recurs across series — what students mean by
+  /// "the ones that always come up". This is teaching judgement drawn from the
+  /// published syllabus and its assessment objectives, NOT a Cambridge
+  /// statistic, and never past-paper text. Basis: src/lib/exam/high-yield.ts.
+  highYield  Boolean @default(false)
+  /// Rank within the subject's high-yield list; 1 comes up most. 0 = unranked.
+  examRank   Int     @default(0)
+  /// The single commonest way marks are dropped on this question form.
+  trap       String?
   createdAt  DateTime @default(now())
 
   subject  Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -259,6 +268,7 @@ model Question {
 
   @@index([subjectId, type])
   @@index([subtopicId])
+  @@index([subjectId, highYield, examRank])
 }
 
 model QuestionAttempt {

@@ -6,6 +6,7 @@ import { Check, ShieldCheck, X } from 'lucide-react';
 
 import { Badge, Button, EmptyState, Notice, Panel, SectionHeader, Select, Stat, Textarea } from '@/components/ui';
 import { cn, relativeTime } from '@/lib/utils';
+import { subjectTone } from '@/lib/subjects';
 
 export type PendingQuestion = {
   id: string;
@@ -244,7 +245,7 @@ export function AdminConsole({
                 <Panel key={question.id}>
                   <div className="mb-3 flex flex-wrap items-center gap-2">
                     <Badge tone="caution">AI-generated</Badge>
-                    <Badge tone={question.subject === 'physics' ? 'physics' : 'chemistry'}>
+                    <Badge tone={subjectTone(question.subject)}>
                       {question.subject}
                     </Badge>
                     <Badge tone="neutral">{question.type}</Badge>

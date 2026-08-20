@@ -3,6 +3,7 @@ import { requireAiAccess } from '@/lib/ai/guard';
 import { getAiProvider } from '@/lib/ai';
 import { buildGrounding } from '@/lib/ai/grounding';
 import { ANALYSE_SYSTEM } from '@/lib/ai/prompts';
+import { asSubjectSlug } from '@/lib/subjects';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -48,7 +49,7 @@ export const POST = handleRoute('analyze', async (request) => {
   const base64 = Buffer.from(await file.arrayBuffer()).toString('base64');
   const grounding = note
     ? await buildGrounding(note, {
-        subject: subject === 'physics' || subject === 'chemistry' ? subject : undefined,
+        subject: asSubjectSlug(subject),
       })
     : { text: '', sourceRefs: [] as string[] };
 

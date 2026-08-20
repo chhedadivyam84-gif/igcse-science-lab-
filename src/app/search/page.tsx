@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { Badge, EmptyState, Panel } from '@/components/ui';
 import type { SearchHit } from '@/app/api/search/route';
+import { subjectTone, subjectName } from '@/lib/subjects';
 
 export const metadata: Metadata = {
   title: 'Search',
@@ -93,9 +94,7 @@ export default async function SearchPage({
                         <span className="block text-sm text-ink-muted">{hit.detail}</span>
                       </span>
                       {hit.subject && (
-                        <Badge tone={hit.subject === 'physics' ? 'physics' : 'chemistry'}>
-                          {hit.subject === 'physics' ? 'Physics' : 'Chemistry'}
-                        </Badge>
+                        <Badge tone={subjectTone(hit.subject)}>{subjectName(hit.subject)}</Badge>
                       )}
                     </Link>
                   </li>

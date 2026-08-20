@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { handleRoute, ok } from '@/lib/api';
 import { getSessionUser } from '@/lib/auth';
 import { keywords } from '@/lib/ai/grounding';
+import { calculatorFor } from '@/lib/subjects';
 
 export const dynamic = 'force-dynamic';
 
@@ -118,7 +119,9 @@ export const GET = handleRoute('search', async (request) => {
       kind: 'formula' as const,
       title: f.name,
       detail: `${f.expression} — result in ${f.resultUnit}`,
-      href: f.subject.slug === 'chemistry' ? '/tools/mole' : '/tools/physics',
+      // Only Physics and Chemistry have a calculator. This was a two-way
+      // ternary, so every Maths formula linked to the mole calculator.
+      href: calculatorFor(f.subject.slug) ?? `/learn/${f.subject.slug}`,
       subject: f.subject.slug,
       badge: 'Formula',
     })),

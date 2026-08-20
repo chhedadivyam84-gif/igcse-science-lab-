@@ -22,6 +22,14 @@ export const AVAILABLE_SIMULATIONS = [
   'diffusion-tube',
   'solar-system',
   'molecule-viewer',
+  'osmosis-lab',
+  'enzyme-lab',
+  'photosynthesis-lab',
+  'quadratic-explorer',
+  'circle-theorems',
+  'transformations',
+  'validation-checker',
+  'spreadsheet-references',
 ] as const;
 
 export type AvailableSimulation = (typeof AVAILABLE_SIMULATIONS)[number];

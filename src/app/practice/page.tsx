@@ -7,6 +7,7 @@ import { getSessionUser } from '@/lib/auth';
 import { QuizRunner } from '@/components/practice/QuizRunner';
 import { Badge, LinkButton, Notice, Panel } from '@/components/ui';
 import { PRACTICE_MODES, type PracticeMode } from '@/lib/types';
+import { ALL_SUBJECTS, subjectTone } from '@/lib/subjects';
 
 export const metadata: Metadata = {
   title: 'Practice',
@@ -22,7 +23,7 @@ const MODE_META: Record<PracticeMode, { label: string; description: string; coun
   exam: { label: 'Exam mode', description: 'Timed, distraction-free, marked at the end.', count: 12 },
   timed: { label: 'Timed test', description: 'Against the clock, with feedback as you go.', count: 10 },
   weak: { label: 'Weak topics', description: 'Targets whatever your mastery scores say you find hardest.', count: 8 },
-  random: { label: 'Random challenge', description: 'Anything from either subject.', count: 8 },
+  random: { label: 'Random challenge', description: 'Anything from any subject you study.', count: 8 },
 };
 
 type Props = {
@@ -58,7 +59,7 @@ export default async function PracticePage({ searchParams }: Props) {
         {mode && <p className="mt-2 text-ink-muted">{MODE_META[mode].description}</p>}
         {subtopic && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Badge tone={subtopic.topic.version.subject.slug === 'physics' ? 'physics' : 'chemistry'}>
+            <Badge tone={subjectTone(subtopic.topic.version.subject.slug)}>
               {subtopic.number} {subtopic.title}
             </Badge>
             <Link
@@ -117,24 +118,23 @@ export default async function PracticePage({ searchParams }: Props) {
 
           <Panel className="mt-6">
             <p className="eyebrow mb-2">Filter</p>
+            {/* Built from ALL_SUBJECTS rather than listed by hand: the two
+                hard-coded buttons here meant a Biology or Maths student had no
+                way to filter practice to their own subject at all. */}
             <div className="flex flex-wrap gap-2">
               <LinkButton href="/practice" variant={!params.subject ? 'primary' : 'secondary'} size="sm">
-                Both subjects
+                All subjects
               </LinkButton>
-              <LinkButton
-                href="/practice?subject=physics"
-                variant={params.subject === 'physics' ? 'primary' : 'secondary'}
-                size="sm"
-              >
-                Physics only
-              </LinkButton>
-              <LinkButton
-                href="/practice?subject=chemistry"
-                variant={params.subject === 'chemistry' ? 'primary' : 'secondary'}
-                size="sm"
-              >
-                Chemistry only
-              </LinkButton>
+              {ALL_SUBJECTS.map(({ slug, display }) => (
+                <LinkButton
+                  key={slug}
+                  href={`/practice?subject=${slug}`}
+                  variant={params.subject === slug ? 'primary' : 'secondary'}
+                  size="sm"
+                >
+                  {display.name}
+                </LinkButton>
+              ))}
             </div>
           </Panel>
 

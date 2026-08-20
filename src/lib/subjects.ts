@@ -43,8 +43,22 @@ const DISPLAY: Record<SubjectSlug, SubjectDisplay> = {
   ict: { name: 'ICT', code: '0417', tone: 'ict', textClass: 'text-ict' },
 };
 
-function isSubjectSlug(value: string): value is SubjectSlug {
-  return (SUBJECT_SLUGS as readonly string[]).includes(value);
+/**
+ * Narrows an arbitrary string — a query parameter, usually — to a subject.
+ *
+ * Exported because the alternative that grew up around the codebase was
+ * `subject === 'physics' || subject === 'chemistry' ? subject : undefined`,
+ * which does not just mislabel a Biology request: it discards the subject
+ * entirely, so the tutor, the notes writer and the photo analyser were answering
+ * five of the seven subjects with no syllabus grounding at all.
+ */
+export function isSubjectSlug(value: string | undefined | null): value is SubjectSlug {
+  return typeof value === 'string' && (SUBJECT_SLUGS as readonly string[]).includes(value);
+}
+
+/** The subject if it is one, otherwise undefined. Never a different subject. */
+export function asSubjectSlug(value: string | undefined | null): SubjectSlug | undefined {
+  return isSubjectSlug(value) ? value : undefined;
 }
 
 /** Falls back to the slug itself, so an unknown subject is never mislabelled
@@ -70,6 +84,22 @@ export function subjectNameWithCode(slug: string): string {
 
 export function subjectTone(slug: string): SubjectSlug {
   return subjectDisplay(slug).tone;
+}
+
+/**
+ * The calculator tool for a subject, where one exists.
+ *
+ * Partial on purpose. The UI used to pick between the two tools with a
+ * ternary, which meant a Maths or Biology student following "Open calculator"
+ * landed on the mole calculator. A subject with no entry should show no link.
+ */
+export const CALCULATOR_BY_SUBJECT: Partial<Record<SubjectSlug, string>> = {
+  physics: '/tools/physics',
+  chemistry: '/tools/mole',
+};
+
+export function calculatorFor(slug: string): string | null {
+  return isSubjectSlug(slug) ? (CALCULATOR_BY_SUBJECT[slug] ?? null) : null;
 }
 
 /** Every subject, in teaching order — for filters and switchers. */

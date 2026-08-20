@@ -3,6 +3,7 @@ import 'server-only';
 import { findLibraryDiagram } from '@/lib/diagrams/library';
 import type { ExplainResult, NoteDoc, NoteStyle, Storyboard, SubjectSlug } from '@/lib/types';
 import { searchCurriculum } from './grounding';
+import { subjectNameWithCode } from '@/lib/subjects';
 
 /**
  * Curriculum-only generators, used when no AI provider is configured.
@@ -104,7 +105,7 @@ export async function notesFromCurriculum(
 
   return {
     title: primary.title,
-    subtitle: `${primary.subject === 'physics' ? 'Physics 0625' : 'Chemistry 0620'} · ${primary.number} ${primary.topicTitle}`,
+    subtitle: `${subjectNameWithCode(primary.subject)} · ${primary.number} ${primary.topicTitle}`,
     style,
     blocks,
     sourceRefs: results.subtopics.map((s) => s.number),

@@ -7,6 +7,7 @@ import { parseList } from '@/lib/json';
 import { isSimulationAvailable } from '@/components/sim/available';
 import { SimulationRunner } from '@/components/sim/registry';
 import { Badge, EmptyState, LinkButton } from '@/components/ui';
+import { subjectTone } from '@/lib/subjects';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,7 @@ export default async function SimulationPage({ params }: Params) {
 
       <header className="mb-6">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge tone={isPhysics ? 'physics' : 'chemistry'}>
+          <Badge tone={subjectTone(simulation.subject.slug)}>
             {simulation.subject.name} {simulation.subject.code}
           </Badge>
           {simulation.subtopic && (

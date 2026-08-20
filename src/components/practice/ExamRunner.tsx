@@ -38,8 +38,19 @@ type Phase = 'sitting' | 'marking' | 'results';
 /** Roughly the pace of a real paper: about 75 seconds per mark. */
 const SECONDS_PER_MARK = 75;
 
-export function ExamRunner({ subject, count = 12 }: { subject?: string; count?: number }) {
+export function ExamRunner({
+  subject,
+  count = 12,
+  paper,
+}: {
+  subject?: string;
+  count?: number;
+  /** Paper number, e.g. "4". Sits the predicted paper for that blueprint
+   *  instead of a generic practice set, timed to the real paper's length. */
+  paper?: string;
+}) {
   const [questions, setQuestions] = useState<Question[] | null>(null);
+  const [paperMeta, setPaperMeta] = useState<{ name: string; marks: number; target: number; minutes: number; complete: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [flagged, setFlagged] = useState<Set<string>>(new Set());
@@ -60,27 +71,49 @@ export function ExamRunner({ subject, count = 12 }: { subject?: string; count?: 
     setIndex(0);
     setPhase('sitting');
 
-    const params = new URLSearchParams({ mode: 'exam', count: String(count) });
-    if (subject) params.set('subject', subject);
+    setPaperMeta(null);
+
+    // A predicted paper comes from the blueprint endpoint and carries its own
+    // timing; a generic practice paper is paced at 75 seconds per mark.
+    const url =
+      paper && subject
+        ? `/api/predicted?subject=${subject}&paper=${paper}`
+        : `/api/quiz?${new URLSearchParams({
+            mode: 'exam',
+            count: String(count),
+            ...(subject ? { subject } : {}),
+          })}`;
 
     try {
-      const response = await fetch(`/api/quiz?${params}`);
+      const response = await fetch(url);
       const data = await response.json();
       if (!response.ok) {
         setError(data.error ?? 'Could not start the paper.');
         return;
       }
-      if (!data.questions.length) {
+      if (!data.questions?.length) {
         setError(data.message ?? 'There are not enough questions in the bank for a paper yet.');
         return;
       }
       const loaded = data.questions as Question[];
       setQuestions(loaded);
-      setRemaining(loaded.reduce((sum, q) => sum + q.marks, 0) * SECONDS_PER_MARK);
+
+      if (paper) {
+        setPaperMeta({
+          name: data.paper.name,
+          marks: data.marksBuilt,
+          target: data.marksTarget,
+          minutes: data.minutes,
+          complete: data.complete,
+        });
+        setRemaining(data.minutes * 60);
+      } else {
+        setRemaining(loaded.reduce((sum, q) => sum + q.marks, 0) * SECONDS_PER_MARK);
+      }
     } catch {
       setError('Could not reach the server. Check your connection and try again.');
     }
-  }, [subject, count]);
+  }, [subject, count, paper]);
 
   useEffect(() => {
     void load();
@@ -352,6 +385,14 @@ export function ExamRunner({ subject, count = 12 }: { subject?: string; count?: 
             {totalMarks} marks · {answered}/{questions.length} answered
           </p>
           <ProgressBar value={(answered / questions.length) * 100} className="mt-3" />
+          {paperMeta && !paperMeta.complete && (
+            // Said plainly rather than hidden: a short paper sat as if it were
+            // full length teaches the wrong pace.
+            <p className="mt-3 border-t border-line pt-3 text-xs text-caution">
+              The real {paperMeta.name} is {paperMeta.target} marks. The bank can fill{' '}
+              {paperMeta.marks} so far, and the time has been scaled to match.
+            </p>
+          )}
         </Panel>
 
         <Panel className="p-4">

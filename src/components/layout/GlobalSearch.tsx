@@ -7,6 +7,7 @@ import { Badge, Spinner } from '@/components/ui';
 import { ALL_NAV } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 import type { SearchHit } from '@/app/api/search/route';
+import { subjectTone } from '@/lib/subjects';
 
 /**
  * Command palette. Searches pages instantly (they are known client-side) and
@@ -150,9 +151,7 @@ export function GlobalSearch({ open, onClose }: { open: boolean; onClose: () => 
                       <span className="block truncate text-xs text-ink-muted">{hit.detail}</span>
                     </span>
                     {hit.badge && (
-                      <Badge
-                        tone={hit.subject === 'physics' ? 'physics' : hit.subject === 'chemistry' ? 'chemistry' : 'neutral'}
-                      >
+                      <Badge tone={hit.subject ? subjectTone(hit.subject) : 'neutral'}>
                         {hit.badge}
                       </Badge>
                     )}

@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { parseList } from '@/lib/json';
 import { isSimulationAvailable } from '@/components/sim/available';
 import { Badge, Card, Notice, Panel } from '@/components/ui';
+import { isSubjectSlug, subjectTextClass, subjectTone } from '@/lib/subjects';
 
 export const metadata: Metadata = {
   title: 'Simulation Lab',
@@ -21,7 +22,7 @@ export default async function LabPage({
   const { subject } = await searchParams;
 
   const simulations = await db.simulation.findMany({
-    where: subject === 'physics' || subject === 'chemistry' ? { subject: { slug: subject } } : {},
+    where: isSubjectSlug(subject) ? { subject: { slug: subject } } : {},
     include: { subject: true, subtopic: { include: { topic: true } } },
     orderBy: [{ subjectId: 'asc' }, { order: 'asc' }],
   });
@@ -57,8 +58,8 @@ export default async function LabPage({
             <Card key={simulation.id} interactive className="p-0">
               <Link href={`/lab/${simulation.slug}`} className="flex h-full flex-col p-5">
                 <div className="flex items-start justify-between gap-3">
-                  <Badge tone={isPhysics ? 'physics' : 'chemistry'}>{simulation.subject.name}</Badge>
-                  <FlaskConical className={`h-4 w-4 ${isPhysics ? 'text-physics' : 'text-chemistry'}`} />
+                  <Badge tone={subjectTone(simulation.subject.slug)}>{simulation.subject.name}</Badge>
+                  <FlaskConical className={`h-4 w-4 ${subjectTextClass(simulation.subject.slug)}`} />
                 </div>
                 <h2 className="mt-3 text-base font-semibold text-ink">{simulation.title}</h2>
                 <p className="mt-1.5 flex-1 text-sm text-ink-muted">{simulation.description}</p>
