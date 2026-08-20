@@ -4,6 +4,8 @@ import { hashPassword, startSession } from '@/lib/auth';
 import { isOwnerEmail } from '@/lib/owner';
 import { TRIAL_DAYS } from '@/lib/billing/plans';
 import { fail, handleRoute, ok, parseBody } from '@/lib/api';
+import { sendEmail } from '@/lib/email';
+import { welcomeEmail } from '@/lib/email/templates';
 import { rateLimit } from '@/lib/ratelimit';
 
 const schema = z.object({
@@ -59,6 +61,11 @@ export const POST = handleRoute('auth/register', async (request) => {
     role: owner ? 'ADMIN' : 'STUDENT',
     owner,
   });
+
+  // Deliberately not awaited: a slow or failing mail provider must not break a
+  // registration that has already succeeded. sendEmail never throws, so nothing
+  // can escape here.
+  void sendEmail({ ...welcomeEmail({ name: user.name, trialDays: TRIAL_DAYS }), to: user.email });
 
   return ok({ id: user.id, name: user.name, email: user.email, role: user.role, owner }, { status: 201 });
 });

@@ -28,6 +28,11 @@ export default async function SignInPage() {
           Create one
         </Link>
       </p>
+      <p className="mt-2 text-sm text-ink-muted">
+        <Link href="/forgot" className="text-accent hover:underline">
+          Forgot your password?
+        </Link>
+      </p>
     </div>
   );
 }

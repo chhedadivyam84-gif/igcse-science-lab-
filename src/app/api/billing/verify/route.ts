@@ -4,6 +4,9 @@ import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireUser } from '@/lib/auth';
 import { entitlementsFor } from '@/lib/billing/entitlements';
 import { fetchSubscription, verifyCheckoutSignature } from '@/lib/billing/razorpay';
+import { formatPrice } from '@/lib/billing/plans';
+import { sendEmail } from '@/lib/email';
+import { paymentReceiptEmail } from '@/lib/email/templates';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -62,6 +65,22 @@ export const POST = handleRoute('billing/verify', async (request) => {
   });
 
   const entitlements = await entitlementsFor(user.id);
+
+  // A receipt is the student's own record of the charge, and the refunds policy
+  // is one click from it. Not awaited — the payment has already succeeded, and
+  // a mail failure must not make it look otherwise.
+  const account = await db.user.findUnique({ where: { id: user.id } });
+  if (account) {
+    void sendEmail({
+      ...paymentReceiptEmail({
+        name: account.name,
+        amountLabel: formatPrice(subscription.amountMinor, subscription.currency),
+        interval: subscription.interval,
+        renewsAt: entitlements.renewsAt ? new Date(entitlements.renewsAt).toDateString() : null,
+      }),
+      to: account.email,
+    });
+  }
 
   return ok({
     plan: entitlements.plan,

@@ -56,6 +56,7 @@ model User {
   reviews       FlashcardReview[]
   plans         DailyPlan[]
   subscriptions Subscription[]
+  resetTokens   PasswordResetToken[]
   authoredContent ContentReview[] @relation("ContentReviewer")
 
   @@index([role])
@@ -531,6 +532,27 @@ model Subscription {
 
   @@index([userId, status])
   @@index([status, currentPeriodEnd])
+}
+
+/// A pending "forgot password" request.
+///
+/// Only a SHA-256 hash of the token is stored, so a leaked database still does
+/// not hand anyone a working reset link — the raw token exists solely in the
+/// email that was sent. Tokens are single use (`usedAt`) and short-lived
+/// (`expiresAt`), and old rows are cleared whenever a new one is issued.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  /// SHA-256 of the token that went out in the email. Never the token itself.
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 /// Raw webhook audit trail. `eventId` is unique so a provider retrying a
