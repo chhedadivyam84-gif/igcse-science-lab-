@@ -22,18 +22,16 @@ const schema = z.object({
     .default([]),
 });
 
-const modelSchema = z.object({
-  reply: z.string(),
-  actions: z
-    .array(
-      z.object({
-        kind: z.enum(ACTION_KINDS),
-        target: z.string().default(''),
-        label: z.string().max(48),
-      }),
-    )
-    .default([]),
-});
+const actionsSchema = z.array(
+  z.object({
+    kind: z.enum(ACTION_KINDS),
+    target: z.string().default(''),
+    label: z.string().max(48),
+  }),
+);
+
+/** Separates the prose answer from the trailing action list. */
+const ACTION_MARKER = '<<<ACTIONS>>>';
 
 /** Static destinations the assistant may link to, by name. */
 const PAGES: Record<string, string> = {
@@ -62,6 +60,21 @@ export type AssistantAction = { kind: string; label: string; href: string };
  * product is worse than no suggestion at all. Anything that cannot be resolved
  * is dropped silently rather than shown.
  */
+/**
+ * Streams the answer as it is written, then sends the resolved actions.
+ *
+ * The panel used to wait for a complete JSON object before showing anything,
+ * which meant several seconds of a blank box even though the first sentence was
+ * ready almost immediately. Now the prose streams straight through and the
+ * action buttons arrive at the end, so the panel starts answering in about a
+ * second.
+ *
+ * Wire format is newline-delimited JSON, one object per line:
+ *   {"type":"delta","text":"..."}     — append to the reply
+ *   {"type":"actions","actions":[…]}  — resolved links, once
+ *   {"type":"error","error":"..."}    — something went wrong mid-stream
+ *   {"type":"done"}
+ */
 export const POST = handleRoute('assistant', async (request) => {
   await requireAiAccess('tutor');
   const body = await parseBody(request, schema);
@@ -74,7 +87,8 @@ export const POST = handleRoute('assistant', async (request) => {
     });
   }
 
-  // What the student is looking at, resolved from the URL they are on.
+  // Sequential on purpose: the grounding search is seeded with the page hint,
+  // so it cannot start until the location is known.
   const context = await describeLocation(body.pathname);
   const grounding = await buildGrounding(`${body.message} ${context.hint}`.trim());
 
@@ -86,40 +100,92 @@ export const POST = handleRoute('assistant', async (request) => {
     .filter(Boolean)
     .join('\n\n');
 
-  const raw = await provider.complete({
-    system,
-    messages: [...body.history, { role: 'user' as const, content: body.message }],
-    maxTokens: 700,
-    temperature: 0.4,
-    responseFormat: 'json',
+  const encoder = new TextEncoder();
+  const line = (value: unknown) => encoder.encode(`${JSON.stringify(value)}\n`);
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let full = '';
+      let emitted = 0; // how much of the prose has already been sent
+
+      try {
+        for await (const chunk of provider.stream({
+          system,
+          messages: [...body.history, { role: 'user' as const, content: body.message }],
+          maxTokens: 700,
+          temperature: 0.4,
+        })) {
+          full += chunk;
+
+          // Everything before the marker is the answer. Once the marker starts
+          // appearing, stop emitting so a half-written "<<<ACTIONS" never
+          // flashes up in the panel.
+          const markerAt = full.indexOf(ACTION_MARKER);
+          const safeEnd =
+            markerAt >= 0 ? markerAt : Math.max(0, full.length - ACTION_MARKER.length);
+
+          if (safeEnd > emitted) {
+            controller.enqueue(line({ type: 'delta', text: full.slice(emitted, safeEnd) }));
+            emitted = safeEnd;
+          }
+          if (markerAt >= 0) break;
+        }
+
+        // Flush any tail that was being held back as a possible marker.
+        const markerAt = full.indexOf(ACTION_MARKER);
+        const proseEnd = markerAt >= 0 ? markerAt : full.length;
+        if (proseEnd > emitted) {
+          controller.enqueue(line({ type: 'delta', text: full.slice(emitted, proseEnd) }));
+        }
+
+        controller.enqueue(line({ type: 'actions', actions: await parseActions(full) }));
+        controller.enqueue(line({ type: 'done' }));
+      } catch (error) {
+        console.error('[api:assistant] stream failed', error);
+        controller.enqueue(
+          line({ type: 'error', error: 'The assistant stopped mid-answer. Please try again.' }),
+        );
+      } finally {
+        controller.close();
+      }
+    },
   });
 
-  const parsed = extractJson<unknown>(raw, null);
-  const validated = parsed ? modelSchema.safeParse(parsed) : null;
-  if (!validated?.success) {
-    return fail('The assistant returned something unreadable. Please try again.', 502, {
-      code: 'ai_shape',
-    });
-  }
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'application/x-ndjson; charset=utf-8',
+      'Cache-Control': 'no-store',
+      // Stops proxies buffering the stream and undoing the whole point.
+      'X-Accel-Buffering': 'no',
+    },
+  });
+});
+
+/** Reads the trailing action list, resolving each to a real link. */
+async function parseActions(full: string): Promise<AssistantAction[]> {
+  const markerAt = full.indexOf(ACTION_MARKER);
+  if (markerAt < 0) return [];
+
+  const parsed = extractJson<unknown>(full.slice(markerAt + ACTION_MARKER.length), null);
+  const validated = parsed ? actionsSchema.safeParse(parsed) : null;
+  if (!validated?.success) return [];
 
   const actions: AssistantAction[] = [];
-  for (const action of validated.data.actions.slice(0, 3)) {
+  for (const action of validated.data.slice(0, 3)) {
     const href = await resolveAction(action.kind, action.target);
     if (href) actions.push({ kind: action.kind, label: action.label, href });
   }
-
-  return ok({
-    reply: validated.data.reply,
-    actions,
-    grounding: grounding.sourceRefs,
-  });
-});
+  return actions;
+}
 
 /** Turns the current pathname into something the model can reason about. */
 async function describeLocation(pathname?: string): Promise<{ hint: string }> {
   if (!pathname) return { hint: '' };
 
-  const learn = pathname.match(/^\/learn\/(physics|chemistry)\/([^/]+)\/([^/?]+)/);
+  // Any subject slug, not a fixed pair — this was left behind when Biology,
+  // the three maths syllabuses and ICT were added, so the assistant had no idea
+  // what page the student was on for five of the seven subjects.
+  const learn = pathname.match(/^\/learn\/([a-z-]+)\/([^/]+)\/([^/?]+)/);
   if (learn) {
     const subtopic = await db.subtopic.findFirst({
       where: { slug: learn[3], topic: { slug: learn[2] } },

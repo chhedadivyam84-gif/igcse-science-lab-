@@ -90,23 +90,64 @@ export function VoiceMode({ onClose }: { onClose: () => void }) {
           }),
         });
 
-        const data = await response.json();
-        if (!response.ok) {
+        if (!response.ok || !response.body) {
+          const data = await response.json().catch(() => ({}));
           setError(data.error ?? 'The assistant is unavailable.');
           setPhase('idle');
           busy.current = false;
           return;
         }
 
-        const replyActions: Action[] = data.actions ?? [];
-        setTurns((current) => [...current, { role: 'nova', text: data.reply }]);
+        /* The assistant streams newline-delimited JSON. Speech still waits for
+           the whole answer: the reply is only a few sentences, and starting to
+           speak before the action list has arrived would mean deciding whether
+           to ask "shall I open it?" after the sentence had already been said. */
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let reply = '';
+        let replyActions: Action[] = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+          for (const raw of lines) {
+            if (!raw.trim()) continue;
+            try {
+              const event = JSON.parse(raw) as {
+                type: string;
+                text?: string;
+                actions?: Action[];
+                error?: string;
+              };
+              if (event.type === 'delta' && event.text) reply += event.text;
+              else if (event.type === 'actions') replyActions = event.actions ?? [];
+              else if (event.type === 'error' && event.error) setError(event.error);
+            } catch {
+              /* a partial line — the next chunk completes it */
+            }
+          }
+        }
+
+        reply = reply.trim();
+        if (!reply) {
+          setError('The assistant did not answer. Please try again.');
+          setPhase('idle');
+          busy.current = false;
+          return;
+        }
+
+        setTurns((current) => [...current, { role: 'nova', text: reply }]);
         setActions(replyActions);
         setPhase('speaking');
 
         // If there is exactly one thing to do, ask for consent out loud so the
         // whole task can be finished without touching the screen.
         const single = replyActions.length === 1 ? replyActions[0] : null;
-        const spoken = single ? `${data.reply} Shall I open ${single.label}?` : data.reply;
+        const spoken = single ? `${reply} Shall I open ${single.label}?` : reply;
         if (single) offered.current = single;
 
         speech.speak(spoken, () => {
