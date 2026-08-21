@@ -53,6 +53,44 @@ export type PredictedPaper = {
   minutes: number;
 };
 
+/**
+ * Picks questions summing as close to the mark total as possible, never over.
+ *
+ * A single greedy pass is not good enough here. Whole questions rarely tile to
+ * the target by luck, so greedy can stop several marks short while questions
+ * that would have fitted a *different* combination sit unused — Chemistry Paper
+ * 6 landed on 36 of 40 with 53 marks available. That then reads as "the bank
+ * cannot fill this paper", which is simply false.
+ *
+ * So this searches for an exact fit instead. Candidates arrive in priority
+ * order (high-yield first) and a total is only ever recorded the first time it
+ * is reached, which keeps the search biased towards those earlier questions.
+ * The pools are at most a few dozen questions against a target under 200, so
+ * the work is trivial.
+ */
+function fillToTarget<T extends { marks: number }>(candidates: T[], target: number): T[] {
+  /** Mark total -> the indices that reach it. */
+  const reachable = new Map<number, number[]>([[0, []]]);
+
+  for (let i = 0; i < candidates.length; i++) {
+    const marks = candidates[i].marks;
+    if (marks <= 0) continue;
+    // Snapshot, so each question is used at most once per total.
+    for (const [sum, picked] of [...reachable]) {
+      const next = sum + marks;
+      if (next > target || reachable.has(next)) continue;
+      reachable.set(next, [...picked, i]);
+    }
+    if (reachable.has(target)) break;
+  }
+
+  const best = reachable.has(target)
+    ? target
+    : Math.max(...reachable.keys());
+
+  return (reachable.get(best) ?? []).map((index) => candidates[index]);
+}
+
 /** A stable seed per paper, so the same paper comes back every time. */
 function seedFor(subject: string, paperNumber: string): number {
   let hash = 0;
@@ -104,16 +142,8 @@ export async function buildPredictedPaper(
     seed,
   );
 
-  const chosen: typeof rows = [];
-  let marks = 0;
-  for (const question of [...ranked, ...rest]) {
-    if (marks >= paper.marks) break;
-    // Never overshoot the real mark total: a longer paper misleads the timing
-    // just as much as a shorter one.
-    if (marks + question.marks > paper.marks) continue;
-    chosen.push(question);
-    marks += question.marks;
-  }
+  const chosen = fillToTarget([...ranked, ...rest], paper.marks);
+  const marks = chosen.reduce((sum, q) => sum + q.marks, 0);
 
   return {
     paper,

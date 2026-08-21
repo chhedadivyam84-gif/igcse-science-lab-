@@ -33,14 +33,18 @@ async function main() {
         ...rows.filter((r) => r.highYield).sort((a, b) => a.examRank - b.examRank),
         ...rows.filter((r) => !r.highYield),
       ];
-      let built = 0;
-      let count = 0;
-      for (const q of ordered) {
-        if (built >= paper.marks) break;
-        if (built + q.marks > paper.marks) continue;
-        built += q.marks;
-        count++;
+      const reachable = new Map<number, number[]>([[0, []]]);
+      for (let i = 0; i < ordered.length; i++) {
+        const m = ordered[i].marks;
+        for (const [sum, picked] of [...reachable]) {
+          const next = sum + m;
+          if (next > paper.marks || reachable.has(next)) continue;
+          reachable.set(next, [...picked, i]);
+        }
+        if (reachable.has(paper.marks)) break;
       }
+      const built = reachable.has(paper.marks) ? paper.marks : Math.max(...reachable.keys());
+      const count = (reachable.get(built) ?? []).length;
       const pool = rows.reduce((n, r) => n + r.marks, 0);
       const status = built >= paper.marks ? 'COMPLETE' : `partial ${Math.round((built / paper.marks) * 100)}%`;
       console.log(
