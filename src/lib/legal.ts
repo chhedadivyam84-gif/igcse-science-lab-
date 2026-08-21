@@ -15,7 +15,7 @@ export const PENDING = 'PENDING' as const;
 
 export const BUSINESS = {
   /** Registered or trading name of the operator. */
-  legalName: PENDING,
+  legalName: 'Divyam Chheda',
   /** Public-facing product name. */
   productName: 'IGCSE Science Lab',
   /** Full postal address, required by the payment provider. */
@@ -25,14 +25,19 @@ export const BUSINESS = {
   /** Support mailbox students write to. */
   email: 'chhedadivyam84@gmail.com',
   /** Courts whose law governs the agreement. */
-  jurisdiction: PENDING,
+  jurisdiction: 'Mumbai',
 } as const;
 
 /** Days after payment within which a refund may be requested. */
 export const REFUND_WINDOW_DAYS = 7;
 
-/** Shown as the "last updated" date on every policy. */
-export const POLICY_UPDATED = '19 August 2026';
+/**
+ * Shown as the "last updated" date on every policy.
+ *
+ * Bump this whenever anything in BUSINESS or the policy text changes — naming a
+ * different operator is a substantive change to the agreement, not a typo fix.
+ */
+export const POLICY_UPDATED = '21 August 2026';
 
 /** True when every required detail has been filled in. */
 export function legalDetailsComplete(): boolean {
