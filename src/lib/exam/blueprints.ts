@@ -9,11 +9,17 @@ import type { SubjectSlug } from '../types';
  * numbers here are the published assessment structure, not estimates, and each
  * subject carries the source they came from.
  *
- * `buildable` is the honest part. A written theory paper can be assembled from
- * a question bank; a practical test in a laboratory, an ICT paper marked on a
- * spreadsheet file, or a graphics-calculator investigation cannot be. Those are
- * listed anyway — a student planning revision needs to see the whole
+ * `buildable` is the honest part. A written paper can be assembled from a
+ * question bank; a practical test at a laboratory bench, an ICT paper marked on
+ * a spreadsheet file, or a graphics-calculator investigation cannot be. Those
+ * are listed anyway — a student planning revision needs to see the whole
  * qualification — but they are not offered as predicted papers.
+ *
+ * The Alternative to Practical (Paper 6) *is* buildable, and is worth 20% of
+ * each science. It is written, so it can be sat on a screen; it simply asks
+ * different questions from a theory paper — instruments, tables, graphs,
+ * sources of error — which is why those questions carry their own flag and are
+ * kept out of the theory papers.
  *
  * Structures are those published for the series named in `seriesLabel`.
  * Cambridge revises specifications; when that happens add a new entry rather
@@ -122,8 +128,7 @@ function sciencePapers(): PaperBlueprint[] {
       marks: 40,
       weight: 20,
       style: 'PRACTICAL',
-      buildable: false,
-      note: 'Written, but it examines apparatus, readings and sources of error rather than syllabus theory. Our bank is theory, so predicting it would be guesswork.',
+      buildable: true,
     },
   ];
 }

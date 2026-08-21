@@ -76,8 +76,15 @@ export async function buildPredictedPaper(
     where: {
       reviewStatus: 'APPROVED',
       subject: { slug: subject },
-      // A multiple-choice paper is all MCQ; a theory paper contains none.
-      ...(paper.style === 'MCQ' ? { type: 'MCQ' } : { type: { not: 'MCQ' } }),
+      // Three distinct paper shapes, and they must not borrow from each other:
+      // a multiple-choice paper is all MCQ; an Alternative-to-Practical paper is
+      // only the experimental-skills questions; a theory paper is everything
+      // else, which means excluding both.
+      ...(paper.style === 'MCQ'
+        ? { type: 'MCQ', practical: false }
+        : paper.style === 'PRACTICAL'
+          ? { practical: true }
+          : { type: { not: 'MCQ' }, practical: false }),
       // Core papers do not carry Extended-only material.
       ...(paper.tier === 'CORE' ? { difficulty: { not: 'CHALLENGE' } } : {}),
     },

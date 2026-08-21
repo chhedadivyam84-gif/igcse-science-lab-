@@ -81,6 +81,23 @@ export type HighYieldSeed = {
   question: QuestionSeed;
 };
 
+/**
+ * An Alternative-to-Practical question.
+ *
+ * Paper 6 is written, but it does not examine syllabus theory — it examines
+ * whether you can read an instrument, tabulate results, plot and use a graph,
+ * and say what went wrong and how to fix it. Those are different questions from
+ * the theory bank, so they are marked as such and kept out of the theory papers.
+ */
+export type PracticalSeed = {
+  subject: SubjectSlug;
+  /** Subtopic number the practical belongs to, e.g. "1.4". */
+  subtopic: string;
+  /** The single commonest way marks are dropped on this question form. */
+  trap: string;
+  question: QuestionSeed;
+};
+
 export type SubtopicSeed = {
   number: string;
   slug: string;

@@ -13,6 +13,7 @@ import { formulas } from '../src/lib/curriculum/formulas';
 import { simulations } from '../src/lib/curriculum/simulations';
 import { syllabuses } from '../src/lib/curriculum';
 import { highYieldSeeds } from '../src/lib/curriculum/high-yield';
+import { practicalSeeds } from '../src/lib/curriculum/practical';
 
 assertNotProductionDatabase();
 const db = new PrismaClient();
@@ -266,6 +267,47 @@ async function main() {
     highYieldSeeded++;
   }
   console.log(`  ${highYieldSeeded} high-yield questions`);
+
+  // --- Alternative-to-Practical questions -----------------------------------
+  let practicalSeeded = 0;
+  const unmatchedPractical: string[] = [];
+  for (const pr of practicalSeeds) {
+    const subjectId = subjectIdBySlug.get(pr.subject);
+    const subtopicId = subtopicIdByNumber.get(subtopicKey(pr.subject, pr.subtopic));
+    if (!subjectId || !subtopicId) {
+      unmatchedPractical.push(`${pr.subject} ${pr.subtopic}`);
+      continue;
+    }
+    const q = pr.question;
+    const existing = await db.question.findFirst({ where: { subtopicId, stem: q.stem } });
+    const data = {
+      subjectId,
+      subtopicId,
+      type: q.type,
+      difficulty: q.difficulty,
+      stem: q.stem,
+      options: JSON.stringify(q.options ?? []),
+      answer: q.answer,
+      markScheme: JSON.stringify(q.markScheme),
+      marks: q.marks,
+      explanation: q.explanation,
+      hint: q.hint ?? null,
+      origin: 'AUTHORED',
+      reviewStatus: 'APPROVED',
+      practical: true,
+      trap: pr.trap,
+    };
+    if (existing) await db.question.update({ where: { id: existing.id }, data });
+    else await db.question.create({ data });
+    practicalSeeded++;
+  }
+  console.log(`  ${practicalSeeded} alternative-to-practical questions`);
+  if (unmatchedPractical.length) {
+    console.warn(
+      `  WARNING: ${unmatchedPractical.length} practical questions could not be attached:\n` +
+        unmatchedPractical.map((s) => `    - ${s}`).join('\n'),
+    );
+  }
   if (unmatchedHighYield.length) {
     console.warn(
       `  WARNING: ${unmatchedHighYield.length} high-yield questions could not be attached:\n` +

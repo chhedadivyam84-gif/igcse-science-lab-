@@ -266,6 +266,11 @@ model Question {
   examRank   Int     @default(0)
   /// The single commonest way marks are dropped on this question form.
   trap       String?
+  /// True for an Alternative-to-Practical question: apparatus, readings,
+  /// tables, graphs, sources of error and improvements rather than syllabus
+  /// theory. Paper 6 is built only from these, and the theory papers exclude
+  /// them, so the two never contaminate each other.
+  practical  Boolean @default(false)
   createdAt  DateTime @default(now())
 
   subject  Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)

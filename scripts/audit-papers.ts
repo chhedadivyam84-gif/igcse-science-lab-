@@ -19,7 +19,11 @@ async function main() {
         where: {
           reviewStatus: 'APPROVED',
           subject: { slug: subject },
-          ...(paper.style === 'MCQ' ? { type: 'MCQ' } : { type: { not: 'MCQ' } }),
+          ...(paper.style === 'MCQ'
+            ? { type: 'MCQ', practical: false }
+            : paper.style === 'PRACTICAL'
+              ? { practical: true }
+              : { type: { not: 'MCQ' }, practical: false }),
           ...(paper.tier === 'CORE' ? { difficulty: { not: 'CHALLENGE' } } : {}),
         },
         select: { marks: true, highYield: true, examRank: true },

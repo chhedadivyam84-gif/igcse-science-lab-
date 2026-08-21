@@ -71,3 +71,19 @@ for (const f of formulas) {
   keys.add(f.key);
 }
 console.log(`${definitions.length} definitions and ${formulas.length} formulas checked, ${orphaned} orphaned.`);
+
+// --- practical questions ----------------------------------------------------
+import { practicalSeeds } from '../src/lib/curriculum/practical';
+let pBad = 0;
+const pMarks = new Map<string, number>();
+for (const pr of practicalSeeds) {
+  if (!valid.has(`${pr.subject}:${pr.subtopic}`)) {
+    console.log(`BAD practical subtopic ${pr.subject}:${pr.subtopic}`);
+    pBad++;
+  }
+  if (!pr.question.markScheme.length) { console.log(`NO mark scheme: practical ${pr.subject}`); pBad++; }
+  if (!pr.trap.trim()) { console.log(`NO trap: practical ${pr.subject}`); pBad++; }
+  pMarks.set(pr.subject, (pMarks.get(pr.subject) ?? 0) + pr.question.marks);
+}
+console.log(`\n${practicalSeeds.length} practical questions checked, ${pBad} problems.`);
+for (const [k, v] of pMarks) console.log(`  ${k}: ${v} marks available for a 40-mark Paper 6 -> ${v >= 40 ? 'OK' : 'SHORT'}`);
