@@ -161,8 +161,33 @@ function parse(text: string): { value: number | null; unit: string } {
   return { value: number.value, unit: canonicalUnit(normalised.slice(number.endsAt)) };
 }
 
+/**
+ * Last resort when the canonical forms differ: compare the raw unit as a sorted
+ * character multiset. This accepts "15 Nm" for "15 N m", where the tokeniser
+ * cannot tell whether "nm" is newton-metre or nanometre, while still keeping
+ * cm² and cm³ apart because their digits differ.
+ */
+function looselyEqualUnit(a: string, b: string): boolean {
+  if (!a || !b) return false;
+
+  // Only when every token on both sides is a first power. "N m" and "Nm" are
+  // the same torque; cm² and cm³ are not the same thing at all, and neither are
+  // m/s² and m², so anything carrying a power other than 1 is excluded here.
+  const firstPowersOnly = (unit: string) =>
+    unit.split(' ').every((token) => token.endsWith('^1'));
+  if (!firstPowersOnly(a) || !firstPowersOnly(b)) return false;
+
+  const letters = (unit: string) =>
+    [...unit.replace(/\^1/g, '').replace(/\s/g, '')].sort().join('');
+  return letters(a) === letters(b);
+}
+
 export function markNumerical(response: string, expected: string): NumericMark {
-  const given = parse(response);
+  // Both sides are split the same way. A student who types the model answer
+  // exactly — including an equivalent in brackets — must be marked correct,
+  // which splitting only the expected side got wrong.
+  const givenForms = alternatives(response).map(parse).filter((f) => f.value !== null);
+  const given = givenForms[0] ?? parse(response);
   const forms = alternatives(expected).map(parse).filter((f) => f.value !== null);
 
   // Neither side is numeric: fall back to comparing the text itself.
@@ -180,14 +205,17 @@ export function markNumerical(response: string, expected: string): NumericMark {
 
   for (const form of forms) {
     const tolerance = Math.max(Math.abs(form.value as number) * TOLERANCE, 1e-9);
-    if (Math.abs(given.value - (form.value as number)) > tolerance) continue;
-    numberCorrect = true;
-    if (form.unit) anyUnitExpected = true;
-    // No unit expected, or the unit agrees.
-    if (!form.unit || form.unit === given.unit) {
-      matchedWithUnit = true;
-      break;
+    for (const candidate of givenForms.length ? givenForms : [given]) {
+      if (candidate.value === null) continue;
+      if (Math.abs(candidate.value - (form.value as number)) > tolerance) continue;
+      numberCorrect = true;
+      if (form.unit) anyUnitExpected = true;
+      if (!form.unit || form.unit === candidate.unit || looselyEqualUnit(form.unit, candidate.unit)) {
+        matchedWithUnit = true;
+        break;
+      }
     }
+    if (matchedWithUnit) break;
   }
 
   return {

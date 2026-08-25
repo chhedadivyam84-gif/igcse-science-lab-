@@ -60,3 +60,23 @@ if (failures.length) {
   console.log(failures.join('\n'));
   process.exit(1);
 }
+
+// Regression guard for the loose-unit fallback: it must never equate a unit
+// with a different power, or "m/s²" would pass as "m²".
+import { markNumerical as mk } from '../src/lib/marking';
+const guards: [string, string, boolean][] = [
+  ['9.8 m²', '9.8 m/s²', false],
+  ['9.8 m/s', '9.8 m/s²', false],
+  ['15 Nm', '15 N m', true],
+  ['15 N m', '15 N m', true],
+  ['24 cm²', '24 cm³', false],
+  ['2.7 g/cm3', '2.7 g/cm³', true],
+];
+let g = 0;
+for (const [r, e, want] of guards) {
+  const got = mk(r, e).correct;
+  if (got === want) g++;
+  else console.log(`GUARD FAIL: "${r}" vs "${e}" want ${want} got ${got}`);
+}
+console.log(`${g}/${guards.length} unit guards passed`);
+if (g !== guards.length) process.exit(1);

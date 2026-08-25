@@ -826,7 +826,7 @@ Every substance in a balanced equation can be labelled with a state symbol: **(s
               explanation: 'The lowest common multiple of 3 and 2 is 6, so 2 aluminium ions (2 × 3 = 6) balance 3 oxide ions (3 × 2 = 6).',
             },
             {
-              type: 'NUMERICAL',
+              type: 'STRUCTURED',
               difficulty: 'STANDARD',
               stem: 'Balance the equation: __Mg + __O₂ → __MgO',
               answer: '2Mg + O₂ → 2MgO',

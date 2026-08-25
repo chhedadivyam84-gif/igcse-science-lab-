@@ -277,7 +277,7 @@ Note that it keeps falling — it does not stop. Terminal velocity means constan
               hint: 'Name both forces, then say what happens to each one as speed changes.',
             },
             {
-              type: 'NUMERICAL',
+              type: 'STRUCTURED',
               difficulty: 'CHALLENGE',
               stem: 'A train decelerates uniformly from 30 m/s to 6.0 m/s in 12 s. Calculate (a) the deceleration and (b) the distance travelled while decelerating.',
               answer: '(a) 2.0 m/s²  (b) 216 m',
@@ -424,7 +424,7 @@ An object floats in a fluid if its density is **less than** the density of the f
           ],
           questions: [
             {
-              type: 'NUMERICAL',
+              type: 'STRUCTURED',
               difficulty: 'STANDARD',
               stem: 'A block of metal has a mass of 810 g and a volume of 300 cm³. Calculate its density in g/cm³ and state whether it would float in water (density 1.0 g/cm³).',
               answer: '2.7 g/cm³; it sinks',
@@ -1626,7 +1626,7 @@ A **thermistor**'s resistance falls as temperature rises, so it is used in tempe
           ],
           questions: [
             {
-              type: 'NUMERICAL',
+              type: 'STRUCTURED',
               difficulty: 'CHALLENGE',
               stem: 'Two resistors, 6.0 Ω and 3.0 Ω, are connected in parallel across a 12 V supply. Calculate the total resistance and the total current drawn from the supply.',
               answer: 'R = 2.0 Ω, I = 6.0 A',
@@ -1924,7 +1924,7 @@ This experiment replaced an earlier "plum pudding" model, in which positive char
           ],
           questions: [
             {
-              type: 'NUMERICAL',
+              type: 'STRUCTURED',
               difficulty: 'FOUNDATION',
               stem: 'An atom has proton number 17 and nucleon number 35. State the number of protons, neutrons and electrons.',
               answer: '17 protons, 18 neutrons, 17 electrons',
