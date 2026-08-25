@@ -1,8 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import type { ComponentType } from 'react';
-import { Skeleton } from '@/components/ui';
 import { AVAILABLE_SIMULATIONS } from './available';
 
 import { ProjectileMotion, MomentsBalance } from './physics-motion';
@@ -13,6 +11,7 @@ import { AtomShells, ElectrolysisCell, DiffusionTube } from './chemistry-structu
 import { OsmosisLab, EnzymeLab, PhotosynthesisLab } from './biology-sims';
 import { QuadraticExplorer, CircleTheorems, Transformations } from './maths-sims';
 import { ValidationChecker, SpreadsheetReferences } from './ict-sims';
+import { SolarSystemSim, MoleculeSim } from './ThreeSims';
 
 /**
  * Simulation registry.
@@ -28,13 +27,14 @@ import { ValidationChecker, SpreadsheetReferences } from './ict-sims';
  * on this route only, so importing them directly costs little and removes the
  * failure mode entirely.
  *
- * The 3D scenes stay lazy, because three.js genuinely is large and must not be
- * downloaded by someone opening a spring diagram. `ssr: false` means they are
- * client-only from the start rather than server-rendered and then hydrated,
- * which is the path that broke.
+ * The 3D wrappers are imported directly too. They contain no three.js
+ * themselves — they render LazyScene, which loads the real scenes only once the
+ * canvas scrolls into view, via `import('./Scene')` against a default export.
+ * That is the form that works. The broken one was
+ * `import('./x').then((m) => m.Named)`, whose module the production client
+ * manifest never wired up, so three.js is still never downloaded by someone
+ * opening a spring diagram.
  */
-
-const loading = () => <Skeleton className="h-96 w-full" />;
 
 export const SIMULATIONS: Record<string, ComponentType> = {
   'projectile-motion': ProjectileMotion,
@@ -58,14 +58,8 @@ export const SIMULATIONS: Record<string, ComponentType> = {
   transformations: Transformations,
   'validation-checker': ValidationChecker,
   'spreadsheet-references': SpreadsheetReferences,
-  'solar-system': dynamic(() => import('./ThreeSims').then((m) => m.SolarSystemSim), {
-    ssr: false,
-    loading,
-  }),
-  'molecule-viewer': dynamic(() => import('./ThreeSims').then((m) => m.MoleculeSim), {
-    ssr: false,
-    loading,
-  }),
+  'solar-system': SolarSystemSim,
+  'molecule-viewer': MoleculeSim,
 };
 
 // Guard against the catalogue promising a simulation the registry cannot render.
