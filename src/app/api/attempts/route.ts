@@ -4,6 +4,7 @@ import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireUser } from '@/lib/auth';
 import { parseList, parseJson } from '@/lib/json';
 import { recordAttempt } from '@/lib/progress';
+import { markNumerical } from '@/lib/marking';
 import { MISTAKE_CATEGORIES, PRACTICE_MODES, type Difficulty, type MistakeCategory } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -108,58 +109,6 @@ export const POST = handleRoute('attempts', async (request) => {
     achievements: outcome.newAchievements,
   });
 });
-
-/**
- * Marks a numerical answer: the value must be within 1.5%, and if a unit was
- * expected it must be present. A right number with a missing unit is reported
- * separately so the mistake analyser can log it as a unit error.
- */
-function markNumerical(response: string, expected: string) {
-  const responseValue = firstNumber(response);
-  const expectedValue = firstNumber(expected);
-
-  if (responseValue === null || expectedValue === null) {
-    return {
-      correct: response.trim().toLowerCase() === expected.trim().toLowerCase(),
-      numberCorrect: false,
-      unitProblem: false,
-    };
-  }
-
-  const tolerance = Math.max(Math.abs(expectedValue) * 0.015, 1e-9);
-  const numberCorrect = Math.abs(responseValue - expectedValue) <= tolerance;
-
-  const expectedUnit = unitOf(expected);
-  const responseUnit = unitOf(response);
-  const unitProblem = Boolean(expectedUnit) && responseUnit !== expectedUnit;
-
-  return { correct: numberCorrect && !unitProblem, numberCorrect, unitProblem };
-}
-
-/** Reads the first number, understanding "3.2 × 10^4" and "3.2e4". */
-function firstNumber(text: string): number | null {
-  const normalised = text
-    .replace(/\s/g, '')
-    .replace(/×10\^?/gi, 'e')
-    .replace(/x10\^?/gi, 'e')
-    .replace(/⁻/g, '-')
-    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (c) => String('⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)));
-  const match = normalised.match(/-?\d+(?:\.\d+)?(?:e-?\d+)?/i);
-  return match ? Number(match[0]) : null;
-}
-
-/** Everything after the number, normalised for comparison. */
-function unitOf(text: string): string {
-  const stripped = text
-    .replace(/-?\d+(?:\.\d+)?/g, ' ')
-    .replace(/×\s*10\s*\^?\s*-?\d*/gi, ' ')
-    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]/g, ' ')
-    .replace(/[()]/g, ' ')
-    .trim()
-    .toLowerCase();
-  // Collapse whitespace and strip trailing punctuation so "5.0 m/s." matches "5 m/s".
-  return stripped.replace(/\s+/g, ' ').replace(/[.,;]+$/, '');
-}
 
 function classify(type: string, unitProblem: boolean): MistakeCategory {
   if (unitProblem) return 'UNIT';

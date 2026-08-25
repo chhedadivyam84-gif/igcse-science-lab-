@@ -8,6 +8,7 @@ import { Badge, Button, EmptyState, ErrorState, Panel, ProgressBar, Skeleton, Te
 import { MISTAKE_META, type MistakeCategory, type PracticeMode } from '@/lib/types';
 import { cn, percent } from '@/lib/utils';
 import { HandwritingPad } from '@/components/input/HandwritingPad';
+import { SymbolPad, insertAtCursor } from '@/components/input/SymbolPad';
 import { subjectTone, subjectName } from '@/lib/subjects';
 
 type Question = {
@@ -63,6 +64,7 @@ export function QuizRunner({
   const [inputMode, setInputMode] = useState<'type' | 'write'>('type');
   const [results, setResults] = useState<{ correct: boolean; marks: number; total: number }[]>([]);
   const startedAt = useRef(Date.now());
+  const answerRef = useRef<HTMLTextAreaElement>(null);
 
   const load = useCallback(async () => {
     setQuestions(null);
@@ -319,18 +321,27 @@ export function QuizRunner({
               </div>
 
               {inputMode === 'type' ? (
-                <Textarea
-                  value={response}
-                  onChange={(event) => setResponse(event.target.value)}
-                  rows={question.type === 'NUMERICAL' ? 2 : 5}
-                  disabled={Boolean(marked)}
-                  placeholder={
-                    question.type === 'NUMERICAL'
-                      ? 'Your answer, including the unit'
-                      : 'Write your full answer here'
-                  }
-                  aria-label="Your answer"
-                />
+                <div className="space-y-2">
+                  <Textarea
+                    ref={answerRef}
+                    value={response}
+                    onChange={(event) => setResponse(event.target.value)}
+                    rows={question.type === 'NUMERICAL' ? 2 : 5}
+                    disabled={Boolean(marked)}
+                    placeholder={
+                      question.type === 'NUMERICAL'
+                        ? 'Your answer, including the unit'
+                        : 'Write your full answer here'
+                    }
+                    aria-label="Your answer"
+                  />
+                  {/* Without this a student simply cannot write m/s² or 10⁻³. */}
+                  {!marked && (
+                    <SymbolPad
+                      onInsert={(symbol) => insertAtCursor(answerRef.current, symbol, setResponse)}
+                    />
+                  )}
+                </div>
               ) : (
                 <div className="space-y-2">
                   <HandwritingPad
