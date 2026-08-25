@@ -24,6 +24,15 @@ function WhenVisible({ children, fallback }: { children: ReactNode; fallback?: R
       setVisible(true);
       return;
     }
+
+    // If it is already on screen, load it now rather than waiting for the
+    // observer to report what we can measure directly.
+    const rect = element.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 200 && rect.bottom > -200) {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -34,7 +43,18 @@ function WhenVisible({ children, fallback }: { children: ReactNode; fallback?: R
       { rootMargin: '200px' },
     );
     observer.observe(element);
-    return () => observer.disconnect();
+
+    // A page that never composites — a hidden tab, an embedded frame, some
+    // headless browsers — gets no intersection callbacks at all, and the scene
+    // would sit on "Loading…" for ever. Give up waiting after a few seconds and
+    // load it anyway; the point of the observer is to save bandwidth on scenes
+    // far down the page, not to withhold one the reader is looking at.
+    const timer = window.setTimeout(() => setVisible(true), 4000);
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+    };
   }, []);
 
   return (
