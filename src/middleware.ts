@@ -23,6 +23,13 @@ const STUDENT_ROUTES = [
   '/mistakes',
   '/plan',
   '/photo',
+  // These previously guarded themselves inside the page, which worked but lost
+  // the destination: signing in dropped the student on the dashboard instead of
+  // the page they asked for.
+  '/voice',
+  '/papers',
+  '/account',
+  '/onboarding',
 ];
 
 const ADMIN_ROUTES = ['/admin'];

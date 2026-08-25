@@ -79,6 +79,7 @@ export const POST = handleRoute('attempts', async (request) => {
     response: body.response,
     isCorrect,
     marksAwarded,
+    marks: question.marks,
     timeMs: body.timeMs,
     mode: body.mode,
     difficulty: question.difficulty as Difficulty,

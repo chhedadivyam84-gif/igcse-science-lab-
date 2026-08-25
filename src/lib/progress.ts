@@ -66,6 +66,8 @@ export async function recordAttempt(params: {
   response: string;
   isCorrect: boolean;
   marksAwarded: number;
+  /** Marks the question was out of, so partial credit counts for something. */
+  marks: number;
   timeMs: number;
   mode: string;
   difficulty: Difficulty;
@@ -94,7 +96,11 @@ export async function recordAttempt(params: {
     previousMastery = existing ? effectiveMastery(existing.mastery, existing.lastStudiedAt) : 0;
     const attempts = (existing?.attempts ?? 0) + 1;
     const alpha = learningRate(attempts);
-    const target = params.isCorrect ? 100 * DIFFICULTY_WEIGHT[params.difficulty] : 0;
+    // Mastery follows the fraction of marks earned, not a bare right/wrong.
+    // Scoring 5 of 6 on a written answer used to drive mastery towards zero
+    // exactly as hard as scoring 0 of 6, which made progress look arbitrary.
+    const earned = params.marks > 0 ? params.marksAwarded / params.marks : params.isCorrect ? 1 : 0;
+    const target = clamp(100 * earned * DIFFICULTY_WEIGHT[params.difficulty], 0, 100);
     mastery = clamp(Math.round(previousMastery + (target - previousMastery) * alpha), 0, 100);
 
     await db.progress.upsert({
