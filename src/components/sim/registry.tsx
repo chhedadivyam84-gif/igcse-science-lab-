@@ -5,31 +5,59 @@ import type { ComponentType } from 'react';
 import { Skeleton } from '@/components/ui';
 import { AVAILABLE_SIMULATIONS } from './available';
 
+import { ProjectileMotion, MomentsBalance } from './physics-motion';
+import { OhmsLaw, CircuitBuilder } from './physics-electricity';
+import { WaveMachine, RayOptics, HalfLife } from './physics-waves';
+import { ParticleModel, RatesLab, PhTitration } from './chemistry-sims';
+import { AtomShells, ElectrolysisCell, DiffusionTube } from './chemistry-structure';
+import { OsmosisLab, EnzymeLab, PhotosynthesisLab } from './biology-sims';
+import { QuadraticExplorer, CircleTheorems, Transformations } from './maths-sims';
+import { ValidationChecker, SpreadsheetReferences } from './ict-sims';
+
 /**
  * Simulation registry.
  *
- * Each entry is code-split, so opening one simulation never downloads the
- * others. A slug with no entry here renders the "planned" card in the lab
- * rather than a button that does nothing — availability is derived from this
- * map, never hard-coded in the catalogue.
+ * The two-dimensional simulations are imported statically. They used to be
+ * code-split with next/dynamic, which worked locally and silently failed in
+ * production: the server rendered the simulation, the browser downloaded the
+ * chunk, and the client never executed it — so every control was inert HTML.
+ * Nothing in the console, nothing failing, just a page that did not respond.
+ * Every simulation on the site was affected.
+ *
+ * They are all SVG and canvas drawing with no heavy dependencies, and they load
+ * on this route only, so importing them directly costs little and removes the
+ * failure mode entirely.
+ *
+ * The 3D scenes stay lazy, because three.js genuinely is large and must not be
+ * downloaded by someone opening a spring diagram. `ssr: false` means they are
+ * client-only from the start rather than server-rendered and then hydrated,
+ * which is the path that broke.
  */
 
 const loading = () => <Skeleton className="h-96 w-full" />;
 
 export const SIMULATIONS: Record<string, ComponentType> = {
-  'projectile-motion': dynamic(() => import('./physics-motion').then((m) => m.ProjectileMotion), { loading }),
-  'moments-balance': dynamic(() => import('./physics-motion').then((m) => m.MomentsBalance), { loading }),
-  'ohms-law': dynamic(() => import('./physics-electricity').then((m) => m.OhmsLaw), { loading }),
-  'circuit-builder': dynamic(() => import('./physics-electricity').then((m) => m.CircuitBuilder), { loading }),
-  'wave-machine': dynamic(() => import('./physics-waves').then((m) => m.WaveMachine), { loading }),
-  'ray-optics': dynamic(() => import('./physics-waves').then((m) => m.RayOptics), { loading }),
-  'half-life': dynamic(() => import('./physics-waves').then((m) => m.HalfLife), { loading }),
-  'particle-model': dynamic(() => import('./chemistry-sims').then((m) => m.ParticleModel), { loading }),
-  'rates-lab': dynamic(() => import('./chemistry-sims').then((m) => m.RatesLab), { loading }),
-  'ph-titration': dynamic(() => import('./chemistry-sims').then((m) => m.PhTitration), { loading }),
-  'atom-shells': dynamic(() => import('./chemistry-structure').then((m) => m.AtomShells), { loading }),
-  'electrolysis-cell': dynamic(() => import('./chemistry-structure').then((m) => m.ElectrolysisCell), { loading }),
-  'diffusion-tube': dynamic(() => import('./chemistry-structure').then((m) => m.DiffusionTube), { loading }),
+  'projectile-motion': ProjectileMotion,
+  'moments-balance': MomentsBalance,
+  'ohms-law': OhmsLaw,
+  'circuit-builder': CircuitBuilder,
+  'wave-machine': WaveMachine,
+  'ray-optics': RayOptics,
+  'half-life': HalfLife,
+  'particle-model': ParticleModel,
+  'rates-lab': RatesLab,
+  'ph-titration': PhTitration,
+  'atom-shells': AtomShells,
+  'electrolysis-cell': ElectrolysisCell,
+  'diffusion-tube': DiffusionTube,
+  'osmosis-lab': OsmosisLab,
+  'enzyme-lab': EnzymeLab,
+  'photosynthesis-lab': PhotosynthesisLab,
+  'quadratic-explorer': QuadraticExplorer,
+  'circle-theorems': CircleTheorems,
+  transformations: Transformations,
+  'validation-checker': ValidationChecker,
+  'spreadsheet-references': SpreadsheetReferences,
   'solar-system': dynamic(() => import('./ThreeSims').then((m) => m.SolarSystemSim), {
     ssr: false,
     loading,
@@ -38,14 +66,6 @@ export const SIMULATIONS: Record<string, ComponentType> = {
     ssr: false,
     loading,
   }),
-  'osmosis-lab': dynamic(() => import('./biology-sims').then((m) => m.OsmosisLab), { loading }),
-  'enzyme-lab': dynamic(() => import('./biology-sims').then((m) => m.EnzymeLab), { loading }),
-  'photosynthesis-lab': dynamic(() => import('./biology-sims').then((m) => m.PhotosynthesisLab), { loading }),
-  'quadratic-explorer': dynamic(() => import('./maths-sims').then((m) => m.QuadraticExplorer), { loading }),
-  'circle-theorems': dynamic(() => import('./maths-sims').then((m) => m.CircleTheorems), { loading }),
-  transformations: dynamic(() => import('./maths-sims').then((m) => m.Transformations), { loading }),
-  'validation-checker': dynamic(() => import('./ict-sims').then((m) => m.ValidationChecker), { loading }),
-  'spreadsheet-references': dynamic(() => import('./ict-sims').then((m) => m.SpreadsheetReferences), { loading }),
 };
 
 // Guard against the catalogue promising a simulation the registry cannot render.
