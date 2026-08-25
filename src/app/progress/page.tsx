@@ -92,7 +92,7 @@ export default async function ProgressPage() {
         </p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Questions answered" value={sessionsCount} />
         <Stat
           label="Overall accuracy"
@@ -104,7 +104,7 @@ export default async function ProgressPage() {
         <Stat label={`Level ${level.level}`} value={level.label} sub={`${user.xp} XP`} />
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {subjectCards.map(({ data, slug, display }) => {
           const tone = display.tone;
           const name = `${display.name} ${display.code}`;
@@ -206,7 +206,7 @@ export default async function ProgressPage() {
       {achievements.length > 0 && (
         <Panel className="mt-6">
           <SectionHeader eyebrow="Achievements" title={`${achievements.length} earned`} />
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {achievements.map((entry) => (
               <li key={entry.id} className="rounded-card border border-line p-3.5">
                 <p className="text-sm font-medium text-ink">{entry.achievement.title}</p>

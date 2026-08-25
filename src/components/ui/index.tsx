@@ -30,9 +30,16 @@ const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   subject: 'text-white shadow-glow',
 };
 
+/**
+ * Taller on phones, denser from the small breakpoint up.
+ *
+ * A fingertip needs about 44px; a mouse pointer does not. Sizing for the mouse
+ * everywhere left the primary call to action 32px tall on a phone, which is
+ * both hard to hit and looks like a mistake next to the surrounding text.
+ */
 const BUTTON_SIZES: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-[0.8125rem]',
-  md: 'h-10 px-4 text-sm',
+  sm: 'h-10 px-3.5 text-[0.8125rem] sm:h-8 sm:px-3',
+  md: 'h-11 px-5 text-sm sm:h-10 sm:px-4',
   lg: 'h-12 px-6 text-[0.9375rem]',
 };
 

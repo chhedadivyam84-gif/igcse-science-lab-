@@ -230,7 +230,7 @@ function Node({ node }: { node: DiagramNode }) {
 /** The explanation and key-terms panel that accompanies a diagram. */
 export function DiagramNotes({ spec }: { spec: DiagramSpec }) {
   return (
-    <div className="grid gap-5 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
       {spec.explanation.length > 0 && (
         <div>
           <p className="eyebrow mb-2.5">How it works</p>

@@ -63,7 +63,7 @@ export default async function PapersPage() {
         leak, and nothing here is endorsed by Cambridge.
       </Notice>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {ordered.map(({ slug, display }) => {
           const blueprint = blueprintFor(slug);
           const papers = buildablePapers(slug);

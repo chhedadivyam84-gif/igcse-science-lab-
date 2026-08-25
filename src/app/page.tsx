@@ -87,7 +87,7 @@ export default async function HomePage() {
           {/* Subject entry points */}
           {/* Driven by the curriculum, not a separate list — adding a syllabus
               makes it appear here automatically. */}
-          <Stagger className="mt-14 grid gap-4 sm:mt-20 sm:grid-cols-2 lg:grid-cols-3">
+          <Stagger className="mt-14 grid grid-cols-1 gap-4 sm:mt-20 sm:grid-cols-2 lg:grid-cols-3">
             {syllabuses.map((syllabus) => {
               const { slug, code, name, tagline } = syllabus.subject;
               const style = SUBJECT_STYLES[slug] ?? DEFAULT_SUBJECT_STYLE;
@@ -142,7 +142,7 @@ export default async function HomePage() {
           </h2>
         </Reveal>
 
-        <Stagger className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Stagger className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {entryPoints.map((item) => (
             <StaggerItem key={item.href}>
               <Link
@@ -163,7 +163,7 @@ export default async function HomePage() {
       {/* ------------------------------------------------------------------ */}
       <section className="border-y border-line bg-surface/40">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
-          <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
             <Reveal>
               <div>
                 <p className="eyebrow">The loop</p>
@@ -186,7 +186,7 @@ export default async function HomePage() {
               </div>
             </Reveal>
 
-            <Stagger className="grid gap-3 sm:grid-cols-2">
+            <Stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {[
                 {
                   step: '01',
@@ -226,7 +226,7 @@ export default async function HomePage() {
       {/* Accuracy                                                            */}
       {/* ------------------------------------------------------------------ */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
-        <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
           <Reveal>
             <div>
               <p className="eyebrow">Content you can trust</p>

@@ -289,7 +289,7 @@ export function ElectrolysisCell() {
         </>
       }
       readouts={
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="rounded-card border border-line bg-surface px-3.5 py-2.5">
             <p className="text-2xs uppercase tracking-wide text-ink-faint">At the cathode — reduction</p>
             <p className="mt-1 font-mono text-sm text-physics">{electrolyte.cathodeEquation}</p>

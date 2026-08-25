@@ -89,7 +89,7 @@ export function KnowledgeMap({ nodes, subject }: { nodes: MapNode[]; subject: Su
   const accent = `rgb(var(--${subjectTone(subject)}))`;
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_18rem]">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_18rem]">
       <div className="scroll-x rounded-panel border border-line bg-surface p-2">
         <svg
           viewBox={`0 0 ${width} ${height}`}

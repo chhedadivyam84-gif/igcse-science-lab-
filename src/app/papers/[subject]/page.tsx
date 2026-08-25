@@ -62,7 +62,7 @@ export default async function SubjectPapersPage({ params }: Params) {
           description="Each paper is built to the published mark total and timing, and weighted towards the topics that recur. The same paper comes back every time, so you can compare with a classmate."
         />
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {blueprint.papers.map((paper) => (
             <Card key={paper.number} className="p-5">
               <div className="flex items-start justify-between gap-3">

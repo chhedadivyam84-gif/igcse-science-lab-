@@ -62,7 +62,7 @@ export default async function PricingPage() {
       )}
 
       {/* ---- Plans -------------------------------------------------------- */}
-      <div className="mt-12 grid gap-5 lg:grid-cols-2">
+      <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Reveal delay={0.08}>
           <Panel className="flex h-full flex-col">
             <div>

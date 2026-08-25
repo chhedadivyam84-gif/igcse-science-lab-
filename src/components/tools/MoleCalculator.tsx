@@ -68,7 +68,7 @@ export function MoleCalculator() {
   const outcome = compute(mode, fields, num);
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[20rem_1fr]">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[20rem_1fr]">
       <div className="space-y-4">
         <Panel className="p-4">
           <Label htmlFor="mode">Calculation</Label>

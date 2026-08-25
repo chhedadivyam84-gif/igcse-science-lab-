@@ -48,7 +48,7 @@ export function PhysicsCalculator() {
   const targetVariable = entry.variables.find((v) => v.symbol === target);
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[19rem_1fr]">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[19rem_1fr]">
       <div className="space-y-4">
         <Panel className="p-4">
           <Label htmlFor="equation">Equation</Label>

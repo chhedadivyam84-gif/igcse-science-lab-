@@ -191,7 +191,7 @@ export function ExplainerStudio({
       )}
 
       {storyboard && scene && (
-        <div className="grid gap-5 lg:grid-cols-[1fr_16rem]">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_16rem]">
           <div className="min-w-0 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-semibold text-ink">{storyboard.title}</h2>

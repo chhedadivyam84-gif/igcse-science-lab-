@@ -159,7 +159,7 @@ function ElementDetail({ element }: { element: Element }) {
 
   return (
     <Panel>
-      <div className="grid gap-6 lg:grid-cols-[auto_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[auto_1fr]">
         <div
           className="flex h-32 w-32 flex-col items-center justify-center rounded-panel border"
           style={{

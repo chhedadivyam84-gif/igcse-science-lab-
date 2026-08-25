@@ -124,7 +124,7 @@ export default async function SubtopicPage({ params }: Params) {
         </Notice>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_18rem]">
         <div className="min-w-0 space-y-6">
           {/* ---- What do I need to know? --------------------------------- */}
           {subtopic.objectives.length > 0 && (
@@ -214,7 +214,7 @@ export default async function SubtopicPage({ params }: Params) {
 
           {/* ---- Misconceptions and exam technique ----------------------- */}
           {(misconceptions.length > 0 || examTips.length > 0) && (
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               {misconceptions.length > 0 && (
                 <Panel>
                   <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-negative">

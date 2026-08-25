@@ -92,7 +92,7 @@ export function NotesWorkbench({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_17rem]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_17rem]">
       <div className="min-w-0 space-y-5">
         <Panel className="no-print">
           <form
@@ -117,7 +117,7 @@ export function NotesWorkbench({
 
             <div>
               <p className="eyebrow mb-2">Style</p>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {NOTE_STYLES.map((option) => (
                   <button
                     key={option.value}

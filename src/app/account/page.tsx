@@ -56,7 +56,7 @@ export default async function AccountPage({
         </Notice>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_16rem]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_16rem]">
         <div className="min-w-0 space-y-6">
           {/* ---- Plan ---------------------------------------------------- */}
           <Panel>
@@ -129,7 +129,7 @@ export default async function AccountPage({
                 </p>
                 <div className="mt-5">
                   {isRazorpayConfigured() ? (
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <UpgradeButton interval="MONTHLY">
                         Subscribe — {PRICING.MONTHLY.label}/mo
                       </UpgradeButton>

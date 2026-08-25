@@ -90,7 +90,7 @@ export default async function MistakesPage() {
         </Notice>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_18rem]">
         <div className="min-w-0 space-y-6">
           <Panel>
             <SectionHeader eyebrow="By type" title="Where the marks go" />

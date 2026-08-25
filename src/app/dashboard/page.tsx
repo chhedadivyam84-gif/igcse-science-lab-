@@ -162,7 +162,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Top stats ---------------------------------------------------------- */}
-      <div className="grid gap-4 lg:grid-cols-[auto_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[auto_1fr]">
         <Panel className="flex items-center gap-6">
           <ProgressRing value={overall} size={104} tone="accent">
             <span className="text-2xl font-semibold tabular-nums text-ink">{overall}%</span>
@@ -218,7 +218,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Main grid ---------------------------------------------------------- */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Panel>
             <SectionHeader
@@ -284,7 +284,7 @@ export default async function DashboardPage() {
               }
             />
             {needsRevision.length ? (
-              <ul className="grid gap-2 sm:grid-cols-2">
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {needsRevision.map((item) => (
                   <li key={item.subtopicId}>
                     <Link
@@ -324,7 +324,7 @@ export default async function DashboardPage() {
             )}
           </Panel>
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <Panel>
               <SectionHeader eyebrow="Ask AI" title="Recent questions" />
               {conversations.length ? (

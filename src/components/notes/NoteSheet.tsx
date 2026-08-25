@@ -222,7 +222,7 @@ function MindMap({
           {centre}
         </span>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {branches.map((branch, index) => (
           <div key={index} className="relative rounded-lg border border-line bg-surface p-3">
             <p className="text-sm font-bold text-ink">{branch.label}</p>

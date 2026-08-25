@@ -40,7 +40,7 @@ export function SimShell({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-5 lg:grid-cols-[1fr_18rem]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_18rem]">
         <div className="min-w-0 space-y-4">
           <div className="overflow-hidden rounded-panel border border-line bg-surface">{stage}</div>
           {readouts}
@@ -63,7 +63,7 @@ export function SimShell({
         </aside>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Panel>
           <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-caution">
             <HelpCircle className="h-3.5 w-3.5" /> Predict

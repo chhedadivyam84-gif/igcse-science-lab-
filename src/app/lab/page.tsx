@@ -66,7 +66,7 @@ export default async function LabPage({
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {available.map((simulation) => {
           const concepts = parseList<string>(simulation.concepts);
 
@@ -109,7 +109,7 @@ export default async function LabPage({
             is worse than an honest gap.
           </Notice>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {planned.map((simulation) => (
               <Panel key={simulation.id} className="p-4 opacity-70">
                 <div className="flex items-start justify-between gap-3">

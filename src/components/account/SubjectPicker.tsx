@@ -69,7 +69,7 @@ export function SubjectPicker({
 
   return (
     <div>
-      <ul className="grid gap-2.5 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         {ALL_SUBJECTS.map(({ slug, display }) => {
           const active = chosen.has(slug);
           return (

@@ -88,7 +88,7 @@ export default async function LearnPage() {
                 </p>
               </Notice>
 
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {version.topics.map((topic) => {
                   const withLessons = topic.subtopics.filter((s) => s._count.lessons > 0).length;
 
@@ -116,7 +116,7 @@ export default async function LearnPage() {
                             <li key={subtopic.id}>
                               <Link
                                 href={`/learn/${subject.slug}/${topic.slug}/${subtopic.slug}`}
-                                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-surface-raised"
+                                className="flex items-center gap-2 rounded-lg px-2 py-2.5 text-sm transition-colors hover:bg-surface-raised sm:py-1.5"
                               >
                                 <span className="w-8 shrink-0 font-mono text-xs text-ink-faint">
                                   {subtopic.number}

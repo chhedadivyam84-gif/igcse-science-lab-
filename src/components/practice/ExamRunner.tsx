@@ -288,7 +288,7 @@ export function ExamRunner({
   const lowTime = remaining < 300;
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_15rem]">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_15rem]">
       <div className="min-w-0 space-y-4">
         <Panel>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

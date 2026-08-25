@@ -198,7 +198,7 @@ export function AdminConsole({
 
       {tab === 'overview' && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label="Students" value={stats.users} />
             <Stat label="Questions answered" value={stats.attempts} />
             <Stat label="Approved questions" value={stats.questions} tone="positive" />
