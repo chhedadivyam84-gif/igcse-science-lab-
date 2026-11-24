@@ -42,7 +42,12 @@ export function SimShell({
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_18rem]">
         <div className="min-w-0 space-y-4">
-          <div className="overflow-hidden rounded-panel border border-line bg-surface">{stage}</div>
+          {/* On phones the stage stays pinned under the header while the
+              controls scroll beneath it, so a slider's effect is visible as
+              it moves instead of off-screen above. */}
+          <div className="overflow-hidden rounded-panel border border-line bg-surface max-lg:sticky max-lg:top-14 max-lg:z-30 max-lg:max-h-[48vh] max-lg:shadow-lift [&_svg]:max-lg:max-h-[48vh]">
+            {stage}
+          </div>
           {readouts}
         </div>
 

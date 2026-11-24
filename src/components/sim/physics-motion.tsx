@@ -10,22 +10,39 @@ import { Readout, SimShell } from './SimShell';
 /* Projectile motion                                                          */
 /* -------------------------------------------------------------------------- */
 
+type Shot = { speed: number; angle: number; gravity: number; vx: number; vy: number; flightTime: number; range: number; maxHeight: number };
+
+function shot(speed: number, angle: number, gravity: number): Shot {
+  const radians = (angle * Math.PI) / 180;
+  const vx = speed * Math.cos(radians);
+  const vy = speed * Math.sin(radians);
+  const flightTime = (2 * vy) / gravity;
+  return { speed, angle, gravity, vx, vy, flightTime, range: vx * flightTime, maxHeight: (vy * vy) / (2 * gravity) };
+}
+
+/** A tidy tick step (1, 2 or 5 × 10ⁿ) giving about five ticks across `span`. */
+function niceStep(span: number) {
+  const raw = span / 5;
+  const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+  const m = raw / pow;
+  return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * pow;
+}
+
 export function ProjectileMotion() {
   const [speed, setSpeed] = useState(22);
   const [angle, setAngle] = useState(45);
   const [gravity, setGravity] = useState(9.8);
   const [t, setT] = useState(0);
   const [running, setRunning] = useState(false);
+  const [trails, setTrails] = useState<Shot[]>([]);
   const reduced = usePrefersReducedMotion();
   const rafRef = useRef<number | null>(null);
   const lastRef = useRef(0);
 
-  const radians = (angle * Math.PI) / 180;
-  const vx = speed * Math.cos(radians);
-  const vy = speed * Math.sin(radians);
-  const flightTime = (2 * vy) / gravity;
-  const range = vx * flightTime;
-  const maxHeight = (vy * vy) / (2 * gravity);
+  const current = shot(speed, angle, gravity);
+  const { vx, vy, flightTime, range, maxHeight } = current;
+  // Long flights (the Moon) play faster so a launch never takes half a minute.
+  const playback = Math.max(1, flightTime / 4);
 
   useEffect(() => {
     setT(0);
@@ -33,14 +50,20 @@ export function ProjectileMotion() {
   }, [speed, angle, gravity]);
 
   useEffect(() => {
-    if (!running || reduced) return;
+    if (!running) return;
+    // Reduced motion: show the finished flight instead of doing nothing.
+    if (reduced) {
+      setT(flightTime);
+      setRunning(false);
+      return;
+    }
     lastRef.current = performance.now();
 
     const tick = (now: number) => {
-      const delta = (now - lastRef.current) / 1000;
+      const delta = ((now - lastRef.current) / 1000) * playback;
       lastRef.current = now;
-      setT((current) => {
-        const next = current + delta;
+      setT((value) => {
+        const next = value + delta;
         if (next >= flightTime) {
           setRunning(false);
           return flightTime;
@@ -54,24 +77,52 @@ export function ProjectileMotion() {
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, [running, flightTime, reduced]);
+  }, [running, flightTime, reduced, playback]);
 
-  // World-to-screen mapping, scaled so the full trajectory always fits.
-  const width = 640;
-  const height = 320;
-  const padding = 40;
-  const scaleX = (width - padding * 2) / Math.max(range, 1);
-  const scaleY = (height - padding * 2) / Math.max(maxHeight, 1);
-  const scale = Math.min(scaleX, scaleY);
-  const toScreen = (x: number, y: number) => [padding + x * scale, height - padding - y * scale];
+  function launch() {
+    // Keep the last few flights as faint ghosts so 30° and 60°, or Earth and
+    // the Moon, can be compared on the same axes.
+    setTrails((previous) => {
+      const same = (s: Shot) => s.speed === speed && s.angle === angle && s.gravity === gravity;
+      return [...previous.filter((s) => !same(s)), current].slice(-4);
+    });
+    setT(0);
+    setRunning(true);
+  }
 
-  const pathPoints = Array.from({ length: 61 }, (_, i) => {
-    const time = (i / 60) * flightTime;
-    const [sx, sy] = toScreen(vx * time, vy * time - 0.5 * gravity * time * time);
+  // Fixed axes shared by the current flight and the kept trails, so a change
+  // in speed, angle or gravity is visible as a change in size, not only in
+  // the numbers.
+  const width = 720;
+  const height = 380;
+  const left = 64;
+  const bottom = 48;
+  const top = 24;
+  const right = 24;
+  const all = [current, ...trails];
+  const spanX = niceStep(Math.max(...all.map((s) => s.range), 1) * 1.08) * 5.5;
+  const spanY = Math.max(...all.map((s) => s.maxHeight), 1) * 1.15;
+  const scale = Math.min((width - left - right) / spanX, (height - top - bottom) / spanY);
+  const step = niceStep(spanX);
+  const toScreen = (x: number, y: number) => [left + x * scale, height - bottom - y * scale] as const;
+  const path = (s: Shot) =>
+    Array.from({ length: 61 }, (_, i) => {
+      const time = (i / 60) * s.flightTime;
+      const [sx, sy] = toScreen(s.vx * time, s.vy * time - 0.5 * s.gravity * time * time);
+      return `${sx.toFixed(1)},${sy.toFixed(1)}`;
+    }).join(' ');
+
+  const y = Math.max(0, vy * t - 0.5 * gravity * t * t);
+  const [ballX, ballY] = toScreen(vx * t, y);
+  const vyNow = vy - gravity * t;
+  // Velocity arrows ride on the ball: the horizontal one never changes, the
+  // vertical one shrinks to zero at the top and then points down.
+  const arrow = 2.2 * Math.min(1, 140 / (speed * 2.2));
+  const travelled = Array.from({ length: 41 }, (_, i) => {
+    const time = (i / 40) * t;
+    const [sx, sy] = toScreen(vx * time, Math.max(0, vy * time - 0.5 * gravity * time * time));
     return `${sx.toFixed(1)},${sy.toFixed(1)}`;
   }).join(' ');
-
-  const [ballX, ballY] = toScreen(vx * t, Math.max(0, vy * t - 0.5 * gravity * t * t));
 
   return (
     <SimShell
@@ -79,18 +130,74 @@ export function ProjectileMotion() {
       description="Horizontal and vertical motion are independent."
       stage={
         <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label="Projectile trajectory">
-          <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="rgb(var(--border))" strokeWidth={2} />
-          <polyline points={pathPoints} fill="none" stroke="rgb(var(--physics))" strokeWidth={2} strokeDasharray="4 5" opacity={0.6} />
-          {/* Velocity components at the launch point make the independence visible. */}
-          <line x1={padding} y1={height - padding} x2={padding + vx * scale * 0.6} y2={height - padding} stroke="rgb(var(--positive))" strokeWidth={2.5} />
-          <line x1={padding} y1={height - padding} x2={padding} y2={height - padding - vy * scale * 0.6} stroke="rgb(var(--negative))" strokeWidth={2.5} />
-          <text x={padding + vx * scale * 0.3} y={height - padding + 16} fontSize={11} fill="rgb(var(--positive))">
-            vₓ = {sigFig(vx, 2)} m/s
+          <defs>
+            <marker id="pm-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="context-stroke" />
+            </marker>
+          </defs>
+          {/* distance ticks */}
+          {Array.from({ length: Math.floor(spanX / step) + 1 }, (_, i) => i * step).map((d) => {
+            const [x] = toScreen(d, 0);
+            if (x > width - right) return null;
+            return (
+              <g key={d}>
+                <line x1={x} x2={x} y1={top} y2={height - bottom} stroke="rgb(var(--border))" strokeOpacity={0.35} />
+                <text x={x} y={height - bottom + 20} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
+                  {sigFig(d, 3)}
+                </text>
+              </g>
+            );
+          })}
+          <text x={width - right} y={height - 6} textAnchor="end" fontSize={13} fill="rgb(var(--muted))">
+            distance / m
           </text>
-          <text x={padding + 6} y={height - padding - vy * scale * 0.3} fontSize={11} fill="rgb(var(--negative))">
-            v_y = {sigFig(vy, 2)} m/s
+          <line x1={left} y1={height - bottom} x2={width - right} y2={height - bottom} stroke="rgb(var(--border))" strokeWidth={2} />
+
+          {trails.map((s, i) => (
+            <g key={`${s.speed}-${s.angle}-${s.gravity}-${i}`} opacity={0.35}>
+              <polyline points={path(s)} fill="none" stroke="rgb(var(--muted))" strokeWidth={2} strokeDasharray="3 6" />
+              <text x={toScreen(s.range, 0)[0]} y={height - bottom - 8} textAnchor="end" fontSize={14} fill="rgb(var(--muted))">
+                {`${s.angle}°, ${s.speed} m/s${s.gravity !== 9.8 ? `, g ${s.gravity}` : ''}`}
+              </text>
+            </g>
+          ))}
+
+          <polyline points={path(current)} fill="none" stroke="rgb(var(--physics))" strokeWidth={2} strokeDasharray="5 6" opacity={0.55} />
+          {t > 0 && <polyline points={travelled} fill="none" stroke="rgb(var(--physics))" strokeWidth={3.5} strokeLinecap="round" />}
+
+          {/* max height marker */}
+          <line
+            x1={toScreen(range / 2, 0)[0]}
+            x2={toScreen(range / 2, 0)[0]}
+            y1={height - bottom}
+            y2={toScreen(0, maxHeight)[1]}
+            stroke="rgb(var(--physics))"
+            strokeOpacity={0.35}
+            strokeDasharray="2 4"
+          />
+          <text x={toScreen(range / 2, 0)[0] + 6} y={toScreen(0, maxHeight)[1] - 8} fontSize={13} fill="rgb(var(--physics))">
+            {`max height ${sigFig(maxHeight, 3)} m`}
           </text>
-          <circle cx={ballX} cy={ballY} r={8} fill="rgb(var(--accent))" />
+
+          <line x1={ballX} y1={ballY} x2={ballX + vx * arrow} y2={ballY} stroke="rgb(var(--positive))" strokeWidth={3} markerEnd="url(#pm-head)" />
+          {Math.abs(vyNow) > 0.3 && (
+            <line x1={ballX} y1={ballY} x2={ballX} y2={ballY - vyNow * arrow} stroke="rgb(var(--negative))" strokeWidth={3} markerEnd="url(#pm-head)" />
+          )}
+          <circle cx={ballX} cy={ballY} r={9} fill="rgb(var(--accent))" stroke="white" strokeWidth={2} />
+
+          <g fontSize={14}>
+            <text x={width - right} y={top + 14} textAnchor="end" fill="rgb(var(--positive))">
+              {`horizontal v = ${sigFig(vx, 3)} m/s (constant)`}
+            </text>
+            <text x={width - right} y={top + 34} textAnchor="end" fill="rgb(var(--negative))">
+              {`vertical v = ${sigFig(vyNow, 2)} m/s ${vyNow > 0.3 ? '↑' : vyNow < -0.3 ? '↓' : '(zero at the top)'}`}
+            </text>
+            {playback > 1.05 && (
+              <text x={width - right} y={top + 54} textAnchor="end" fill="rgb(var(--muted))">
+                {`playing ×${sigFig(playback, 2)} speed`}
+              </text>
+            )}
+          </g>
         </svg>
       }
       controls={
@@ -107,17 +214,14 @@ export function ProjectileMotion() {
             onChange={setGravity}
             format={(v) => v.toFixed(1)}
           />
-          <Button
-            variant="primary"
-            size="sm"
-            className="w-full"
-            onClick={() => {
-              setT(0);
-              setRunning(true);
-            }}
-          >
+          <Button variant="primary" size="sm" className="w-full" onClick={launch}>
             Launch
           </Button>
+          {trails.length > 0 && (
+            <Button variant="ghost" size="sm" className="w-full" onClick={() => setTrails([])}>
+              Clear earlier flights
+            </Button>
+          )}
           <p className="text-xs text-ink-faint">
             The Moon is about 1.6 N/kg, Earth 9.8, Jupiter about 25.
           </p>
@@ -133,7 +237,7 @@ export function ProjectileMotion() {
       }
       content={{
         observe:
-          'The green arrow is the horizontal velocity and the red one is the vertical velocity. Watch which of them changes during the flight.',
+          'The green arrow on the ball is the horizontal velocity and the red one is the vertical velocity. Watch which of them changes during the flight. Earlier launches stay on the graph as faint dashed paths so you can compare them.',
         variables: 'Launch speed, launch angle and gravitational field strength.',
         predict: {
           question: 'Which launch angle gives the greatest range, with speed and gravity unchanged?',
@@ -203,13 +307,13 @@ export function MomentsBalance() {
             {/* Left load */}
             <line x1={pivotX - leftDistance * pixelsPerMetre} y1={pivotY} x2={pivotX - leftDistance * pixelsPerMetre} y2={pivotY + 40} stroke="rgb(var(--physics))" strokeWidth={2} />
             <rect x={pivotX - leftDistance * pixelsPerMetre - 16} y={pivotY + 40} width={32} height={20 + leftForce * 0.7} rx={3} fill="rgb(var(--physics))" opacity={0.85} />
-            <text x={pivotX - leftDistance * pixelsPerMetre} y={pivotY - 14} textAnchor="middle" fontSize={12} fill="rgb(var(--physics))">
+            <text x={pivotX - leftDistance * pixelsPerMetre} y={pivotY - 14} textAnchor="middle" fontSize={14} fill="rgb(var(--physics))">
               {leftForce} N
             </text>
             {/* Right load */}
             <line x1={pivotX + rightDistance * pixelsPerMetre} y1={pivotY} x2={pivotX + rightDistance * pixelsPerMetre} y2={pivotY + 40} stroke="rgb(var(--chemistry))" strokeWidth={2} />
             <rect x={pivotX + rightDistance * pixelsPerMetre - 16} y={pivotY + 40} width={32} height={20 + rightForce * 0.7} rx={3} fill="rgb(var(--chemistry))" opacity={0.85} />
-            <text x={pivotX + rightDistance * pixelsPerMetre} y={pivotY - 14} textAnchor="middle" fontSize={12} fill="rgb(var(--chemistry))">
+            <text x={pivotX + rightDistance * pixelsPerMetre} y={pivotY - 14} textAnchor="middle" fontSize={14} fill="rgb(var(--chemistry))">
               {rightForce} N
             </text>
           </g>
@@ -218,7 +322,7 @@ export function MomentsBalance() {
             points={`${pivotX},${pivotY + 8} ${pivotX - 22},${pivotY + 56} ${pivotX + 22},${pivotY + 56}`}
             fill="rgb(var(--muted))"
           />
-          <text x={pivotX} y={pivotY + 76} textAnchor="middle" fontSize={11} fill="rgb(var(--muted))">
+          <text x={pivotX} y={pivotY + 76} textAnchor="middle" fontSize={13} fill="rgb(var(--muted))">
             pivot
           </text>
           <text

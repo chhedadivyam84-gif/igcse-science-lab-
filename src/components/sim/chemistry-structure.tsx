@@ -56,13 +56,13 @@ export function AtomShells() {
           <text x={20} y={34} fontSize={14} fill="rgb(var(--text))">
             {element.name}
           </text>
-          <text x={20} y={56} fontSize={12} fill="rgb(var(--muted))">
+          <text x={20} y={56} fontSize={14} fill="rgb(var(--muted))">
             Configuration {electronConfiguration(element)}
           </text>
-          <text x={width - 20} y={34} textAnchor="end" fontSize={12} fill="rgb(var(--accent))">
+          <text x={width - 20} y={34} textAnchor="end" fontSize={14} fill="rgb(var(--accent))">
             outer shell electrons: {outer}
           </text>
-          <text x={width - 20} y={56} textAnchor="end" fontSize={12} fill="rgb(var(--muted))">
+          <text x={width - 20} y={56} textAnchor="end" fontSize={14} fill="rgb(var(--muted))">
             occupied shells: {shells.length}
           </text>
         </svg>
@@ -232,11 +232,11 @@ export function ElectrolysisCell() {
           <rect x={tankX} y={90} width={tankWidth} height={180} rx={8} fill="rgb(var(--chemistry))" fillOpacity={0.07} stroke="rgb(var(--border))" strokeWidth={2} />
 
           <rect x={cathodeX - 10} y={60} width={20} height={190} rx={3} fill="rgb(var(--physics))" />
-          <text x={cathodeX} y={48} textAnchor="middle" fontSize={12} fill="rgb(var(--physics))">
+          <text x={cathodeX} y={48} textAnchor="middle" fontSize={14} fill="rgb(var(--physics))">
             Cathode (−)
           </text>
           <rect x={anodeX - 10} y={60} width={20} height={190} rx={3} fill="rgb(var(--negative))" />
-          <text x={anodeX} y={48} textAnchor="middle" fontSize={12} fill="rgb(var(--negative))">
+          <text x={anodeX} y={48} textAnchor="middle" fontSize={14} fill="rgb(var(--negative))">
             Anode (+)
           </text>
 
@@ -244,26 +244,26 @@ export function ElectrolysisCell() {
           <line x1={cathodeX} y1={26} x2={anodeX} y2={26} stroke="rgb(var(--accent))" strokeWidth={2} />
           <line x1={anodeX} y1={26} x2={anodeX} y2={60} stroke="rgb(var(--accent))" strokeWidth={2} />
           <rect x={width / 2 - 22} y={16} width={44} height={20} rx={3} fill="rgb(var(--accent))" />
-          <text x={width / 2} y={31} textAnchor="middle" fontSize={11} fill="rgb(var(--surface-0))">
+          <text x={width / 2} y={31} textAnchor="middle" fontSize={13} fill="rgb(var(--surface-0))">
             {current.toFixed(1)} A
           </text>
 
           {ions.map((ion, index) => (
             <g key={index}>
               <circle cx={ion.x} cy={ion.y} r={9} fill={ion.positive ? 'rgb(var(--physics))' : 'rgb(var(--negative))'} opacity={0.85} />
-              <text x={ion.x} y={ion.y + 4} textAnchor="middle" fontSize={11} fill="rgb(var(--surface-0))">
+              <text x={ion.x} y={ion.y + 4} textAnchor="middle" fontSize={13} fill="rgb(var(--surface-0))">
                 {ion.positive ? '+' : '−'}
               </text>
             </g>
           ))}
 
-          <text x={cathodeX} y={288} textAnchor="middle" fontSize={12} fill="rgb(var(--physics))">
+          <text x={cathodeX} y={288} textAnchor="middle" fontSize={14} fill="rgb(var(--physics))">
             {electrolyte.cathode}
           </text>
-          <text x={anodeX} y={288} textAnchor="middle" fontSize={12} fill="rgb(var(--negative))">
+          <text x={anodeX} y={288} textAnchor="middle" fontSize={14} fill="rgb(var(--negative))">
             {electrolyte.anode}
           </text>
-          <text x={width / 2} y={310} textAnchor="middle" fontSize={11} fill="rgb(var(--muted))">
+          <text x={width / 2} y={310} textAnchor="middle" fontSize={13} fill="rgb(var(--muted))">
             PANIC — Positive is Anode, Negative Is Cathode
           </text>
         </svg>
@@ -400,18 +400,18 @@ export function DiffusionTube() {
           <rect x={hclFront} y={tubeY} width={Math.max(0, tubeX + tubeWidth - hclFront)} height={54} rx={27} fill="rgb(var(--physics))" fillOpacity={0.16} />
 
           <circle cx={tubeX - 18} cy={tubeY + 27} r={14} fill="rgb(var(--chemistry))" opacity={0.8} />
-          <text x={tubeX - 18} y={tubeY - 6} textAnchor="middle" fontSize={11} fill="rgb(var(--chemistry))">
+          <text x={tubeX - 18} y={tubeY - 6} textAnchor="middle" fontSize={13} fill="rgb(var(--chemistry))">
             NH₃
           </text>
-          <text x={tubeX - 18} y={tubeY + 84} textAnchor="middle" fontSize={10} fill="rgb(var(--muted))">
+          <text x={tubeX - 18} y={tubeY + 84} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
             Mr 17
           </text>
 
           <circle cx={tubeX + tubeWidth + 18} cy={tubeY + 27} r={14} fill="rgb(var(--physics))" opacity={0.8} />
-          <text x={tubeX + tubeWidth + 18} y={tubeY - 6} textAnchor="middle" fontSize={11} fill="rgb(var(--physics))">
+          <text x={tubeX + tubeWidth + 18} y={tubeY - 6} textAnchor="middle" fontSize={13} fill="rgb(var(--physics))">
             HCl
           </text>
-          <text x={tubeX + tubeWidth + 18} y={tubeY + 84} textAnchor="middle" fontSize={10} fill="rgb(var(--muted))">
+          <text x={tubeX + tubeWidth + 18} y={tubeY + 84} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
             Mr 36.5
           </text>
 
@@ -422,7 +422,7 @@ export function DiffusionTube() {
                 x={tubeX + meetingFraction * tubeWidth}
                 y={tubeY - 22}
                 textAnchor="middle"
-                fontSize={12}
+                fontSize={14}
                 fill="rgb(var(--positive))"
               >
                 white ring of NH₄Cl
@@ -431,7 +431,7 @@ export function DiffusionTube() {
           )}
 
           <line x1={tubeX} y1={tubeY + 96} x2={tubeX + meetingFraction * tubeWidth} y2={tubeY + 96} stroke="rgb(var(--chemistry))" strokeWidth={2} />
-          <text x={tubeX + (meetingFraction * tubeWidth) / 2} y={tubeY + 112} textAnchor="middle" fontSize={11} fill="rgb(var(--chemistry))">
+          <text x={tubeX + (meetingFraction * tubeWidth) / 2} y={tubeY + 112} textAnchor="middle" fontSize={13} fill="rgb(var(--chemistry))">
             {(meetingFraction * 100).toFixed(0)}% of the tube
           </text>
         </svg>

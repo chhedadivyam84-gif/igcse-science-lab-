@@ -33,7 +33,8 @@ function currentFor(component: Component, voltage: number, resistance: number): 
   }
 
   if (voltage <= 0.7) return voltage < 0 ? -0.0005 : voltage * 0.004;
-  return (voltage - 0.7) / (resistance * 0.25);
+  // Continuous at the 0.7 V threshold, then rising steeply.
+  return 0.0028 + (voltage - 0.7) / (resistance * 0.25);
 }
 
 export function OhmsLaw() {
@@ -69,10 +70,10 @@ export function OhmsLaw() {
         <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label="Current against voltage">
           <line x1={40} y1={height / 2} x2={width - 40} y2={height / 2} stroke="rgb(var(--border))" strokeWidth={1.5} />
           <line x1={width / 2} y1={20} x2={width / 2} y2={height - 20} stroke="rgb(var(--border))" strokeWidth={1.5} />
-          <text x={width - 44} y={height / 2 - 10} textAnchor="end" fontSize={12} fill="rgb(var(--muted))">
+          <text x={width - 44} y={height / 2 - 10} textAnchor="end" fontSize={14} fill="rgb(var(--muted))">
             V (volts)
           </text>
-          <text x={width / 2 + 10} y={30} fontSize={12} fill="rgb(var(--muted))">
+          <text x={width / 2 + 10} y={30} fontSize={14} fill="rgb(var(--muted))">
             I (amps)
           </text>
           <polyline points={curve} fill="none" stroke="rgb(var(--physics))" strokeWidth={3} strokeLinecap="round" />
@@ -193,13 +194,13 @@ export function CircuitBuilder() {
               <text x={392} y={85} textAnchor="middle" fontSize={13} fill="rgb(var(--text))">
                 {r2} Ω
               </text>
-              <text x={252} y={58} textAnchor="middle" fontSize={11} fill="rgb(var(--accent))">
+              <text x={252} y={58} textAnchor="middle" fontSize={13} fill="rgb(var(--accent))">
                 {v1.toFixed(1)} V
               </text>
-              <text x={392} y={58} textAnchor="middle" fontSize={11} fill="rgb(var(--accent))">
+              <text x={392} y={58} textAnchor="middle" fontSize={13} fill="rgb(var(--accent))">
                 {v2.toFixed(1)} V
               </text>
-              <text x={320} y={244} textAnchor="middle" fontSize={12} fill="rgb(var(--muted))">
+              <text x={320} y={244} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
                 same current everywhere: {totalCurrent.toFixed(2)} A
               </text>
             </>
@@ -216,13 +217,13 @@ export function CircuitBuilder() {
               <text x={320} y={185} textAnchor="middle" fontSize={13} fill="rgb(var(--text))">
                 {r2} Ω
               </text>
-              <text x={420} y={125} fontSize={11} fill="rgb(var(--accent))">
+              <text x={420} y={125} fontSize={13} fill="rgb(var(--accent))">
                 {i1.toFixed(2)} A
               </text>
-              <text x={420} y={185} fontSize={11} fill="rgb(var(--accent))">
+              <text x={420} y={185} fontSize={13} fill="rgb(var(--accent))">
                 {i2.toFixed(2)} A
               </text>
-              <text x={320} y={268} textAnchor="middle" fontSize={12} fill="rgb(var(--muted))">
+              <text x={320} y={268} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
                 same p.d. across each branch: {supply.toFixed(1)} V
               </text>
             </>
@@ -232,7 +233,7 @@ export function CircuitBuilder() {
             x={320}
             y={arrangement === 'series' ? 225 : 245}
             textAnchor="middle"
-            fontSize={12}
+            fontSize={14}
             fill="rgb(var(--surface-0))"
           >
             {supply} V

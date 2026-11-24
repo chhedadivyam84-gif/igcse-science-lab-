@@ -40,8 +40,8 @@ export function WaveMachine() {
   const pxPerMetre = 1.6;
   const wavelengthPx = wavelength * pxPerMetre;
 
-  const points = Array.from({ length: 161 }, (_, i) => {
-    const x = (i / 160) * width;
+  const points = Array.from({ length: 641 }, (_, i) => {
+    const x = (i / 640) * width;
     const phase = (x / wavelengthPx - frequency * time) * Math.PI * 2;
     const y = 150 - Math.sin(phase) * amplitude;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
@@ -64,11 +64,11 @@ export function WaveMachine() {
               <line x1={0} y1={150} x2={width} y2={150} stroke="rgb(var(--border))" strokeWidth={1} strokeDasharray="4 5" />
               <polyline points={points} fill="none" stroke="rgb(var(--physics))" strokeWidth={3} strokeLinecap="round" />
               <line x1={20} y1={150} x2={20} y2={150 - amplitude} stroke="rgb(var(--positive))" strokeWidth={2} />
-              <text x={26} y={150 - amplitude / 2} fontSize={11} fill="rgb(var(--positive))">
+              <text x={26} y={150 - amplitude / 2} fontSize={13} fill="rgb(var(--positive))">
                 amplitude
               </text>
               <line x1={80} y1={62} x2={80 + wavelengthPx} y2={62} stroke="rgb(var(--accent))" strokeWidth={2} />
-              <text x={80 + wavelengthPx / 2} y={54} textAnchor="middle" fontSize={11} fill="rgb(var(--accent))">
+              <text x={80 + wavelengthPx / 2} y={54} textAnchor="middle" fontSize={13} fill="rgb(var(--accent))">
                 λ = {sigFig(wavelength, 3)} m
               </text>
             </>
@@ -77,12 +77,12 @@ export function WaveMachine() {
               {particles.map((x, index) => (
                 <circle key={index} cx={x} cy={150} r={5} fill="rgb(var(--chemistry))" opacity={0.85} />
               ))}
-              <text x={width / 2} y={230} textAnchor="middle" fontSize={12} fill="rgb(var(--muted))">
+              <text x={width / 2} y={230} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
                 compressions (bunched) and rarefactions (spread out)
               </text>
             </>
           )}
-          <text x={width / 2} y={276} textAnchor="middle" fontSize={12} fill="rgb(var(--muted))">
+          <text x={width / 2} y={276} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
             energy travels to the right — the particles do not
           </text>
         </svg>
@@ -196,13 +196,13 @@ export function RayOptics() {
           <rect x={0} y={boundaryY} width={width} height={height - boundaryY} fill="rgb(var(--physics))" fillOpacity={0.09} />
           <line x1={0} y1={boundaryY} x2={width} y2={boundaryY} stroke="rgb(var(--border))" strokeWidth={2} />
           <line x1={originX} y1={20} x2={originX} y2={height - 20} stroke="rgb(var(--muted))" strokeWidth={1.5} strokeDasharray="6 5" />
-          <text x={originX + 8} y={34} fontSize={11} fill="rgb(var(--muted))">
+          <text x={originX + 8} y={34} fontSize={13} fill="rgb(var(--muted))">
             normal
           </text>
-          <text x={16} y={boundaryY - 12} fontSize={12} fill="rgb(var(--muted))">
+          <text x={16} y={boundaryY - 12} fontSize={14} fill="rgb(var(--muted))">
             air (n = 1.00)
           </text>
-          <text x={16} y={boundaryY + 24} fontSize={12} fill="rgb(var(--muted))">
+          <text x={16} y={boundaryY + 24} fontSize={14} fill="rgb(var(--muted))">
             glass (n = {refractiveIndex.toFixed(2)})
           </text>
 
@@ -216,11 +216,11 @@ export function RayOptics() {
             </>
           )}
 
-          <text x={originX - 40} y={direction === 'into' ? boundaryY - 30 : boundaryY + 40} fontSize={12} fill="rgb(var(--physics))">
+          <text x={originX - 40} y={direction === 'into' ? boundaryY - 30 : boundaryY + 40} fontSize={14} fill="rgb(var(--physics))">
             i = {angle}°
           </text>
           {refractedAngle !== null && (
-            <text x={originX + 16} y={direction === 'into' ? boundaryY + 46 : boundaryY - 30} fontSize={12} fill="rgb(var(--accent))">
+            <text x={originX + 16} y={direction === 'into' ? boundaryY + 46 : boundaryY - 30} fontSize={14} fill="rgb(var(--accent))">
               r = {refractedAngle.toFixed(1)}°
             </text>
           )}
@@ -358,15 +358,15 @@ export function HalfLife() {
         <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label="Decay curve">
           <line x1={60} y1={20} x2={60} y2={height - 50} stroke="rgb(var(--border))" strokeWidth={2} />
           <line x1={60} y1={height - 50} x2={width - 40} y2={height - 50} stroke="rgb(var(--border))" strokeWidth={2} />
-          <text x={54} y={30} textAnchor="end" fontSize={11} fill="rgb(var(--muted))">
+          <text x={54} y={30} textAnchor="end" fontSize={13} fill="rgb(var(--muted))">
             counts/min
           </text>
-          <text x={width / 2} y={height - 22} textAnchor="middle" fontSize={11} fill="rgb(var(--muted))">
+          <text x={width / 2} y={height - 22} textAnchor="middle" fontSize={13} fill="rgb(var(--muted))">
             time (minutes)
           </text>
 
           <line x1={60} y1={toY(background)} x2={width - 40} y2={toY(background)} stroke="rgb(var(--caution))" strokeWidth={1.5} strokeDasharray="5 4" />
-          <text x={width - 44} y={toY(background) - 6} textAnchor="end" fontSize={11} fill="rgb(var(--caution))">
+          <text x={width - 44} y={toY(background) - 6} textAnchor="end" fontSize={13} fill="rgb(var(--caution))">
             background {background}
           </text>
 
@@ -375,7 +375,7 @@ export function HalfLife() {
           {[1, 2, 3].map((n) => (
             <g key={n}>
               <line x1={toX(halfLife * n)} y1={toY(initial * 2 ** -n + background)} x2={toX(halfLife * n)} y2={height - 50} stroke="rgb(var(--muted))" strokeWidth={1} strokeDasharray="3 4" />
-              <text x={toX(halfLife * n)} y={height - 34} textAnchor="middle" fontSize={10} fill="rgb(var(--muted))">
+              <text x={toX(halfLife * n)} y={height - 34} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
                 {n}T½
               </text>
             </g>

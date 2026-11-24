@@ -77,10 +77,10 @@ export function OsmosisLab() {
               );
             })}
 
-          <text x={240} y={30} textAnchor="middle" fontSize={12} fill="rgb(var(--muted))">
+          <text x={240} y={30} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
             sucrose solution — {external.toFixed(2)} mol/dm³
           </text>
-          <text x={240} y={256} textAnchor="middle" fontSize={11} fill="rgb(var(--faint))">
+          <text x={240} y={256} textAnchor="middle" fontSize={13} fill="rgb(var(--faint))">
             inside the cells ≈ {CELL.toFixed(2)} mol/dm³
           </text>
         </svg>
@@ -160,18 +160,20 @@ export function EnzymeLab() {
   const [enzyme, setEnzyme] = useState<'amylase' | 'pepsin'>('amylase');
 
   const optimumPh = enzyme === 'pepsin' ? 2 : 7;
-  const denatured = temperature > 50;
+  const denatured = temperature > 45;
 
-  // Below the optimum, rate rises with kinetic energy. Above it, the enzyme
-  // denatures and the rate collapses — a different mechanism, so a different curve.
-  const tempFactor = denatured
-    ? Math.max(0, 1 - (temperature - 50) / 12)
-    : Math.exp(-Math.pow((temperature - 37) / 18, 2));
+  // Below the optimum, rate rises with kinetic energy. Above it the enzyme
+  // denatures and the rate falls steeply to zero by about 60 °C. The two
+  // branches meet at 37 °C so the curve never jumps.
+  const tempFactor =
+    temperature <= 37
+      ? Math.exp(-Math.pow((temperature - 37) / 18, 2))
+      : Math.max(0, 1 - Math.pow((temperature - 37) / 23, 1.6));
   const phFactor = Math.exp(-Math.pow((ph - optimumPh) / 2.2, 2));
   const rate = Math.max(0, tempFactor * phFactor * 100);
 
   // The active site is drawn open at high rate and distorted once denatured.
-  const distortion = denatured ? Math.min(1, (temperature - 50) / 15) : 0;
+  const distortion = denatured ? Math.min(1, (temperature - 45) / 15) : 0;
 
   return (
     <SimShell
@@ -186,7 +188,7 @@ export function EnzymeLab() {
               fill="rgb(var(--biology))"
               opacity={0.75}
             />
-            <text x={70} y={110} textAnchor="middle" fontSize={11} fill="rgb(var(--faint))">
+            <text x={70} y={110} textAnchor="middle" fontSize={13} fill="rgb(var(--faint))">
               {denatured ? 'active site distorted' : 'active site'}
             </text>
             {/* Substrate sits in the notch only while the shape is complementary */}
@@ -207,7 +209,7 @@ export function EnzymeLab() {
               fill={denatured ? 'rgb(var(--negative))' : 'rgb(var(--positive))'}
               opacity={0.8}
             />
-            <text x={75} y={182} textAnchor="middle" fontSize={11} fill="rgb(var(--faint))">
+            <text x={75} y={182} textAnchor="middle" fontSize={13} fill="rgb(var(--faint))">
               relative rate of reaction
             </text>
           </g>
@@ -358,10 +360,10 @@ export function PhotosynthesisLab() {
             opacity={0.6}
           />
 
-          <text x={242} y={238} textAnchor="middle" fontSize={11} fill="rgb(var(--faint))">
+          <text x={242} y={238} textAnchor="middle" fontSize={13} fill="rgb(var(--faint))">
             light intensity →
           </text>
-          <text x={14} y={120} fontSize={11} fill="rgb(var(--faint))" transform="rotate(-90 14 120)">
+          <text x={14} y={120} fontSize={13} fill="rgb(var(--faint))" transform="rotate(-90 14 120)">
             rate →
           </text>
         </svg>

@@ -35,9 +35,9 @@ export function QuadraticExplorer() {
   // because a rescaling graph hides what changing `a` actually does to the shape.
   const W = 460;
   const H = 260;
-  const unit = 22;
+  const unit = 20;
   const cx = W / 2;
-  const cy = H / 2 + 30;
+  const cy = H / 2 + 8;
   const toX = (x: number) => cx + x * unit;
   const toY = (y: number) => cy - y * unit;
 
@@ -73,7 +73,7 @@ export function QuadraticExplorer() {
             <circle key={i} cx={toX(r)} cy={cy} r={5} fill="rgb(var(--positive))" />
           ))}
           <circle cx={toX(vertexX)} cy={toY(vertexY)} r={5} fill="rgb(var(--accent))" />
-          <text x={toX(vertexX) + 8} y={toY(vertexY) - 8} fontSize={11} fill="rgb(var(--accent))">
+          <text x={toX(vertexX) + 8} y={toY(vertexY) - 8} fontSize={13} fill="rgb(var(--accent))">
             vertex
           </text>
         </svg>
@@ -190,12 +190,12 @@ export function CircleTheorems() {
           <circle cx={bx} cy={by} r={4.5} fill="rgb(var(--text))" />
           <circle cx={px} cy={py} r={5.5} fill="rgb(var(--accent))" />
 
-          <text x={ax - 14} y={ay + 4} fontSize={12} fill="rgb(var(--muted))">A</text>
-          <text x={bx + 8} y={by + 4} fontSize={12} fill="rgb(var(--muted))">B</text>
-          <text x={px + 8} y={py + 4} fontSize={12} fill="rgb(var(--accent))">P</text>
-          <text x={cx + 8} y={cy + 16} fontSize={12} fill="rgb(var(--maths))">O</text>
+          <text x={ax - 14} y={ay + 4} fontSize={14} fill="rgb(var(--muted))">A</text>
+          <text x={bx + 8} y={by + 4} fontSize={14} fill="rgb(var(--muted))">B</text>
+          <text x={px + 8} y={py + 4} fontSize={14} fill="rgb(var(--accent))">P</text>
+          <text x={cx + 8} y={cy + 16} fontSize={14} fill="rgb(var(--maths))">O</text>
 
-          <text x={cx} y={244} textAnchor="middle" fontSize={12} fill="rgb(var(--muted))">
+          <text x={cx} y={244} textAnchor="middle" fontSize={14} fill="rgb(var(--muted))">
             angle AOB = {centreAngle.toFixed(0)}°   ·   angle APB = {circumferenceAngle.toFixed(0)}°
           </text>
         </svg>

@@ -64,25 +64,33 @@ export function ParticleModel() {
             let x: number;
             let y: number;
 
+            const floor = boxY + boxHeight - 12;
             if (state === 'solid') {
-              // Regular lattice, vibrating on the spot.
-              const columns = 8;
-              const restX = boxX + 30 + (index % columns) * ((boxWidth - 60) / (columns - 1));
-              const restY = boxY + 40 + Math.floor(index / columns) * 32;
+              // Regular lattice of touching particles resting on the floor,
+              // vibrating about fixed positions.
+              const columns = 10;
+              const restX = boxX + boxWidth / 2 + ((index % columns) - (columns - 1) / 2) * 16;
+              const restY = floor - Math.floor(index / columns) * 16;
               x = restX + Math.sin(tick * 0.16 + particle.phase) * jitter;
               y = restY + Math.cos(tick * 0.19 + particle.phase) * jitter;
             } else if (state === 'liquid') {
-              // Close together but sliding past one another, settled low in the box.
-              const columns = 9;
-              const restX = boxX + 26 + (index % columns) * ((boxWidth - 52) / (columns - 1));
-              const restY = boxY + 110 + Math.floor(index / columns) * 28;
-              x = restX + Math.sin(tick * 0.05 + particle.phase) * jitter * 2.4;
-              y = restY + Math.cos(tick * 0.045 + particle.phase * 1.7) * jitter;
+              // Still touching, but irregular and sliding past one another,
+              // spread across the bottom of the container.
+              const columns = Math.max(10, Math.floor((boxWidth - 30) / 17));
+              const row = Math.floor(index / columns);
+              const restX = boxX + 15 + (index % columns) * 17 + (row % 2) * 8;
+              const slide = Math.sin(tick * 0.03 + particle.phase) * 10;
+              x = Math.min(boxX + boxWidth - 10, Math.max(boxX + 10, restX + slide));
+              y = floor - row * 15 + Math.cos(tick * 0.06 + particle.phase * 1.7) * 2.5;
             } else {
-              // Free flight, wrapping at the walls.
+              // Free flight in straight lines, bouncing off the walls.
               const speed = jitter * 0.55;
-              x = boxX + 12 + ((particle.seed * 3 + tick * speed * (0.6 + (particle.seed % 7) / 10)) % (boxWidth - 24));
-              y = boxY + 12 + ((particle.seed * 5 + tick * speed * (0.5 + (particle.seed % 5) / 8)) % (boxHeight - 24));
+              const bounce = (v: number, span: number) => {
+                const m = ((v % (2 * span)) + 2 * span) % (2 * span);
+                return m < span ? m : 2 * span - m;
+              };
+              x = boxX + 10 + bounce(particle.seed * 3 + tick * speed * (0.6 + (particle.seed % 7) / 10), boxWidth - 20);
+              y = boxY + 10 + bounce(particle.seed * 5 + tick * speed * (0.5 + (particle.seed % 5) / 8), boxHeight - 20);
             }
 
             return <circle key={index} cx={x} cy={y} r={7} fill="rgb(var(--chemistry))" opacity={0.85} />;
@@ -199,13 +207,13 @@ export function RatesLab() {
           <line x1={60} y1={20} x2={60} y2={height - 50} stroke="rgb(var(--border))" strokeWidth={2} />
           <line x1={60} y1={height - 50} x2={width - 40} y2={height - 50} stroke="rgb(var(--border))" strokeWidth={2} />
           <line x1={60} y1={toY(maxVolume)} x2={width - 40} y2={toY(maxVolume)} stroke="rgb(var(--muted))" strokeWidth={1} strokeDasharray="4 5" />
-          <text x={54} y={toY(maxVolume) + 4} textAnchor="end" fontSize={11} fill="rgb(var(--muted))">
+          <text x={54} y={toY(maxVolume) + 4} textAnchor="end" fontSize={13} fill="rgb(var(--muted))">
             {maxVolume}
           </text>
-          <text x={54} y={30} textAnchor="end" fontSize={11} fill="rgb(var(--muted))">
+          <text x={54} y={30} textAnchor="end" fontSize={13} fill="rgb(var(--muted))">
             cm³
           </text>
-          <text x={width / 2} y={height - 22} textAnchor="middle" fontSize={11} fill="rgb(var(--muted))">
+          <text x={width / 2} y={height - 22} textAnchor="middle" fontSize={13} fill="rgb(var(--muted))">
             time (s)
           </text>
 
@@ -320,6 +328,29 @@ export function RatesLab() {
 /* Titration and pH                                                           */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * pH after adding `v` cm³ of 0.100 mol/dm³ NaOH to 25.0 cm³ of 0.100 mol/dm³
+ * acid. Strong acid: excess H⁺ directly. Weak acid (ethanoic, pKa 4.76): the
+ * buffer region follows pH = pKa + log([A⁻]/[HA]), which is why its curve
+ * rises quickly, flattens, then jumps — and why equivalence sits above 7.
+ */
+function phAfter(v: number, strength: 'strong' | 'weak'): number {
+  const acid = 25 * 0.1; // mmol
+  const base = v * 0.1;
+  const volume = 25 + v;
+  if (base > acid + 1e-9) {
+    const oh = (base - acid) / volume;
+    return Math.min(13, 14 + Math.log10(oh));
+  }
+  if (strength === 'strong') {
+    if (Math.abs(base - acid) < 1e-9) return 7;
+    return -Math.log10((acid - base) / volume);
+  }
+  if (Math.abs(base - acid) < 1e-9) return 8.7;
+  if (base === 0) return 2.88; // √(Ka × 0.1)
+  return Math.max(2.88, 4.76 + Math.log10(base / (acid - base)));
+}
+
 export function PhTitration() {
   const [added, setAdded] = useState(0);
   const [acidStrength, setAcidStrength] = useState<'strong' | 'weak'>('strong');
@@ -329,18 +360,7 @@ export function PhTitration() {
 
   const equivalence = 25;
 
-  /** Approximate titration curve: gentle, then a sharp jump at equivalence. */
-  const pH = useMemo(() => {
-    const start = acidStrength === 'strong' ? 1 : 2.9;
-    if (added < equivalence) {
-      const fraction = added / equivalence;
-      return start + (acidStrength === 'strong' ? 2.4 : 3.1) * Math.pow(fraction, 3.1);
-    }
-    if (Math.abs(added - equivalence) < 0.001) return acidStrength === 'strong' ? 7 : 8.7;
-    const excess = added - equivalence;
-    const cap = 12.9;
-    return Math.min(cap, (acidStrength === 'strong' ? 9.6 : 9.9) + 3.4 * Math.log10(1 + excess * 2.2));
-  }, [added, acidStrength]);
+  const pH = useMemo(() => phAfter(added, acidStrength), [added, acidStrength]);
 
   useEffect(() => {
     if (!running || reduced) return;
@@ -371,10 +391,7 @@ export function PhTitration() {
 
   const curve = Array.from({ length: 201 }, (_, i) => {
     const v = (i / 200) * 50;
-    const start = acidStrength === 'strong' ? 1 : 2.9;
-    let value: number;
-    if (v < equivalence) value = start + (acidStrength === 'strong' ? 2.4 : 3.1) * Math.pow(v / equivalence, 3.1);
-    else value = Math.min(12.9, (acidStrength === 'strong' ? 9.6 : 9.9) + 3.4 * Math.log10(1 + (v - equivalence) * 2.2));
+    const value = phAfter(v, acidStrength);
     return `${toX(v).toFixed(1)},${toY(value).toFixed(1)}`;
   }).join(' ');
 
@@ -391,20 +408,20 @@ export function PhTitration() {
           {[0, 7, 14].map((p) => (
             <g key={p}>
               <line x1={56} y1={toY(p)} x2={width - 40} y2={toY(p)} stroke="rgb(var(--border))" strokeWidth={1} strokeDasharray="3 6" opacity={0.6} />
-              <text x={50} y={toY(p) + 4} textAnchor="end" fontSize={11} fill="rgb(var(--muted))">
+              <text x={50} y={toY(p) + 4} textAnchor="end" fontSize={13} fill="rgb(var(--muted))">
                 {p}
               </text>
             </g>
           ))}
-          <text x={40} y={26} fontSize={11} fill="rgb(var(--muted))">
+          <text x={40} y={26} fontSize={13} fill="rgb(var(--muted))">
             pH
           </text>
-          <text x={width / 2} y={height - 22} textAnchor="middle" fontSize={11} fill="rgb(var(--muted))">
+          <text x={width / 2} y={height - 22} textAnchor="middle" fontSize={13} fill="rgb(var(--muted))">
             volume of alkali added (cm³)
           </text>
 
           <line x1={toX(equivalence)} y1={20} x2={toX(equivalence)} y2={height - 50} stroke="rgb(var(--caution))" strokeWidth={1.5} strokeDasharray="5 4" />
-          <text x={toX(equivalence) + 6} y={40} fontSize={11} fill="rgb(var(--caution))">
+          <text x={toX(equivalence) + 6} y={40} fontSize={13} fill="rgb(var(--caution))">
             equivalence
           </text>
 
@@ -412,7 +429,7 @@ export function PhTitration() {
           <circle cx={toX(added)} cy={toY(pH)} r={7} fill={indicatorColour} stroke="rgb(var(--surface))" strokeWidth={2} />
 
           <rect x={width - 90} y={40} width={44} height={80} rx={6} fill={indicatorColour} opacity={0.85} />
-          <text x={width - 68} y={134} textAnchor="middle" fontSize={11} fill="rgb(var(--muted))">
+          <text x={width - 68} y={134} textAnchor="middle" fontSize={13} fill="rgb(var(--muted))">
             indicator
           </text>
         </svg>
