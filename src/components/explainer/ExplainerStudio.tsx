@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pause, PlayCircle, Play, SkipBack, SkipForward, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { Loader2, Maximize2, Pause, PlayCircle, Play, SkipBack, SkipForward, Sparkles, Volume2, VolumeX } from 'lucide-react';
 
 import { SceneVisual } from './SceneVisuals';
 import { Badge, Button, EmptyState, ErrorState, Input, Notice, Panel, Skeleton } from '@/components/ui';
@@ -30,13 +30,23 @@ export function ExplainerStudio({
   const [sceneIndex, setSceneIndex] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [narrate, setNarrate] = useState(false);
+  const [narrate, setNarrate] = useState(true);
+  const [voice, setVoice] = useState<{ status: 'idle' | 'loading' | 'ready' | 'failed'; audio: (HTMLAudioElement | null)[] }>({
+    status: 'idle',
+    audio: [],
+  });
+  const [durations, setDurations] = useState<number[]>([]);
+  const audioSceneRef = useRef<number | null>(null);
+  const playerRef = useRef<HTMLDivElement | null>(null);
 
   const rafRef = useRef<number | null>(null);
   const lastTickRef = useRef<number>(0);
 
   const scene = storyboard?.scenes[sceneIndex];
   const speechSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
+  const sceneSeconds = (index: number) =>
+    durations[index] ?? storyboard?.scenes[index]?.seconds ?? 0;
+  const sceneDuration = sceneSeconds(sceneIndex);
 
   const goToScene = useCallback((index: number) => {
     setSceneIndex(index);
@@ -54,13 +64,13 @@ export function ExplainerStudio({
 
       setElapsed((current) => {
         const next = current + delta;
-        if (next >= scene.seconds) {
+        if (next >= sceneDuration) {
           if (sceneIndex < storyboard.scenes.length - 1) {
             setSceneIndex((i) => i + 1);
             return 0;
           }
           setPlaying(false);
-          return scene.seconds;
+          return sceneDuration;
         }
         return next;
       });
@@ -72,14 +82,14 @@ export function ExplainerStudio({
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, [playing, storyboard, scene, sceneIndex]);
+  }, [playing, storyboard, scene, sceneIndex, sceneDuration]);
 
   // Narration follows the current scene rather than the clock, so a scrub does
   // not restart mid-sentence.
   useEffect(() => {
     if (!speechSupported) return;
     window.speechSynthesis.cancel();
-    if (!narrate || !playing || !scene) return;
+    if (voice.status !== 'failed' || !narrate || !playing || !scene) return;
 
     const utterance = new SpeechSynthesisUtterance(scene.narration);
     utterance.rate = 1.0;
@@ -88,7 +98,61 @@ export function ExplainerStudio({
 
     return () => window.speechSynthesis.cancel();
     // Deliberately keyed on the scene id: re-narrate only when the scene changes.
-  }, [scene?.id, narrate, playing, speechSupported, scene]);
+  }, [scene?.id, narrate, playing, speechSupported, scene, voice.status]);
+
+  // Google narrator voice. Same scene → resume where it paused; new scene →
+  // start that scene's clip from the top.
+  useEffect(() => {
+    voice.audio.forEach((a, i) => {
+      if (a && i !== sceneIndex) a.pause();
+    });
+    const clip = voice.audio[sceneIndex];
+    if (!clip) return;
+    if (audioSceneRef.current !== sceneIndex) {
+      clip.currentTime = 0;
+      audioSceneRef.current = sceneIndex;
+    }
+    if (playing && narrate) clip.play().catch(() => undefined);
+    else clip.pause();
+  }, [sceneIndex, playing, narrate, voice.audio]);
+
+  useEffect(() => () => voice.audio.forEach((a) => a?.pause()), [voice.audio]);
+
+  async function loadVoice(board: Storyboard) {
+    setVoice({ status: 'loading', audio: [] });
+    setDurations([]);
+    try {
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texts: board.scenes.map((s) => s.narration.slice(0, 700)) }),
+      });
+      if (!response.ok) throw new Error('tts');
+      const data = (await response.json()) as { audio: (string | null)[] };
+      const clips = data.audio.map((src) => (src ? new Audio(src) : null));
+      // Each scene lasts as long as its narration (plus a breath), never less
+      // than the storyboard's own minimum.
+      const lengths = await Promise.all(
+        clips.map(
+          (clip, i) =>
+            new Promise<number>((resolve) => {
+              const fallback = board.scenes[i].seconds;
+              if (!clip) return resolve(fallback);
+              const done = () => resolve(Number.isFinite(clip.duration) ? Math.max(clip.duration + 0.8, 5) : fallback);
+              if (clip.readyState >= 1) done();
+              else {
+                clip.addEventListener('loadedmetadata', done, { once: true });
+                clip.addEventListener('error', () => resolve(fallback), { once: true });
+              }
+            }),
+        ),
+      );
+      setDurations(lengths);
+      setVoice({ status: 'ready', audio: clips });
+    } catch {
+      setVoice({ status: 'failed', audio: [] });
+    }
+  }
 
   useEffect(() => {
     return () => {
@@ -121,6 +185,8 @@ export function ExplainerStudio({
       }
       setStoryboard(data.storyboard as Storyboard);
       goToScene(0);
+      audioSceneRef.current = null;
+      loadVoice(data.storyboard as Storyboard);
     } catch {
       setError('Could not reach the server. Check your connection and try again.');
     } finally {
@@ -128,10 +194,11 @@ export function ExplainerStudio({
     }
   }
 
-  const totalSeconds = storyboard?.scenes.reduce((sum, s) => sum + s.seconds, 0) ?? 0;
+  const totalSeconds = storyboard?.scenes.reduce((sum, _s, i) => sum + sceneSeconds(i), 0) ?? 0;
   const elapsedTotal =
-    (storyboard?.scenes.slice(0, sceneIndex).reduce((sum, s) => sum + s.seconds, 0) ?? 0) + elapsed;
-  const progress = scene ? Math.min(elapsed / scene.seconds, 1) : 0;
+    (storyboard?.scenes.slice(0, sceneIndex).reduce((sum, _s, i) => sum + sceneSeconds(i), 0) ?? 0) + elapsed;
+  const progress = scene && sceneDuration ? Math.min(elapsed / sceneDuration, 1) : 0;
+  const voiceLoading = voice.status === 'loading';
 
   return (
     <div className="space-y-6">
@@ -203,7 +270,30 @@ export function ExplainerStudio({
               )}
             </div>
 
-            <SceneVisual scene={scene} progress={progress} />
+            <div ref={playerRef} className="relative bg-black">
+              <SceneVisual scene={scene} progress={progress} index={sceneIndex} subject={storyboard.subject} />
+              {!playing && (
+                <button
+                  type="button"
+                  onClick={() => !voiceLoading && setPlaying(true)}
+                  disabled={voiceLoading}
+                  className="absolute inset-0 flex items-center justify-center bg-black/35 transition-colors hover:bg-black/25"
+                  aria-label="Play explainer"
+                >
+                  <span className="flex items-center gap-3 rounded-full bg-white/95 px-6 py-3 text-sm font-semibold text-black shadow-xl">
+                    {voiceLoading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" /> Recording the narrator…
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-5 w-5" /> {elapsedTotal > 0 ? 'Resume' : 'Play with voice'}
+                      </>
+                    )}
+                  </span>
+                </button>
+              )}
+            </div>
 
             {/* Captions */}
             <div className="min-h-[4.5rem] rounded-card border border-line bg-surface p-4">
@@ -229,6 +319,7 @@ export function ExplainerStudio({
                   variant="primary"
                   size="sm"
                   onClick={() => setPlaying((p) => !p)}
+                  disabled={voiceLoading && !playing}
                   aria-label={playing ? 'Pause' : 'Play'}
                 >
                   {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -247,11 +338,19 @@ export function ExplainerStudio({
                   {format(elapsedTotal)} / {format(totalSeconds)}
                 </span>
 
-                {speechSupported && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-auto"
+                  onClick={() => playerRef.current?.requestFullscreen?.().catch(() => undefined)}
+                  aria-label="Full screen"
+                >
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
+                {(voice.status !== 'failed' || speechSupported) && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="ml-auto"
                     onClick={() => setNarrate((n) => !n)}
                     aria-pressed={narrate}
                     aria-label={narrate ? 'Turn narration off' : 'Turn narration on'}
@@ -269,7 +368,7 @@ export function ExplainerStudio({
                     key={s.id}
                     type="button"
                     onClick={() => goToScene(index)}
-                    style={{ flexGrow: s.seconds }}
+                    style={{ flexGrow: sceneSeconds(index) }}
                     aria-label={`Scene ${index + 1}: ${s.title}`}
                     className="group relative h-2 overflow-hidden rounded-full bg-surface-raised"
                   >

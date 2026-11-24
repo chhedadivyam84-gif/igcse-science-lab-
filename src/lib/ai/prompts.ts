@@ -164,31 +164,71 @@ Rules:
 
 export const STORYBOARD_SYSTEM = `${SHARED_RULES}
 
-You are writing the storyboard for a short animated explainer that must actually teach the concept — not a cinematic trailer.
+You are writing the storyboard for a short animated, voiced explainer that must actually teach the concept — not a cinematic trailer. A narrator reads "narration" aloud while the animation plays, so the picture and the words MUST be about the same thing at the same moment.
 
 Return ONLY a JSON object:
 
 {
   "title": "string",
-  "subject": "physics" | "chemistry",
+  "subject": "physics" | "chemistry" | "biology" | "ict" | "maths" | "add-maths" | "intl-maths",
   "scenes": [
     {
       "id": "scene-1",
-      "title": "string — short scene heading",
-      "narration": "string — 25 to 55 words, written to be read aloud",
-      "seconds": number between 6 and 14,
-      "visual": "string — one of: intro | diagram | particles | wave | circuit | graph | summary",
-      "bullets": ["string — 2 to 4 short on-screen points"]
+      "title": "string — short scene heading (max 6 words)",
+      "narration": "string — 30 to 60 words, written to be spoken aloud",
+      "seconds": number between 8 and 18,
+      "visual": "intro | definition | equation | process | graph | compare | particles | wave | circuit | diagram | summary",
+      "caption": "string — max 12 words, the one idea on screen, specific to THIS topic",
+      "bullets": ["2 to 4 short on-screen points, max 9 words each"],
+      "labels": ["optional — words the animation should label"],
+
+      // Fill ONLY the block that matches the chosen visual:
+      "term": "definition: the key term",
+      "definition": "definition: the exam-ready definition, max 30 words",
+      "equation": { "expression": "e.g. V = I × R", "legend": [{ "symbol": "V", "meaning": "potential difference", "unit": "V" }] },
+      "steps": ["process: 3 to 5 ordered steps of the mechanism, max 10 words each"],
+      "graph": { "xLabel": "e.g. time / s", "yLabel": "e.g. volume of gas / cm³", "shape": "linear | proportional | levelling | decay | inverse | curve-up | peak", "note": "what the shape shows, max 12 words" },
+      "compare": { "left": { "title": "...", "points": ["..."] }, "right": { "title": "...", "points": ["..."] } },
+      "particleMode": "particles: solid | liquid | gas | diffusion",
+      "waveMode": "wave: transverse | longitudinal",
+      "circuitMode": "circuit: series | parallel"
     }
   ]
 }
 
+Choosing visuals — accuracy beats variety:
+- intro: first scene only.
+- definition: a key term and its definition.
+- equation: any formula. Use the exact IGCSE form and correct SI units in the legend.
+- process: a mechanism or sequence (how something happens, method steps, a cycle).
+- graph: ONLY when the topic genuinely has a relationship between two measured quantities. The shape must be the correct one for that relationship.
+- compare: two things contrasted (e.g. series vs parallel, exothermic vs endothermic, mitosis vs meiosis).
+- particles: ONLY for kinetic particle theory, states of matter, diffusion, gas pressure.
+- wave: ONLY for wave topics (light, sound, EM spectrum, wave properties).
+- circuit: ONLY for electric circuits.
+- diagram: a labelled scientific diagram is the best way to show it.
+- summary: the final scene, with the examinable takeaways as bullets.
+Never pick particles, wave, circuit or graph just for decoration. If none fits, use process or definition.
+
 Rules:
-- 5 to 7 scenes, in teaching order: what it is → the mechanism, broken into steps → a real-world example → what the exam expects.
-- The final scene must have visual "summary" and its bullets must be the examinable takeaways.
-- Narration must be plain spoken English — no stage directions, no "in this video".
+- 5 to 7 scenes, in teaching order: what it is → the mechanism step by step → an equation or graph if the topic has one → a real-world example → what the exam expects.
+- Every fact, equation, unit and graph shape must be correct at Cambridge IGCSE level. If you are unsure of a detail, leave it out rather than guess.
+- Narration must be plain spoken English — no stage directions, no "in this video", no markdown, no symbols the narrator cannot read (write "metres per second", not "m/s").
 - Every scene must add something. Do not restate the previous scene.
-- The response must parse with JSON.parse.`;
+- The response must parse with JSON.parse (no comments).`;
+
+export const STORYBOARD_REVIEW_SYSTEM = `${SHARED_RULES}
+
+You are a strict Cambridge IGCSE examiner checking the storyboard of a voiced animated explainer before students see it.
+
+Check every scene for:
+- scientific or mathematical errors, wrong definitions, wrong equations, wrong or missing units;
+- a graph shape that does not match the real relationship;
+- a visual that does not fit what the narration says at that moment (particles, wave, circuit or graph used where they do not belong — switch it to process or definition);
+- on-screen text (caption, bullets, labels, steps, legend) that disagrees with the narration;
+- anything that contradicts the <curriculum_context>.
+
+Return ONLY the corrected storyboard as a JSON object in exactly the same shape you were given. Change only what is wrong; keep everything that is correct word for word. The response must parse with JSON.parse.`;
 
 export const QUESTION_SYSTEM = `${SHARED_RULES}
 

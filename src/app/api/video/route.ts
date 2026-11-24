@@ -5,17 +5,30 @@ import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireAiAccess } from '@/lib/ai/guard';
 import { getAiProvider } from '@/lib/ai';
 import { buildGrounding } from '@/lib/ai/grounding';
-import { STORYBOARD_SYSTEM } from '@/lib/ai/prompts';
+import { STORYBOARD_REVIEW_SYSTEM, STORYBOARD_SYSTEM } from '@/lib/ai/prompts';
 import { storyboardFromCurriculum } from '@/lib/ai/fallback';
 import { findLibraryDiagram } from '@/lib/diagrams/library';
 import { extractJson } from '@/lib/json';
 import { clamp } from '@/lib/utils';
-import type { Storyboard } from '@/lib/types';
+import type { GraphShape, Storyboard, StoryboardScene } from '@/lib/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const VISUALS = ['intro', 'diagram', 'particles', 'wave', 'circuit', 'graph', 'summary'] as const;
+const VISUALS = [
+  'intro',
+  'definition',
+  'equation',
+  'process',
+  'graph',
+  'compare',
+  'particles',
+  'wave',
+  'circuit',
+  'diagram',
+  'summary',
+] as const;
+const SHAPES: GraphShape[] = ['linear', 'proportional', 'levelling', 'decay', 'inverse', 'curve-up', 'peak'];
 
 const schema = z.object({
   request: z.string().trim().min(4, 'Say what the explainer should cover.').max(300),
@@ -23,22 +36,94 @@ const schema = z.object({
   save: z.boolean().default(true),
 });
 
+const str = z.string().trim();
+const sideSchema = z.object({ title: str, points: z.array(str).default([]) });
+
+const sceneSchema = z.object({
+  id: z.string().default(''),
+  title: str,
+  narration: str,
+  seconds: z.coerce.number().default(10),
+  visual: z.string().default('summary'),
+  caption: str.optional(),
+  bullets: z.array(str).default([]),
+  labels: z.array(str).optional(),
+  term: str.optional(),
+  definition: str.optional(),
+  equation: z
+    .object({
+      expression: str,
+      legend: z.array(z.object({ symbol: str, meaning: str, unit: str.optional() })).default([]),
+    })
+    .optional(),
+  steps: z.array(str).optional(),
+  graph: z.object({ xLabel: str, yLabel: str, shape: z.string(), note: str.optional() }).optional(),
+  compare: z.object({ left: sideSchema, right: sideSchema }).optional(),
+  particleMode: z.string().optional(),
+  waveMode: z.string().optional(),
+  circuitMode: z.string().optional(),
+});
+
 const modelSchema = z.object({
   title: z.string(),
   subject: z.enum(SUBJECT_SLUGS),
-  scenes: z
-    .array(
-      z.object({
-        id: z.string(),
-        title: z.string(),
-        narration: z.string(),
-        seconds: z.number(),
-        visual: z.string(),
-        bullets: z.array(z.string()).default([]),
-      }),
-    )
-    .min(3),
+  scenes: z.array(sceneSchema).min(3),
 });
+
+type ModelStoryboard = z.infer<typeof modelSchema>;
+
+function pick<T extends string>(value: string | undefined, allowed: readonly T[]): T | undefined {
+  return allowed.find((option) => option === value);
+}
+
+/**
+ * Turn a model scene into a player scene, downgrading any visual whose data is
+ * missing. A graph with no axes or an equation with no expression would
+ * otherwise render as a generic animation that teaches the wrong thing.
+ */
+function toScene(
+  scene: ModelStoryboard['scenes'][number],
+  index: number,
+  libraryDiagram: ReturnType<typeof findLibraryDiagram>,
+): StoryboardScene {
+  let visual = (VISUALS as readonly string[]).includes(scene.visual) ? scene.visual : 'summary';
+  const graphShape = pick(scene.graph?.shape, SHAPES);
+
+  if (visual === 'equation' && !scene.equation?.expression) visual = 'definition';
+  if (visual === 'definition' && !(scene.term && scene.definition)) visual = scene.steps?.length ? 'process' : 'summary';
+  if (visual === 'process' && (scene.steps?.length ?? 0) < 2) visual = 'summary';
+  if (visual === 'graph' && !(scene.graph && graphShape)) visual = 'summary';
+  if (visual === 'compare' && !(scene.compare?.left.points.length && scene.compare?.right.points.length)) visual = 'summary';
+  if (visual === 'diagram' && !libraryDiagram) visual = scene.steps?.length ? 'process' : 'summary';
+
+  return {
+    id: scene.id || `scene-${index + 1}`,
+    title: scene.title,
+    narration: scene.narration,
+    seconds: clamp(Math.round(scene.seconds), 6, 20),
+    visual,
+    diagram: visual === 'diagram' ? (libraryDiagram ?? undefined) : undefined,
+    bullets: scene.bullets.slice(0, 4),
+    caption: scene.caption,
+    labels: scene.labels?.slice(0, 6),
+    term: scene.term,
+    definition: scene.definition,
+    equation: scene.equation
+      ? { expression: scene.equation.expression, legend: scene.equation.legend.slice(0, 5) }
+      : undefined,
+    steps: scene.steps?.slice(0, 5),
+    graph: scene.graph && graphShape ? { ...scene.graph, shape: graphShape } : undefined,
+    compare: scene.compare
+      ? {
+          left: { title: scene.compare.left.title, points: scene.compare.left.points.slice(0, 4) },
+          right: { title: scene.compare.right.title, points: scene.compare.right.points.slice(0, 4) },
+        }
+      : undefined,
+    particleMode: pick(scene.particleMode, ['solid', 'liquid', 'gas', 'diffusion'] as const) ?? 'gas',
+    waveMode: pick(scene.waveMode, ['transverse', 'longitudinal'] as const) ?? 'transverse',
+    circuitMode: pick(scene.circuitMode, ['series', 'parallel'] as const) ?? 'series',
+  };
+}
 
 export const POST = handleRoute('video', async (request) => {
   const user = await requireAiAccess('explainer');
@@ -58,11 +143,12 @@ export const POST = handleRoute('video', async (request) => {
     }
   } else {
     const grounding = await buildGrounding(body.request, { subject: body.subject });
+    const system = `${STORYBOARD_SYSTEM}\n\n${grounding.text}`;
     const raw = await provider.complete({
-      system: `${STORYBOARD_SYSTEM}\n\n${grounding.text}`,
+      system,
       messages: [{ role: 'user', content: body.request }],
-      maxTokens: 2600,
-      temperature: 0.4,
+      maxTokens: 4000,
+      temperature: 0.2,
       responseFormat: 'json',
     });
 
@@ -74,25 +160,37 @@ export const POST = handleRoute('video', async (request) => {
       });
     }
 
+    // Second pass: an examiner-style check that fixes wrong facts, equations,
+    // graph shapes and visuals that do not match the narration. If the review
+    // itself fails, the first draft (already validated) is used.
+    let draft: ModelStoryboard = validated.data;
+    try {
+      const reviewed = await provider.complete({
+        system: `${STORYBOARD_REVIEW_SYSTEM}\n\n${grounding.text}`,
+        messages: [
+          {
+            role: 'user',
+            content: `Student request: ${body.request}\n\nStoryboard to check:\n${JSON.stringify(draft)}`,
+          },
+        ],
+        maxTokens: 4000,
+        temperature: 0,
+        responseFormat: 'json',
+      });
+      const checked = modelSchema.safeParse(extractJson<unknown>(reviewed, null));
+      if (checked.success) draft = checked.data;
+    } catch (error) {
+      console.warn('[video] storyboard review skipped:', error instanceof Error ? error.message : error);
+    }
+
     // Attach a checked diagram to any scene asking for one, so the visual that
     // carries the science is drawn from verified data.
     const libraryDiagram = findLibraryDiagram(body.request);
 
     storyboard = {
-      title: validated.data.title,
-      subject: validated.data.subject,
-      scenes: validated.data.scenes.slice(0, 8).map((scene, index) => {
-        const visual = (VISUALS as readonly string[]).includes(scene.visual) ? scene.visual : 'summary';
-        return {
-          id: scene.id || `scene-${index + 1}`,
-          title: scene.title,
-          narration: scene.narration,
-          seconds: clamp(Math.round(scene.seconds), 5, 20),
-          visual,
-          diagram: visual === 'diagram' ? (libraryDiagram ?? undefined) : undefined,
-          bullets: scene.bullets.slice(0, 4),
-        };
-      }),
+      title: draft.title,
+      subject: draft.subject,
+      scenes: draft.scenes.slice(0, 8).map((scene, index) => toScene(scene, index, libraryDiagram)),
       sourceRefs: grounding.sourceRefs,
       aiAssisted: true,
     };

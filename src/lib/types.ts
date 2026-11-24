@@ -194,7 +194,37 @@ export type StoryboardScene = {
   visual: string;
   diagram?: DiagramSpec;
   bullets: string[];
+  /** One short line shown under the animation, written for THIS topic. */
+  caption?: string;
+  /** Labels the animation draws (component names, axis parts, particle names…). */
+  labels?: string[];
+  /** 'definition' scenes. */
+  term?: string;
+  definition?: string;
+  /** 'equation' scenes. */
+  equation?: { expression: string; legend: { symbol: string; meaning: string; unit?: string }[] };
+  /** 'process' scenes: ordered steps of a mechanism. */
+  steps?: string[];
+  /** 'graph' scenes. */
+  graph?: { xLabel: string; yLabel: string; shape: GraphShape; note?: string };
+  /** 'compare' scenes. */
+  compare?: { left: { title: string; points: string[] }; right: { title: string; points: string[] } };
+  /** 'particles' scenes. */
+  particleMode?: 'solid' | 'liquid' | 'gas' | 'diffusion';
+  /** 'wave' scenes. */
+  waveMode?: 'transverse' | 'longitudinal';
+  /** 'circuit' scenes. */
+  circuitMode?: 'series' | 'parallel';
 };
+
+export type GraphShape =
+  | 'linear'
+  | 'proportional'
+  | 'levelling'
+  | 'decay'
+  | 'inverse'
+  | 'curve-up'
+  | 'peak';
 
 export type Storyboard = {
   title: string;

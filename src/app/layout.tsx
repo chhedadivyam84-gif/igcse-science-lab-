@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
+import { Inter, Instrument_Serif, JetBrains_Mono, Plus_Jakarta_Sans, Sora } from 'next/font/google';
 import './globals.css';
 
 /**
@@ -35,6 +35,21 @@ const mono = JetBrains_Mono({
   variable: '--font-mono-loaded',
 });
 
+/** Explainer-video typography: a geometric display face and a friendly text face. */
+const video = Sora({
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '600', '700', '800'],
+  variable: '--font-video',
+});
+
+const videoBody = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-video-body',
+});
+
 import { AppChrome } from '@/components/layout/AppChrome';
 import { ThemeProvider, themeScript } from '@/components/theme';
 import { getSessionUser } from '@/lib/auth';
@@ -67,7 +82,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang="en-GB"
       suppressHydrationWarning
-      className={`${sans.variable} ${display.variable} ${mono.variable}`}
+      className={`${sans.variable} ${display.variable} ${mono.variable} ${video.variable} ${videoBody.variable}`}
     >
       <head>
         {/* Applies the stored theme before first paint to avoid a flash. */}

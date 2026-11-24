@@ -113,6 +113,29 @@ export class GoogleProvider implements AiProvider {
     throw new AiRequestError(lastError);
   }
 
+  /**
+   * Text-to-speech with a Gemini -tts model. Returns a WAV file: Gemini sends
+   * raw 24 kHz 16-bit mono PCM, which browsers cannot play without a header.
+   */
+  async speak(text: string, voice: string, style: string): Promise<Buffer> {
+    const response = await this.post(this.endpoint('generateContent'), {
+      contents: [{ role: 'user', parts: [{ text: `${style}\n\n${text}` }] }],
+      generationConfig: {
+        responseModalities: ['AUDIO'],
+        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } },
+      },
+    });
+    const data = (await response.json()) as {
+      candidates?: { content?: { parts?: { inlineData?: { data?: string; mimeType?: string } }[] } }[];
+    };
+    const part = data.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data)?.inlineData;
+    if (!part?.data) throw new AiRequestError('Google AI returned no audio.');
+
+    const pcm = Buffer.from(part.data, 'base64');
+    const rate = Number(/rate=(\d+)/.exec(part.mimeType ?? '')?.[1] ?? 24000);
+    return wav(pcm, rate);
+  }
+
   async complete(request: CompletionRequest): Promise<string> {
     const response = await this.post(this.endpoint('generateContent'), this.body(request));
     const data = (await response.json()) as GeminiResponse;
@@ -218,4 +241,23 @@ function describe(status: number, detail: string): string {
   }
   if (status >= 500) return 'Google AI is temporarily unavailable.';
   return `Google AI returned an error (${status}).`;
+}
+
+/** Wrap 16-bit mono PCM in a minimal WAV header. */
+function wav(pcm: Buffer, sampleRate: number): Buffer {
+  const header = Buffer.alloc(44);
+  header.write('RIFF', 0);
+  header.writeUInt32LE(36 + pcm.length, 4);
+  header.write('WAVE', 8);
+  header.write('fmt ', 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20); // PCM
+  header.writeUInt16LE(1, 22); // mono
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(sampleRate * 2, 28);
+  header.writeUInt16LE(2, 32);
+  header.writeUInt16LE(16, 34);
+  header.write('data', 36);
+  header.writeUInt32LE(pcm.length, 40);
+  return Buffer.concat([header, pcm]);
 }
