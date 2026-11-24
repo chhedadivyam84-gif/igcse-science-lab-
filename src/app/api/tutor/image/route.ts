@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireAiAccess } from '@/lib/ai/guard';
-import { getAiProvider, googleApiKey } from '@/lib/ai';
+import { getAiProvider, googleApiKeys } from '@/lib/ai';
 import { GoogleProvider } from '@/lib/ai/google';
 import { buildGrounding } from '@/lib/ai/grounding';
 import { extractJson } from '@/lib/json';
@@ -53,9 +53,9 @@ export const POST = handleRoute('tutor-image', async (request) => {
   await requireAiAccess('image');
   const body = await parseBody(request, schema);
 
-  const key = googleApiKey();
+  const keys = googleApiKeys();
   const planner = getAiProvider();
-  if (!key || !planner) {
+  if (!keys.length || !planner) {
     return fail('Image explanations need the Google AI key to be set.', 503, { code: 'image_unavailable' });
   }
 
@@ -85,7 +85,7 @@ export const POST = handleRoute('tutor-image', async (request) => {
   ].join('\n');
 
   try {
-    const image = await new GoogleProvider(key, IMAGE_MODEL()).draw(prompt);
+    const image = await new GoogleProvider(keys, IMAGE_MODEL()).draw(prompt);
     return ok({
       title,
       caption,

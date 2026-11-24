@@ -29,7 +29,6 @@ const THINKING_HEADROOM = 4096;
 
 /** Gemini returns 503 under load fairly readily; a short retry absorbs it. */
 const RETRY_STATUSES = new Set([429, 500, 502, 503, 504]);
-const MAX_ATTEMPTS = 3;
 
 type GeminiPart = { text: string } | { inlineData: { mimeType: string; data: string } };
 type GeminiContent = { role: 'user' | 'model'; parts: GeminiPart[] };
@@ -47,16 +46,25 @@ export class GoogleProvider implements AiProvider {
   readonly id = 'google';
   readonly model: string;
 
+  private readonly keys: string[];
+
+  /**
+   * @param apiKeys one key, or several (e.g. two Google AI Studio projects)
+   * @param fallbackModels tried in order when the main model is overloaded or
+   *   rate limited on every key; only for text, never for TTS or images.
+   */
   constructor(
-    private readonly apiKey: string,
+    apiKeys: string | string[],
     model: string,
+    private readonly fallbackModels: string[] = [],
   ) {
+    this.keys = [...new Set((Array.isArray(apiKeys) ? apiKeys : [apiKeys]).filter(Boolean))];
     this.model = model;
   }
 
-  private endpoint(method: 'generateContent' | 'streamGenerateContent', stream = false) {
+  private endpoint(model: string, method: 'generateContent' | 'streamGenerateContent', stream = false) {
     const query = stream ? '?alt=sse' : '';
-    return `${BASE}/${encodeURIComponent(this.model)}:${method}${query}`;
+    return `${BASE}/${encodeURIComponent(model)}:${method}${query}`;
   }
 
   private body(request: CompletionRequest) {
@@ -77,36 +85,60 @@ export class GoogleProvider implements AiProvider {
     };
   }
 
-  private async post(url: string, payload: unknown): Promise<Response> {
+  /**
+   * Sends a request, working around load instead of failing on it:
+   *  - each model is tried with every key (a busy or rate-limited key moves
+   *    straight on to the next — separate AI Studio projects have separate
+   *    quotas);
+   *  - if the main model is overloaded on every key, the fallback models are
+   *    tried the same way.
+   * Errors that another key or model cannot fix (a bad request, content
+   * blocked) are thrown at once.
+   */
+  private async post(
+    method: 'generateContent' | 'streamGenerateContent',
+    payload: unknown,
+    options: { stream?: boolean; fallback?: boolean } = {},
+  ): Promise<Response> {
+    const models = [this.model, ...(options.fallback === false ? [] : this.fallbackModels.filter((m) => m !== this.model))];
     let lastError = 'The Google AI request failed.';
 
-    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-      const response = await fetch(url, {
-        method: 'POST',
-        // The key travels in a header, never in the URL, so it cannot end up in
-        // proxy or server access logs.
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
-        body: JSON.stringify(payload),
-      }).catch(() => null);
+    for (const [mi, model] of models.entries()) {
+      for (const [ki, key] of this.keys.entries()) {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          const response = await fetch(this.endpoint(model, method, options.stream), {
+            method: 'POST',
+            // The key travels in a header, never in the URL, so it cannot end
+            // up in proxy or server access logs.
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+            body: JSON.stringify(payload),
+          }).catch(() => null);
 
-      if (response?.ok) return response;
+          if (response?.ok) {
+            if (mi > 0 || ki > 0) console.warn(`[ai] answered by ${model} on key ${ki + 1} after the main option was busy`);
+            return response;
+          }
 
-      if (!response) {
-        lastError = 'Could not reach the Google AI API. Check your network connection.';
-      } else {
-        let detail = '';
-        try {
-          detail = ((await response.json()) as GeminiResponse).error?.message ?? '';
-        } catch {
-          // Body was not JSON; the status code alone will have to do.
+          if (!response) {
+            lastError = 'Could not reach the Google AI API. Check your network connection.';
+            break; // network trouble: try the next key/model rather than hammering this one
+          }
+
+          let detail = '';
+          try {
+            detail = ((await response.json()) as GeminiResponse).error?.message ?? '';
+          } catch {
+            // Body was not JSON; the status code alone will have to do.
+          }
+          lastError = describe(response.status, detail);
+
+          // A fallback model this account cannot use: skip it.
+          if (mi > 0 && (response.status === 404 || response.status === 403)) break;
+          // This key is rejected or out of quota: the next key may work.
+          if (response.status === 429 || response.status === 401 || response.status === 403) break;
+          if (!RETRY_STATUSES.has(response.status)) throw new AiRequestError(lastError);
+          if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 500));
         }
-        lastError = describe(response.status, detail);
-
-        if (!RETRY_STATUSES.has(response.status)) throw new AiRequestError(lastError);
-      }
-
-      if (attempt < MAX_ATTEMPTS) {
-        await new Promise((resolve) => setTimeout(resolve, 400 * 2 ** (attempt - 1)));
       }
     }
 
@@ -118,13 +150,13 @@ export class GoogleProvider implements AiProvider {
    * raw 24 kHz 16-bit mono PCM, which browsers cannot play without a header.
    */
   async speak(text: string, voice: string, style: string): Promise<Buffer> {
-    const response = await this.post(this.endpoint('generateContent'), {
+    const response = await this.post('generateContent', {
       contents: [{ role: 'user', parts: [{ text: `${style}\n\n${text}` }] }],
       generationConfig: {
         responseModalities: ['AUDIO'],
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } },
       },
-    });
+    }, { fallback: false });
     const data = (await response.json()) as {
       candidates?: { content?: { parts?: { inlineData?: { data?: string; mimeType?: string } }[] } }[];
     };
@@ -138,10 +170,11 @@ export class GoogleProvider implements AiProvider {
 
   /** Image generation with a Gemini image ("Nano Banana") model. */
   async draw(prompt: string): Promise<{ mimeType: string; data: string }> {
-    const response = await this.post(this.endpoint('generateContent'), {
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { responseModalities: ['IMAGE'] },
-    });
+    const response = await this.post(
+      'generateContent',
+      { contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { responseModalities: ['IMAGE'] } },
+      { fallback: false },
+    );
     const data = (await response.json()) as {
       candidates?: { content?: { parts?: { inlineData?: { data?: string; mimeType?: string } }[] } }[];
     };
@@ -151,7 +184,7 @@ export class GoogleProvider implements AiProvider {
   }
 
   async complete(request: CompletionRequest): Promise<string> {
-    const response = await this.post(this.endpoint('generateContent'), this.body(request));
+    const response = await this.post('generateContent', this.body(request));
     const data = (await response.json()) as GeminiResponse;
 
     if (data.promptFeedback?.blockReason) {
@@ -174,7 +207,7 @@ export class GoogleProvider implements AiProvider {
   }
 
   async *stream(request: CompletionRequest): AsyncGenerator<string, void, unknown> {
-    const response = await this.post(this.endpoint('streamGenerateContent', true), this.body(request));
+    const response = await this.post('streamGenerateContent', this.body(request), { stream: true });
     const reader = response.body?.getReader();
     if (!reader) throw new AiRequestError('Google AI returned an empty response.');
 
@@ -209,7 +242,7 @@ export class GoogleProvider implements AiProvider {
   }
 
   async describeImage(request: ImageRequest): Promise<string> {
-    const response = await this.post(this.endpoint('generateContent'), {
+    const response = await this.post('generateContent', {
       contents: [
         {
           role: 'user',
@@ -249,9 +282,9 @@ function describe(status: number, detail: string): string {
     // Google retires pinned model versions, so name the alias that keeps working.
     return 'That Google AI model is unavailable or retired. Set AI_MODEL to a current model — "gemini-flash-latest" tracks the newest flash model.';
   }
-  if (status === 429) return 'Google AI is rate limiting requests. Try again shortly.';
+  if (status === 429) return 'Google AI is rate limiting requests on every key. Try again in a minute.';
   if (status === 503) {
-    return 'That Google AI model is busy right now. It was retried automatically — try again in a moment, or switch AI_MODEL to a less loaded model.';
+    return 'Google AI is very busy right now — every model and key was tried. Please try again in a minute.';
   }
   if (status >= 500) return 'Google AI is temporarily unavailable.';
   return `Google AI returned an error (${status}).`;

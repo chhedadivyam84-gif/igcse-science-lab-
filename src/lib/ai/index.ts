@@ -60,8 +60,8 @@ export function getAiProvider(options: ProviderOptions = {}): AiProvider | null 
     const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
     built = apiKey ? new AnthropicProvider(apiKey, model || DEFAULT_MODELS.anthropic) : null;
   } else if (normalised === 'google') {
-    const apiKey = googleApiKey();
-    built = apiKey ? new GoogleProvider(apiKey, model || DEFAULT_MODELS.google) : null;
+    const keys = googleApiKeys();
+    built = keys.length ? new GoogleProvider(keys, model || DEFAULT_MODELS.google, googleFallbackModels()) : null;
   } else if (normalised === 'none') {
     built = null;
   } else {
@@ -99,4 +99,20 @@ export function googleApiKey(): string | undefined {
     process.env.GOOGLE_API_KEY?.trim() ||
     undefined
   );
+}
+
+/**
+ * Every Google AI key configured on the host, de-duplicated. Two AI Studio
+ * projects mean two separate quotas: when one is busy or rate limited the
+ * request moves to the next.
+ */
+export function googleApiKeys(): string[] {
+  const names = ['Api', 'API', 'api', 'GOOGLE_API_KEY', 'GOOGLE_API_KEY_2', 'GEMINI_API_KEY', 'Api2', 'API_2', 'api2'];
+  return [...new Set(names.map((n) => process.env[n]?.trim()).filter((v): v is string => !!v))];
+}
+
+/** Models tried, in order, when the main one is overloaded on every key. */
+export function googleFallbackModels(): string[] {
+  const configured = process.env.AI_FALLBACK_MODELS?.split(',').map((m) => m.trim()).filter(Boolean);
+  return configured?.length ? configured : ['gemini-flash-latest', 'gemini-3.1-flash-lite'];
 }

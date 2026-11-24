@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireFeature } from '@/lib/billing/entitlements';
-import { googleApiKey } from '@/lib/ai';
+import { googleApiKeys } from '@/lib/ai';
 import { GoogleProvider } from '@/lib/ai/google';
 
 export const runtime = 'nodejs';
@@ -28,10 +28,10 @@ export const POST = handleRoute('tts', async (request) => {
   await requireFeature('explainer');
   const body = await parseBody(request, schema);
 
-  const key = googleApiKey();
-  if (!key) return fail('No Google AI key is set, so the narrator voice is unavailable.', 503, { code: 'tts_unavailable' });
+  const keys = googleApiKeys();
+  if (!keys.length) return fail('No Google AI key is set, so the narrator voice is unavailable.', 503, { code: 'tts_unavailable' });
 
-  const voice = new GoogleProvider(key, MODEL());
+  const voice = new GoogleProvider(keys, MODEL());
   const audio: (string | null)[] = new Array(body.texts.length).fill(null);
 
   let next = 0;
