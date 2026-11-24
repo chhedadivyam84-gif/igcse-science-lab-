@@ -60,7 +60,7 @@ export function getAiProvider(options: ProviderOptions = {}): AiProvider | null 
     const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
     built = apiKey ? new AnthropicProvider(apiKey, model || DEFAULT_MODELS.anthropic) : null;
   } else if (normalised === 'google') {
-    const apiKey = process.env.GOOGLE_API_KEY?.trim();
+    const apiKey = process.env.Api?.trim() || process.env.API?.trim() || process.env.GOOGLE_API_KEY?.trim();
     built = apiKey ? new GoogleProvider(apiKey, model || DEFAULT_MODELS.google) : null;
   } else if (normalised === 'none') {
     built = null;
