@@ -55,10 +55,11 @@ const sceneSchema = z.object({
       expression: str,
       legend: z.array(z.object({ symbol: str, meaning: str, unit: str.optional() })).default([]),
     })
-    .optional(),
-  steps: z.array(str).optional(),
-  graph: z.object({ xLabel: str, yLabel: str, shape: z.string(), note: str.optional() }).optional(),
-  compare: z.object({ left: sideSchema, right: sideSchema }).optional(),
+    .optional()
+    .catch(undefined),
+  steps: z.array(str).optional().catch(undefined),
+  graph: z.object({ xLabel: str, yLabel: str, shape: z.string(), note: str.optional() }).optional().catch(undefined),
+  compare: z.object({ left: sideSchema, right: sideSchema }).optional().catch(undefined),
   particleMode: z.string().optional(),
   waveMode: z.string().optional(),
   circuitMode: z.string().optional(),
@@ -66,9 +67,29 @@ const sceneSchema = z.object({
 
 const modelSchema = z.object({
   title: z.string(),
-  subject: z.enum(SUBJECT_SLUGS),
+  subject: z.preprocess((v) => (typeof v === 'string' ? v.toLowerCase().trim() : v), z.enum(SUBJECT_SLUGS)).catch('physics'),
   scenes: z.array(sceneSchema).min(3),
 });
+
+/**
+ * Models fill unused blocks with null, "" or {} ("graph": null on a
+ * definition scene). Strip those before validating so an unused block is
+ * simply absent instead of failing the whole storyboard.
+ */
+function clean(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(clean).filter((v) => v !== undefined);
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      const c = clean(v);
+      if (c === undefined || c === null || c === '') continue;
+      if (typeof c === 'object' && !Array.isArray(c) && !Object.keys(c as object).length) continue;
+      out[k] = c;
+    }
+    return out;
+  }
+  return value === null ? undefined : value;
+}
 
 type ModelStoryboard = z.infer<typeof modelSchema>;
 
@@ -147,13 +168,14 @@ export const POST = handleRoute('video', async (request) => {
     const raw = await provider.complete({
       system,
       messages: [{ role: 'user', content: body.request }],
-      maxTokens: 4000,
+      maxTokens: 7000,
       temperature: 0.2,
       responseFormat: 'json',
     });
 
     const parsed = extractJson<unknown>(raw, null);
-    const validated = parsed ? modelSchema.safeParse(parsed) : null;
+    const validated = parsed ? modelSchema.safeParse(clean(parsed)) : null;
+    if (parsed && !validated?.success) console.warn('[video] storyboard rejected:', validated?.error?.issues.slice(0, 3));
     if (!validated?.success) {
       return fail('The AI returned a storyboard in an unexpected format. Please try again.', 502, {
         code: 'ai_shape',
@@ -173,11 +195,11 @@ export const POST = handleRoute('video', async (request) => {
             content: `Student request: ${body.request}\n\nStoryboard to check:\n${JSON.stringify(draft)}`,
           },
         ],
-        maxTokens: 4000,
+        maxTokens: 7000,
         temperature: 0,
         responseFormat: 'json',
       });
-      const checked = modelSchema.safeParse(extractJson<unknown>(reviewed, null));
+      const checked = modelSchema.safeParse(clean(extractJson<unknown>(reviewed, null)));
       if (checked.success) draft = checked.data;
     } catch (error) {
       console.warn('[video] storyboard review skipped:', error instanceof Error ? error.message : error);
