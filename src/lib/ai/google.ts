@@ -136,6 +136,20 @@ export class GoogleProvider implements AiProvider {
     return wav(pcm, rate);
   }
 
+  /** Image generation with a Gemini image ("Nano Banana") model. */
+  async draw(prompt: string): Promise<{ mimeType: string; data: string }> {
+    const response = await this.post(this.endpoint('generateContent'), {
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { responseModalities: ['IMAGE'] },
+    });
+    const data = (await response.json()) as {
+      candidates?: { content?: { parts?: { inlineData?: { data?: string; mimeType?: string } }[] } }[];
+    };
+    const part = data.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data)?.inlineData;
+    if (!part?.data) throw new AiRequestError('Google AI returned no image.');
+    return { mimeType: part.mimeType ?? 'image/png', data: part.data };
+  }
+
   async complete(request: CompletionRequest): Promise<string> {
     const response = await this.post(this.endpoint('generateContent'), this.body(request));
     const data = (await response.json()) as GeminiResponse;

@@ -2,7 +2,7 @@
 
 import type { SubjectSlug } from '@/lib/types';
 import { useEffect, useRef, useState } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, VolumeX } from 'lucide-react';
+import { ImageIcon, Loader2, Mic, MicOff, Send, Square, Volume2, VolumeX } from 'lucide-react';
 
 import { RichText } from '@/components/content/RichText';
 import { Badge, Button, ErrorState, Notice, Textarea } from '@/components/ui';
@@ -15,7 +15,12 @@ type Message = {
   content: string;
   grounding?: string[];
   aiAssisted?: boolean;
+  /** NOVA image explanation (Pro). */
+  image?: { status: 'loading' | 'ready' | 'error'; src?: string; title?: string; caption?: string; error?: string };
 };
+
+/** "Show me a diagram of…", "draw…", "explain with a picture" and so on. */
+const IMAGE_INTENT = /\b(image|picture|diagram|draw|drawing|illustrat\w*|visuali[sz]e|visual|sketch|show me)\b/i;
 
 const SUGGESTIONS = [
   'Explain Newton’s laws.',
@@ -46,6 +51,7 @@ export function TutorChat({
   const [conversationId, setConversationId] = useState(initialConversationId);
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
+  const [imageMode, setImageMode] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -70,6 +76,7 @@ export function TutorChat({
 
     setError(null);
     setInput('');
+    if (imageMode || IMAGE_INTENT.test(question)) explainWithImage(question);
     const userMessage: Message = { id: `u-${Date.now()}`, role: 'user', content: question };
     const assistantId = `a-${Date.now()}`;
     setMessages((current) => [...current, userMessage, { id: assistantId, role: 'assistant', content: '' }]);
@@ -118,6 +125,31 @@ export function TutorChat({
     } finally {
       setPending(false);
       abortRef.current = null;
+    }
+  }
+
+  async function explainWithImage(question: string) {
+    const id = `img-${Date.now()}`;
+    // Shown after NOVA's written answer, which starts streaming first.
+    setTimeout(() => {
+      setMessages((current) => [...current, { id, role: 'assistant', content: '', image: { status: 'loading' } }]);
+    }, 50);
+    const update = (image: Message['image']) =>
+      setMessages((current) => current.map((m) => (m.id === id ? { ...m, image } : m)));
+    try {
+      const response = await fetch('/api/tutor/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, subject }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        update({ status: 'error', error: data.error ?? 'The image could not be made right now.' });
+        return;
+      }
+      update({ status: 'ready', src: data.image, title: data.title, caption: data.caption });
+    } catch {
+      update({ status: 'error', error: 'Lost connection while drawing the image.' });
     }
   }
 
@@ -277,7 +309,13 @@ export function TutorChat({
                 )}
               </div>
 
-              {message.content ? <RichText text={message.content} /> : <Thinking />}
+              {message.image ? (
+                <ImageAnswer image={message.image} />
+              ) : message.content ? (
+                <RichText text={message.content} />
+              ) : (
+                <Thinking />
+              )}
 
               {message.grounding && message.grounding.length > 0 && (
                 <p className="mt-2.5 text-xs text-ink-faint">
@@ -318,6 +356,16 @@ export function TutorChat({
           <div className="flex shrink-0 gap-2">
             <Button
               type="button"
+              variant={imageMode ? 'primary' : 'secondary'}
+              onClick={() => setImageMode((on) => !on)}
+              aria-pressed={imageMode}
+              aria-label={imageMode ? 'Image explanations on' : 'Explain with an image'}
+              title="Explain with an image (Pro)"
+            >
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
               variant={listening ? 'danger' : 'secondary'}
               onClick={toggleDictation}
               aria-label={listening ? 'Stop dictation' : 'Dictate your question'}
@@ -337,7 +385,7 @@ export function TutorChat({
           </div>
         </div>
         <p className="mt-2 text-xs text-ink-faint">
-          Enter sends · Shift + Enter for a new line. Answers are AI-assisted — check anything that
+          {imageMode ? 'Image mode on — NOVA will also draw a labelled diagram (Pro). ' : ''}Enter sends · Shift + Enter for a new line. Answers are AI-assisted — check anything that
           matters against the official syllabus.
         </p>
       </form>
@@ -397,4 +445,43 @@ function safeParseRefs(header: string | null): string[] {
   } catch {
     return [];
   }
+}
+
+function ImageAnswer({ image }: { image: NonNullable<Message['image']> }) {
+  if (image.status === 'loading') {
+    return (
+      <div className="flex aspect-video w-full max-w-xl items-center justify-center rounded-2xl border border-line bg-surface">
+        <span className="flex items-center gap-2 text-sm text-ink-muted">
+          <Loader2 className="h-4 w-4 animate-spin" /> NOVA is drawing a diagram…
+        </span>
+      </div>
+    );
+  }
+  if (image.status === 'error') {
+    return (
+      <p className="rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink-muted">
+        {image.error}{' '}
+        {/pro|plan|upgrade|subscri/i.test(image.error ?? '') && (
+          <a href="/pricing" className="font-medium text-accent underline-offset-2 hover:underline">
+            See Pro
+          </a>
+        )}
+      </p>
+    );
+  }
+  return (
+    <figure className="max-w-xl space-y-2">
+      {/* eslint-disable-next-line @next/next/no-img-element -- generated data URL */}
+      <img src={image.src} alt={image.title ?? 'NOVA diagram'} className="w-full rounded-2xl border border-line bg-white" />
+      <figcaption className="text-sm text-ink-muted">
+        {image.title && <span className="font-semibold text-ink">{image.title}. </span>}
+        {image.caption}
+      </figcaption>
+      {image.src && (
+        <a href={image.src} download={`${(image.title ?? 'nova-diagram').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.png`} className="text-xs text-accent hover:underline">
+          Download image
+        </a>
+      )}
+    </figure>
+  );
 }

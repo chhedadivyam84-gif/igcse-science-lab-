@@ -44,6 +44,7 @@ export const FEATURES = [
   'photo',
   'question-generation',
   'voice',
+  'image',
 ] as const;
 
 export type Feature = (typeof FEATURES)[number];
@@ -66,6 +67,7 @@ export const PREMIUM_FEATURES: ReadonlySet<Feature> = new Set<Feature>([
   'photo',
   'question-generation',
   'voice',
+  'image',
 ]);
 
 export const FEATURE_META: Record<Feature, { label: string; blurb: string; href: string }> = {
@@ -80,6 +82,11 @@ export const FEATURE_META: Record<Feature, { label: string; blurb: string; href:
     label: 'Unlimited AI questions',
     blurb: 'Generate fresh practice beyond the authored bank',
     href: '/practice',
+  },
+  image: {
+    label: 'Image explanations',
+    blurb: 'Ask NOVA to draw a labelled diagram of any idea',
+    href: '/tutor',
   },
 };
 
