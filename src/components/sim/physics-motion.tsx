@@ -79,13 +79,17 @@ export function ProjectileMotion() {
     };
   }, [running, flightTime, reduced, playback]);
 
+  const lastShotRef = useRef<Shot | null>(null);
   function launch() {
-    // Keep the last few flights as faint ghosts so 30° and 60°, or Earth and
-    // the Moon, can be compared on the same axes.
-    setTrails((previous) => {
-      const same = (s: Shot) => s.speed === speed && s.angle === angle && s.gravity === gravity;
-      return [...previous.filter((s) => !same(s)), current].slice(-4);
-    });
+    // The previous launch becomes a faint ghost so 30° and 60°, or Earth and
+    // the Moon, can be compared on the same axes. The current flight is never
+    // its own ghost.
+    const previous = lastShotRef.current;
+    const same = (x: Shot, y: Shot) => x.speed === y.speed && x.angle === y.angle && x.gravity === y.gravity;
+    if (previous && !same(previous, current)) {
+      setTrails((list) => [...list.filter((s) => !same(s, previous)), previous].slice(-4));
+    }
+    lastShotRef.current = current;
     setT(0);
     setRunning(true);
   }
@@ -153,7 +157,7 @@ export function ProjectileMotion() {
           </text>
           <line x1={left} y1={height - bottom} x2={width - right} y2={height - bottom} stroke="rgb(var(--border))" strokeWidth={2} />
 
-          {trails.map((s, i) => (
+          {trails.filter((s) => !(s.speed === speed && s.angle === angle && s.gravity === gravity)).map((s, i) => (
             <g key={`${s.speed}-${s.angle}-${s.gravity}-${i}`} opacity={0.35}>
               <polyline points={path(s)} fill="none" stroke="rgb(var(--muted))" strokeWidth={2} strokeDasharray="3 6" />
               <text x={toScreen(s.range, 0)[0]} y={height - bottom - 8} textAnchor="end" fontSize={14} fill="rgb(var(--muted))">
@@ -218,7 +222,10 @@ export function ProjectileMotion() {
             Launch
           </Button>
           {trails.length > 0 && (
-            <Button variant="ghost" size="sm" className="w-full" onClick={() => setTrails([])}>
+            <Button variant="ghost" size="sm" className="w-full" onClick={() => {
+                setTrails([]);
+                lastShotRef.current = null;
+              }}>
               Clear earlier flights
             </Button>
           )}
