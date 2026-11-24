@@ -3,6 +3,19 @@ import { markNumerical } from '../src/lib/marking';
 type Case = { response: string; expected: string; want: 'correct' | 'unit' | 'wrong'; why: string };
 
 const cases: Case[] = [
+  // --- prefixes and rounding (added) --------------------------------------
+  { response: '1.5 kN', expected: '1500 N', want: 'correct', why: 'kilo prefix' },
+  { response: '250 mm', expected: '0.25 m', want: 'correct', why: 'milli prefix on metre' },
+  { response: '25 cm', expected: '0.25 m', want: 'correct', why: 'centi prefix' },
+  { response: '2500 g', expected: '2.5 kg', want: 'correct', why: 'grams for kilograms' },
+  { response: '0.5 kW', expected: '500 W', want: 'correct', why: 'kilowatt' },
+  { response: '1.5 kN', expected: '15 N', want: 'wrong', why: 'prefix applied, value wrong' },
+  { response: '4.9 m/s', expected: '4.93 m/s', want: 'correct', why: '2 s.f. rounding' },
+  { response: '5 m/s', expected: '4.93 m/s', want: 'wrong', why: '1 s.f. is too coarse' },
+  { response: '0.33 A', expected: '0.333 A', want: 'correct', why: '2 s.f.' },
+  { response: '2.2 Ω', expected: '2.17 Ω', want: 'correct', why: 'rounded 2 s.f.' },
+  { response: '15 cm2', expected: '0.0015 m²', want: 'correct', why: 'cm² to m²' },
+
   // --- the reported failures ---------------------------------------------
   { response: '150000 Pa', expected: '150 000 Pa (150 kPa)', want: 'correct', why: 'model answer carries an equivalent in brackets' },
   { response: '150 kPa', expected: '150 000 Pa (150 kPa)', want: 'correct', why: 'the bracketed equivalent is also right' },

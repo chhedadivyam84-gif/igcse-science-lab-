@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { Layers, RotateCcw } from 'lucide-react';
+import { Layers, Loader2, RotateCcw, Sparkles } from 'lucide-react';
 
 import { Badge, Button, EmptyState, ErrorState, Panel, ProgressBar, Select, Skeleton } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -26,12 +26,16 @@ const RATINGS = [
   { value: 'easy', label: 'Easy', hint: 'Instant — leave it longer', tone: 'border-positive/40 hover:bg-positive/10' },
 ] as const;
 
+type SubtopicOption = { id: string; number: string; title: string; subject: string };
+
 export function FlashcardDeck({
   initialSubject,
   initialSubtopicId,
+  subtopics = [],
 }: {
   initialSubject?: string;
   initialSubtopicId?: string;
+  subtopics?: SubtopicOption[];
 }) {
   const [subject, setSubject] = useState(initialSubject ?? '');
   const [difficulty, setDifficulty] = useState('');
@@ -107,6 +111,29 @@ export function FlashcardDeck({
     }
   }
 
+  const maker = (
+    <AiCardMaker
+      subtopics={subtopics}
+      initialSubject={subject || initialSubject || ''}
+      initialSubtopicId={initialSubtopicId}
+      onCards={(fresh) => {
+        setError(null);
+        setCards(fresh);
+        setIndex(0);
+        setFlipped(false);
+        setReviewed([]);
+      }}
+    />
+  );
+
+  return (
+    <div className="space-y-6">
+      {maker}
+      {renderDeck()}
+    </div>
+  );
+
+  function renderDeck() {
   if (error) return <ErrorState description={error} onRetry={load} />;
   if (cards === null) return <Skeleton className="h-80 w-full" />;
 
@@ -255,5 +282,134 @@ export function FlashcardDeck({
         </p>
       )}
     </div>
+  );
+  }
+}
+
+/**
+ * "Make new cards with AI": a fresh 60-card set for one subtopic, never
+ * repeating what the deck already holds. The new cards are studied straight
+ * away and stay in the deck for spaced repetition.
+ */
+function AiCardMaker({
+  subtopics,
+  initialSubject,
+  initialSubtopicId,
+  onCards,
+}: {
+  subtopics: SubtopicOption[];
+  initialSubject: string;
+  initialSubtopicId?: string;
+  onCards: (cards: Card[]) => void;
+}) {
+  const startSubject =
+    subtopics.find((s) => s.id === initialSubtopicId)?.subject || initialSubject || subtopics[0]?.subject || 'physics';
+  const [subject, setSubject] = useState(startSubject);
+  const inSubject = subtopics.filter((s) => s.subject === subject);
+  const [subtopicId, setSubtopicId] = useState(initialSubtopicId ?? inSubject[0]?.id ?? '');
+  const [focus, setFocus] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [note, setNote] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    if (!inSubject.some((s) => s.id === subtopicId)) setSubtopicId(inSubject[0]?.id ?? '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subject]);
+
+  useEffect(() => {
+    if (!busy) return;
+    setSeconds(0);
+    const timer = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, [busy]);
+
+  async function generate() {
+    if (!subtopicId || busy) return;
+    setBusy(true);
+    setNote(null);
+    try {
+      const response = await fetch('/api/flashcards/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subtopicId, focus: focus.trim() || undefined, count: 60 }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setNote({ tone: 'error', text: data.error ?? 'Could not make cards right now.' });
+        return;
+      }
+      const picked = subtopics.find((s) => s.id === subtopicId);
+      setNote({
+        tone: 'ok',
+        text: `${data.added} new cards added to ${picked?.number} ${picked?.title}. This topic's deck now has ${data.deckSize} cards. Ask again any time for a different set.`,
+      });
+      onCards(data.cards as Card[]);
+    } catch {
+      setNote({ tone: 'error', text: 'Lost connection while making the cards.' });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!subtopics.length) return null;
+
+  return (
+    <Panel>
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-accent" />
+        <p className="text-sm font-semibold text-ink">Make 60 new flashcards with AI</p>
+        <Badge tone="accent">Pro</Badge>
+      </div>
+      <p className="mt-1 text-sm text-ink-muted">
+        Pick a topic and NOVA writes a fresh set every time — never repeating cards already in that topic.
+      </p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-[10rem_1fr]">
+        <Select value={subject} onChange={(e) => setSubject(e.target.value)} aria-label="Subject for new cards">
+          {ALL_SUBJECTS.filter(({ slug }) => subtopics.some((s) => s.subject === slug)).map(({ slug, display }) => (
+            <option key={slug} value={slug}>
+              {display.name}
+            </option>
+          ))}
+        </Select>
+        <Select value={subtopicId} onChange={(e) => setSubtopicId(e.target.value)} aria-label="Topic for new cards">
+          {inSubject.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.number} {s.title}
+            </option>
+          ))}
+        </Select>
+      </div>
+      <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+        <input
+          value={focus}
+          onChange={(e) => setFocus(e.target.value)}
+          placeholder="Optional focus, e.g. transformers only"
+          maxLength={160}
+          className="h-10 flex-1 rounded-control border border-line bg-surface px-3 text-sm text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none"
+        />
+        <Button variant="primary" onClick={generate} disabled={busy || !subtopicId}>
+          {busy ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Writing cards… {seconds}s
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4" /> Make 60 cards
+            </>
+          )}
+        </Button>
+      </div>
+      {note && (
+        <p className={cn('mt-3 text-sm', note.tone === 'ok' ? 'text-positive' : 'text-negative')}>
+          {note.text}{' '}
+          {note.tone === 'error' && /pro|plan|upgrade|subscri/i.test(note.text) && (
+            <Link href="/pricing" className="font-medium text-accent underline-offset-2 hover:underline">
+              See Pro
+            </Link>
+          )}
+        </p>
+      )}
+    </Panel>
   );
 }

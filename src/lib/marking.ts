@@ -182,6 +182,66 @@ function looselyEqualUnit(a: string, b: string): boolean {
   return letters(a) === letters(b);
 }
 
+const PREFIX: Record<string, number> = { k: 1e3, m: 1e-3, c: 1e-2, µ: 1e-6, μ: 1e-6, u: 1e-6, n: 1e-9, g: 1e9, M: 1e6 };
+
+/**
+ * If `given` is `expected` with an SI prefix on exactly one token (kN for N,
+ * mm for m, cm³ for m³, g for kg…), the factor that converts the given value
+ * into the expected unit. "1.5 kN" for "1500 N" and "250 mm" for "0.25 m" are
+ * right answers, not unit errors.
+ */
+function prefixFactor(given: string, expected: string): number | null {
+  const g = given.split(' ');
+  const e = expected.split(' ');
+  if (!given || !expected || g.length !== e.length) return null;
+  let factor = 1;
+  let changed = 0;
+  for (let i = 0; i < g.length; i++) {
+    if (g[i] === e[i]) continue;
+    const gm = g[i].match(/^(.+)\^(-?\d+)$/);
+    const em = e[i].match(/^(.+)\^(-?\d+)$/);
+    if (!gm || !em || gm[2] !== em[2]) return null;
+    const power = Number(gm[2]);
+    const [gb, eb] = [gm[1], em[1]];
+    // given has a prefix the expected lacks (kN vs N), or the reverse (g vs kg)
+    let f: number | null = null;
+    if (gb.length === eb.length + 1 && gb.endsWith(eb) && PREFIX[gb[0]] !== undefined) f = PREFIX[gb[0]];
+    else if (eb.length === gb.length + 1 && eb.endsWith(gb) && PREFIX[eb[0]] !== undefined) f = 1 / PREFIX[eb[0]];
+    else if (gb.length === eb.length && gb.length >= 2 && gb.slice(1) === eb.slice(1) && PREFIX[gb[0]] && PREFIX[eb[0]])
+      f = PREFIX[gb[0]] / PREFIX[eb[0]];
+    if (f === null) return null;
+    factor *= Math.pow(f, power);
+    changed++;
+  }
+  return changed ? factor : null;
+}
+
+/** Significant figures the student actually wrote, e.g. "4.90" → 3. */
+function figuresWritten(response: string): number {
+  const m = normalise(response).match(/-?(\d+(?:\.\d+)?)/);
+  if (!m) return 0;
+  const digits = m[1].replace('.', '').replace(/^0+/, '');
+  return Math.max(1, digits.length);
+}
+
+/**
+ * Value matches within tolerance, or is the expected value correctly rounded
+ * to the figures the student gave (at least 2) — "4.9" for 4.93 is fine,
+ * "5" is not.
+ */
+function valueMatches(given: number, expected: number, figures: number): boolean {
+  // One significant figure is only right when it is the exact value
+  // ("3e8" for 3.0 × 10⁸), never a rounding of 4.93 to "5".
+  if (figures === 1) return Math.abs(given - expected) <= Math.max(Math.abs(expected) * 1e-9, 1e-12);
+  const tolerance = Math.max(Math.abs(expected) * TOLERANCE, 1e-9);
+  if (Math.abs(given - expected) <= tolerance) return true;
+  if (figures >= 2 && expected !== 0) {
+    const rounded = Number(expected.toPrecision(Math.min(figures, 15)));
+    return Math.abs(given - rounded) <= Math.abs(rounded) * 1e-9;
+  }
+  return false;
+}
+
 export function markNumerical(response: string, expected: string): NumericMark {
   // Both sides are split the same way. A student who types the model answer
   // exactly — including an equivalent in brackets — must be marked correct,
@@ -203,14 +263,25 @@ export function markNumerical(response: string, expected: string): NumericMark {
   let matchedWithUnit = false;
   let anyUnitExpected = false;
 
+  const figures = figuresWritten(response);
   for (const form of forms) {
-    const tolerance = Math.max(Math.abs(form.value as number) * TOLERANCE, 1e-9);
     for (const candidate of givenForms.length ? givenForms : [given]) {
       if (candidate.value === null) continue;
-      if (Math.abs(candidate.value - (form.value as number)) > tolerance) continue;
-      numberCorrect = true;
       if (form.unit) anyUnitExpected = true;
-      if (!form.unit || form.unit === candidate.unit || looselyEqualUnit(form.unit, candidate.unit)) {
+
+      // Same unit (or no unit expected): compare the values directly.
+      if (valueMatches(candidate.value, form.value as number, figures)) {
+        numberCorrect = true;
+        if (!form.unit || form.unit === candidate.unit || looselyEqualUnit(form.unit, candidate.unit)) {
+          matchedWithUnit = true;
+          break;
+        }
+      }
+
+      // Same quantity in a prefixed unit: convert, then compare.
+      const factor = prefixFactor(candidate.unit, form.unit);
+      if (factor !== null && valueMatches(candidate.value * factor, form.value as number, 0)) {
+        numberCorrect = true;
         matchedWithUnit = true;
         break;
       }

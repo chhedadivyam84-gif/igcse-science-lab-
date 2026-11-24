@@ -34,6 +34,7 @@ type Marked = {
   markScheme: string[];
   explanation: string;
   unitProblem?: boolean;
+  aiMarking?: { points: { text: string; met: boolean; comment?: string }[]; feedback: string } | null;
   options?: { id: string; text: string; why?: string }[];
   mistakeCategory?: MistakeCategory | null;
   subtopic?: { id: string; number: string; title: string; slug: string } | null;
@@ -467,6 +468,27 @@ export function QuizRunner({
               <span className="text-ink-muted">Answer: </span>
               <span className="font-medium text-ink">{marked.answer}</span>
             </p>
+          )}
+
+          {marked.aiMarking && (
+            <div className="mt-4 rounded-card border border-line bg-surface-raised/40 p-3.5">
+              <p className="text-sm font-medium text-ink">Examiner marking</p>
+              <ul className="mt-2 space-y-1.5">
+                {marked.aiMarking.points.map((point, i) => (
+                  <li key={i} className="flex gap-2 text-sm">
+                    <span className={point.met ? 'text-positive' : 'text-negative'} aria-label={point.met ? 'awarded' : 'not awarded'}>
+                      {point.met ? '✓' : '✗'}
+                    </span>
+                    <span className="text-ink-muted">
+                      {point.text}
+                      {point.comment && <span className="block text-xs text-ink-faint">{point.comment}</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {marked.aiMarking.feedback && <p className="mt-3 text-sm text-ink">{marked.aiMarking.feedback}</p>}
+              <p className="mt-2 text-xs text-ink-faint">Marked by AI against the mark scheme.</p>
+            </div>
           )}
 
           <div className="prose-science mt-3">

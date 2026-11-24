@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { getSessionUser } from '@/lib/auth';
+import { db } from '@/lib/db';
 import { FlashcardDeck } from '@/components/flashcards/FlashcardDeck';
 
 export const metadata: Metadata = {
@@ -20,6 +21,15 @@ export default async function FlashcardsPage({
 
   const { subject, subtopic } = await searchParams;
 
+  // Every subtopic, for the "make new cards with AI" picker.
+  const subtopics = (
+    await db.subtopic.findMany({
+      select: { id: true, number: true, title: true, topic: { select: { version: { select: { subject: { select: { slug: true } } } } } } },
+    })
+  )
+    .map((s) => ({ id: s.id, number: s.number, title: s.title, subject: s.topic.version.subject.slug }))
+    .sort((a, b) => a.subject.localeCompare(b.subject) || a.number.localeCompare(b.number, undefined, { numeric: true }));
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-6">
@@ -33,7 +43,7 @@ export default async function FlashcardsPage({
         </p>
       </header>
 
-      <FlashcardDeck initialSubject={subject} initialSubtopicId={subtopic} />
+      <FlashcardDeck initialSubject={subject} initialSubtopicId={subtopic} subtopics={subtopics} />
     </div>
   );
 }

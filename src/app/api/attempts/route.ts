@@ -5,6 +5,7 @@ import { requireUser } from '@/lib/auth';
 import { parseList, parseJson } from '@/lib/json';
 import { recordAttempt } from '@/lib/progress';
 import { markNumerical } from '@/lib/marking';
+import { markWritten, type WrittenMark } from '@/lib/ai/mark-written';
 import { MISTAKE_CATEGORIES, PRACTICE_MODES, type Difficulty, type MistakeCategory } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -36,8 +37,22 @@ export const POST = handleRoute('attempts', async (request) => {
   const markScheme = parseList<string>(question.markScheme);
   const options = parseJson<{ id: string; text: string; why?: string }[]>(question.options, []);
 
-  // --- written answers: the student marks against the scheme ---------------
+  // --- written answers: marked point by point against the scheme -----------
+  // The AI examiner marks first; only if it is unavailable does the student
+  // mark themselves.
+  let written: WrittenMark | null = null;
   if (!AUTO_MARKED.has(question.type) && body.selfMarks === undefined) {
+    written = await markWritten({
+      userId: user.id,
+      stem: question.stem,
+      answer: question.answer,
+      markScheme,
+      marks: question.marks,
+      response: body.response,
+    });
+  }
+
+  if (!AUTO_MARKED.has(question.type) && body.selfMarks === undefined && !written) {
     return ok({
       requiresSelfMark: true,
       marks: question.marks,
@@ -60,6 +75,9 @@ export const POST = handleRoute('attempts', async (request) => {
     isCorrect = result.correct;
     unitProblem = result.unitProblem;
     marksAwarded = isCorrect ? question.marks : result.numberCorrect ? Math.max(question.marks - 1, 1) : 0;
+  } else if (written) {
+    marksAwarded = written.marksAwarded;
+    isCorrect = marksAwarded >= question.marks;
   } else {
     marksAwarded = Math.min(body.selfMarks ?? 0, question.marks);
     isCorrect = marksAwarded >= question.marks;
@@ -95,6 +113,7 @@ export const POST = handleRoute('attempts', async (request) => {
     markScheme,
     explanation: question.explanation,
     unitProblem,
+    aiMarking: written ? { points: written.points, feedback: written.feedback } : null,
     // Now that the answer is committed, the distractor rationales are useful.
     options,
     mistakeCategory: mistake?.category ?? null,

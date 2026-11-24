@@ -45,6 +45,7 @@ export const FEATURES = [
   'question-generation',
   'voice',
   'image',
+  'flashcard-generation',
 ] as const;
 
 export type Feature = (typeof FEATURES)[number];
@@ -68,6 +69,7 @@ export const PREMIUM_FEATURES: ReadonlySet<Feature> = new Set<Feature>([
   'question-generation',
   'voice',
   'image',
+  'flashcard-generation',
 ]);
 
 export const FEATURE_META: Record<Feature, { label: string; blurb: string; href: string }> = {
@@ -82,6 +84,11 @@ export const FEATURE_META: Record<Feature, { label: string; blurb: string; href:
     label: 'Unlimited AI questions',
     blurb: 'Generate fresh practice beyond the authored bank',
     href: '/practice',
+  },
+  'flashcard-generation': {
+    label: 'AI flashcards',
+    blurb: '60 fresh flashcards on any topic, every time you ask',
+    href: '/flashcards',
   },
   image: {
     label: 'Image explanations',

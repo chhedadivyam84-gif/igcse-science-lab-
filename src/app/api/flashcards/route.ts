@@ -32,25 +32,42 @@ export const GET = handleRoute('flashcards', async (request) => {
     where.subtopic = { topic: { version: { subject: { slug: params.subject } } } };
   }
 
-  const cards = await db.flashcard.findMany({
-    where,
+  // Choose from the WHOLE deck (it grows into the thousands), then load only
+  // the chosen cards: due reviews first, then cards never seen, then the rest.
+  const ids = (await db.flashcard.findMany({ where, select: { id: true } })).map((c: { id: string }) => c.id);
+  const reviews = await db.flashcardReview.findMany({
+    where: { userId: user.id },
+    select: { flashcardId: true, dueOn: true },
+  });
+  const reviewOf = new Map(reviews.map((r: { flashcardId: string; dueOn: string }) => [r.flashcardId, r]));
+  const seed = Number(today.replace(/-/g, ''));
+  const dueIds = ids.filter((id: string) => {
+    const r = reviewOf.get(id);
+    return r && r.dueOn <= today;
+  });
+  const newIds = ids.filter((id: string) => !reviewOf.has(id));
+  const restIds = ids.filter((id: string) => {
+    const r = reviewOf.get(id);
+    return r && r.dueOn > today;
+  });
+  const pickedIds = [
+    ...seededShuffle(dueIds, seed),
+    ...seededShuffle(newIds, seed + 1),
+    ...seededShuffle(restIds, seed + 2),
+  ].slice(0, params.limit);
+
+  const rows = await db.flashcard.findMany({
+    where: { id: { in: pickedIds } },
     include: {
       // The subject comes along so the card can link back to its own lesson.
-      // Without it the client fell back to "physics", which 404s for every
-      // Biology, Maths and ICT card.
       subtopic: { include: { topic: { include: { version: { include: { subject: true } } } } } },
       reviews: { where: { userId: user.id } },
     },
-    take: 400,
   });
-
-  const due = cards.filter((card) => {
-    const review = card.reviews[0];
-    return !review || review.dueOn <= today;
-  });
-
-  const pool = due.length ? due : cards;
-  const selected = seededShuffle(pool, Number(today.replace(/-/g, ''))).slice(0, params.limit);
+  const order = new Map(pickedIds.map((id, i) => [id, i]));
+  const selected = [...rows].sort((x, y) => (order.get(x.id) ?? 0) - (order.get(y.id) ?? 0));
+  const due = { length: dueIds.length + newIds.length };
+  const cards = { length: ids.length };
 
   return ok({
     dueCount: due.length,

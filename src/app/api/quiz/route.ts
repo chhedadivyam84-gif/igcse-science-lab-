@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { SUBJECT_SLUGS } from '@/lib/types';
 import { db } from '@/lib/db';
 import { fail, handleRoute, ok } from '@/lib/api';
-import { requireUser } from '@/lib/auth';
+import { getSessionUser, requireUser } from '@/lib/auth';
 import { parseList, parseJson } from '@/lib/json';
 import { progressForUser } from '@/lib/progress';
 import { seededShuffle } from '@/lib/utils';
@@ -55,11 +55,34 @@ export const GET = handleRoute('quiz', async (request) => {
     where.subtopicId = { in: weak };
   }
 
-  const rows = await db.question.findMany({
-    where,
-    include: { subtopic: { include: { topic: true } }, subject: true },
-    take: 200,
-  });
+  // Sample from the WHOLE bank, not the first 200 rows: with thousands of
+  // questions, a fixed window meant students saw the same few hundred forever.
+  // Questions this student has not answered yet come first; once everything
+  // has been seen, any question can come back.
+  const ids = (await db.question.findMany({ where, select: { id: true } })).map((q: { id: string }) => q.id);
+  const session = await getSessionUser().catch(() => null);
+  const answered = session
+    ? new Set(
+        (
+          await db.questionAttempt.findMany({
+            where: { userId: session.id },
+            select: { questionId: true },
+            distinct: ['questionId'],
+          })
+        ).map((a: { questionId: string }) => a.questionId),
+      )
+    : new Set<string>();
+  const seed = Date.now() % 100000;
+  const fresh = seededShuffle(ids.filter((id: string) => !answered.has(id)), seed);
+  const seen = seededShuffle(ids.filter((id: string) => answered.has(id)), seed + 1);
+  const pickedIds = [...fresh, ...seen].slice(0, params.count);
+
+  const rows = pickedIds.length
+    ? await db.question.findMany({
+        where: { id: { in: pickedIds } },
+        include: { subtopic: { include: { topic: true } }, subject: true },
+      })
+    : [];
 
   if (!rows.length) {
     return ok({
@@ -69,7 +92,8 @@ export const GET = handleRoute('quiz', async (request) => {
     });
   }
 
-  const shuffled = seededShuffle(rows, Date.now() % 100000).slice(0, params.count);
+  const order = new Map(pickedIds.map((id, i) => [id, i]));
+  const shuffled = [...rows].sort((x, y) => (order.get(x.id) ?? 0) - (order.get(y.id) ?? 0));
 
   return ok({
     questions: shuffled.map((q) => ({
