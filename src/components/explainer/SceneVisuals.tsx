@@ -12,10 +12,23 @@ import type { GraphShape, StoryboardScene, SubjectSlug } from '@/lib/types';
  * the picture always matches what is being said.
  */
 
-type Props = { scene: StoryboardScene; progress: number; index: number; subject: SubjectSlug };
+type Props = {
+  scene: StoryboardScene;
+  progress: number;
+  index: number;
+  subject: SubjectSlug;
+  /** Vertical 9:16 layout for phones, with text sized to stay readable. */
+  portrait?: boolean;
+  /** Label text multiplier, used when a landscape scene is shrunk into portrait. */
+  ts?: number;
+  /** Hide side labels (portrait shows them as chips instead). */
+  bare?: boolean;
+};
 
 const W = 1280;
 const H = 720;
+const PW = 720;
+const PH = 1280;
 const DISPLAY = { fontFamily: 'var(--font-video), var(--font-sans), sans-serif' };
 const BODY = { fontFamily: 'var(--font-video-body), var(--font-sans), sans-serif' };
 
@@ -54,6 +67,7 @@ const SECOND = 'rgb(var(--positive, 52 211 153))';
 
 export function SceneVisual(props: Props) {
   const { scene } = props;
+  if (props.portrait) return <PortraitScene {...props} />;
 
   if (scene.visual === 'diagram' && scene.diagram) {
     return (
@@ -114,7 +128,9 @@ function Body(props: Props) {
 
 // --- shared layers ----------------------------------------------------------
 
-function Backdrop({ progress, subject, index }: Props) {
+function Backdrop({ progress, subject, index, portrait }: Props) {
+  const w = portrait ? PW : W;
+  const h = portrait ? PH : H;
   const c = color(subject);
   const drift = progress * 60;
   return (
@@ -139,10 +155,10 @@ function Backdrop({ progress, subject, index }: Props) {
           </feMerge>
         </filter>
       </defs>
-      <rect width={W} height={H} fill="#070b14" />
-      <rect width={W} height={H} fill="url(#grid)" />
-      <circle cx={180 + drift + (index % 2) * 700} cy={120 + drift * 0.6} r={420} fill="url(#glowA)" />
-      <circle cx={1100 - drift} cy={640 - drift * 0.4} r={380} fill="url(#glowB)" />
+      <rect width={w} height={h} fill="#070b14" />
+      <rect width={w} height={h} fill="url(#grid)" />
+      <circle cx={(180 + drift + (index % 2) * 700) * (w / W)} cy={120 + drift * 0.6} r={420} fill="url(#glowA)" />
+      <circle cx={w - 180 - drift} cy={h - 80 - drift * 0.4} r={380} fill="url(#glowB)" />
     </g>
   );
 }
@@ -424,7 +440,7 @@ function curve(shape: GraphShape, t: number): number {
   }
 }
 
-function Graph({ scene, progress, subject }: Props) {
+function Graph({ scene, progress, subject, ts = 1, bare }: Props) {
   const c = color(subject);
   const g = scene.graph!;
   const ox = 220;
@@ -447,13 +463,13 @@ function Graph({ scene, progress, subject }: Props) {
       ))}
       <line x1={ox} y1={oy} x2={ox} y2={oy - (gh + 30) * axes} stroke="white" strokeOpacity={0.7} strokeWidth={3} />
       <line x1={ox} y1={oy} x2={ox + (gw + 30) * axes} y2={oy} stroke="white" strokeOpacity={0.7} strokeWidth={3} />
-      <text x={ox + gw / 2} y={oy + 52} textAnchor="middle" fontSize={24} fill="rgb(255 255 255 / 0.85)" opacity={axes} style={BODY}>
+      <text x={ox + gw / 2} y={oy + 52} textAnchor="middle" fontSize={24 * ts} fill="rgb(255 255 255 / 0.85)" opacity={axes} style={BODY}>
         {g.xLabel}
       </text>
       <text
         transform={`translate(${ox - 44} ${oy - gh / 2}) rotate(-90)`}
         textAnchor="middle"
-        fontSize={24}
+        fontSize={24 * ts}
         fill="rgb(255 255 255 / 0.85)"
         opacity={axes}
         style={BODY}
@@ -473,7 +489,7 @@ function Graph({ scene, progress, subject }: Props) {
       {g.note && (
         <g opacity={seg(progress, 0.75, 0.88)}>
           <rect x={ox + gw - 420} y={150} width={430} height={56} rx={14} fill="rgb(255 255 255 / 0.08)" stroke={c} strokeOpacity={0.6} />
-          <text x={ox + gw - 205} y={186} textAnchor="middle" fontSize={21} fill="white" style={BODY}>
+          <text x={ox + gw - 205} y={186} textAnchor="middle" fontSize={21 * ts} fill="white" style={BODY}>
             {g.note.length > 40 ? `${g.note.slice(0, 39)}…` : g.note}
           </text>
         </g>
@@ -530,7 +546,7 @@ function Compare({ scene, progress, subject }: Props) {
   );
 }
 
-function Particles({ scene, progress, subject }: Props) {
+function Particles({ scene, progress, subject, ts = 1, bare }: Props) {
   const c = color(subject);
   const mode = scene.particleMode ?? 'gas';
   const box = { x: 180, y: 160, w: 640, h: 420 };
@@ -587,11 +603,11 @@ function Particles({ scene, progress, subject }: Props) {
       {parts.map((p, i) => (
         <circle key={i} cx={p.x} cy={p.y} r={r} fill={p.col} opacity={0.92} />
       ))}
-      <text x={box.x + box.w + 30} y={box.y + 40} fontSize={22} letterSpacing={3} fill={c} style={BODY} fontWeight={700}>
+      {!bare && <text x={box.x + box.w + 30} y={box.y + 40} fontSize={22 * ts} letterSpacing={3} fill={c} style={BODY} fontWeight={700}>
         {mode.toUpperCase()}
-      </text>
-      {(scene.labels ?? []).slice(0, 4).map((l, i) => (
-        <text key={i} x={box.x + box.w + 30} y={box.y + 90 + i * 40} fontSize={22} fill="rgb(255 255 255 / 0.8)" opacity={seg(progress, 0.3 + i * 0.1, 0.4 + i * 0.1)} style={BODY}>
+      </text>}
+      {!bare && (scene.labels ?? []).slice(0, 4).map((l, i) => (
+        <text key={i} x={box.x + box.w + 30} y={box.y + 90 + i * 40} fontSize={22 * ts} fill="rgb(255 255 255 / 0.8)" opacity={seg(progress, 0.3 + i * 0.1, 0.4 + i * 0.1)} style={BODY}>
           {`• ${l}`}
         </text>
       ))}
@@ -599,7 +615,7 @@ function Particles({ scene, progress, subject }: Props) {
   );
 }
 
-function Wave({ scene, progress, subject }: Props) {
+function Wave({ scene, progress, subject, ts = 1, bare }: Props) {
   const c = color(subject);
   const longitudinal = scene.waveMode === 'longitudinal';
   const t = progress * 6;
@@ -620,15 +636,15 @@ function Wave({ scene, progress, subject }: Props) {
           <line key={i} x1={x} x2={x} y1={mid - 110} y2={mid + 110} stroke={c} strokeWidth={4} strokeLinecap="round" />
         ))}
         <g opacity={seg(progress, 0.35, 0.5)}>
-          <text x={x0 + lam * 0.25 + 20} y={mid - 140} textAnchor="middle" fontSize={22} fill="white" style={BODY}>
+          <text x={x0 + lam * 0.25 + 20} y={mid - 140} textAnchor="middle" fontSize={22 * ts} fill="white" style={BODY}>
             compression
           </text>
-          <text x={x0 + lam * 0.75 + 20} y={mid + 160} textAnchor="middle" fontSize={22} fill="rgb(255 255 255 / 0.7)" style={BODY}>
+          <text x={x0 + lam * 0.75 + 20} y={mid + 160} textAnchor="middle" fontSize={22 * ts} fill="rgb(255 255 255 / 0.7)" style={BODY}>
             rarefaction
           </text>
         </g>
         <path d={`M${x0} ${mid + 200} H${x0 + 260}`} stroke="white" strokeOpacity={0.6} strokeWidth={3} opacity={seg(progress, 0.55, 0.7)} />
-        <text x={x0 + 280} y={mid + 208} fontSize={20} fill="rgb(255 255 255 / 0.7)" opacity={seg(progress, 0.55, 0.7)} style={BODY}>
+        <text x={x0 + 280} y={mid + 208} fontSize={20 * ts} fill="rgb(255 255 255 / 0.7)" opacity={seg(progress, 0.55, 0.7)} style={BODY}>
           direction of energy transfer →
         </text>
       </g>
@@ -651,13 +667,13 @@ function Wave({ scene, progress, subject }: Props) {
         <line x1={crest} x2={crest + lam} y1={mid - amp - 40} y2={mid - amp - 40} stroke="white" strokeWidth={2} />
         <line x1={crest} x2={crest} y1={mid - amp - 52} y2={mid - amp - 28} stroke="white" strokeWidth={2} />
         <line x1={crest + lam} x2={crest + lam} y1={mid - amp - 52} y2={mid - amp - 28} stroke="white" strokeWidth={2} />
-        <text x={crest + lam / 2} y={mid - amp - 58} textAnchor="middle" fontSize={22} fill="white" style={BODY}>
+        <text x={crest + lam / 2} y={mid - amp - 58} textAnchor="middle" fontSize={22 * ts} fill="white" style={BODY}>
           wavelength λ
         </text>
       </g>
       <g opacity={seg(progress, 0.5, 0.65)}>
         <line x1={x1 + 30} x2={x1 + 30} y1={mid} y2={mid - amp} stroke="white" strokeWidth={2} />
-        <text x={x1 + 44} y={mid - amp / 2} fontSize={22} fill="white" style={BODY}>
+        <text x={x1 + 44} y={mid - amp / 2} fontSize={22 * ts} fill="white" style={BODY}>
           amplitude
         </text>
       </g>
@@ -665,7 +681,7 @@ function Wave({ scene, progress, subject }: Props) {
   );
 }
 
-function Circuit({ scene, progress, subject }: Props) {
+function Circuit({ scene, progress, subject, ts = 1, bare }: Props) {
   const c = color(subject);
   const parallel = scene.circuitMode === 'parallel';
   const a = seg(progress, 0.02, 0.15);
@@ -717,12 +733,12 @@ function Circuit({ scene, progress, subject }: Props) {
         const [x, y] = along(flow + (i * loop) / 14, path);
         return <circle key={i} cx={x} cy={y} r={7} fill={c} filter="url(#soft)" />;
       })}
-      {labels.slice(0, 3).map((l, i) => (
-        <text key={i} x={R + 40} y={T + 30 + i * 44} fontSize={22} fill="rgb(255 255 255 / 0.85)" opacity={seg(progress, 0.3 + i * 0.1, 0.4 + i * 0.1)} style={BODY}>
+      {!bare && labels.slice(0, 3).map((l, i) => (
+        <text key={i} x={R + 40} y={T + 30 + i * 44} fontSize={22 * ts} fill="rgb(255 255 255 / 0.85)" opacity={seg(progress, 0.3 + i * 0.1, 0.4 + i * 0.1)} style={BODY}>
           {`• ${l}`}
         </text>
       ))}
-      <text x={L} y={B + 56} fontSize={20} letterSpacing={3} fill={c} style={BODY} fontWeight={700}>
+      <text x={L} y={B + 56} fontSize={20 * ts} letterSpacing={3} fill={c} style={BODY} fontWeight={700}>
         {parallel ? 'PARALLEL CIRCUIT' : 'SERIES CIRCUIT'}
       </text>
     </g>
@@ -758,6 +774,343 @@ function Summary({ scene, progress, subject }: Props) {
             />
             {lines.map((l, j) => (
               <text key={j} x={266} y={y + (lines.length === 1 ? 52 : 38 + j * 30)} fontSize={26} fill="white" style={BODY} fontWeight={500}>
+                {l}
+              </text>
+            ))}
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+// --- portrait (phones) --------------------------------------------------------
+
+const GRAPHIC = new Set(['graph', 'particles', 'wave', 'circuit']);
+
+function PortraitScene(props: Props) {
+  const { scene, progress } = props;
+
+  if (scene.visual === 'diagram' && scene.diagram) {
+    return (
+      <div className="relative aspect-[9/16] w-full overflow-hidden bg-[#070b14]">
+        <svg viewBox={`0 0 ${PW} ${PH}`} className="absolute inset-0 h-full w-full">
+          <Backdrop {...props} />
+          <PHeader {...props} />
+          <PCaption {...props} />
+        </svg>
+        <div
+          className="absolute inset-x-[5%] bottom-[20%] top-[20%] flex items-center justify-center rounded-2xl bg-white/95 p-2"
+          style={{ opacity: seg(progress, 0.05, 0.2) }}
+        >
+          <DiagramCanvas spec={scene.diagram} className="h-full w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <svg viewBox={`0 0 ${PW} ${PH}`} className="aspect-[9/16] h-auto w-full bg-[#070b14]" role="img" aria-label={scene.title}>
+      <Backdrop {...props} />
+      {scene.visual !== 'intro' && <PHeader {...props} />}
+      <PBody {...props} />
+      {scene.visual !== 'intro' && <PCaption {...props} />}
+    </svg>
+  );
+}
+
+function PBody(props: Props) {
+  const v = props.scene.visual;
+  if (GRAPHIC.has(v)) {
+    // The landscape animation's stage (x 100–1180, y 140–620) shrunk to the
+    // phone width, with its labels enlarged so they stay readable.
+    // Crop each animation to its own content so it fills the phone's width.
+    const crop: Record<string, [number, number, number, number]> = {
+      graph: [130, 1110, 130, 640],
+      particles: [170, 830, 150, 590],
+      wave: [90, 1250, 160, 620],
+      circuit: [250, 1030, 160, 620],
+    };
+    const [x0, x1, y0, y1] = crop[v];
+    const k = (PW - 40) / (x1 - x0);
+    const cy = 590;
+    const labels = props.scene.labels ?? [];
+    return (
+      <g>
+        <g transform={`translate(${20 - x0 * k} ${cy - ((y0 + y1) / 2) * k}) scale(${k})`}>
+          <Body {...props} portrait={false} ts={Math.min(1.8, 0.95 / k)} bare />
+        </g>
+        {labels.slice(0, 4).map((l, i) => {
+          const a = seg(props.progress, 0.3 + i * 0.1, 0.42 + i * 0.1);
+          return (
+            <g key={i} opacity={a} transform={`translate(60 ${900 + i * 62})`}>
+              <circle cx={10} cy={-9} r={8} fill={color(props.subject)} />
+              <text x={32} y={0} fontSize={28} fill="rgb(255 255 255 / 0.9)" style={BODY}>
+                {l}
+              </text>
+            </g>
+          );
+        })}
+      </g>
+    );
+  }
+  switch (v) {
+    case 'intro':
+      return <PIntro {...props} />;
+    case 'definition':
+      return <PDefinition {...props} />;
+    case 'equation':
+      return <PEquation {...props} />;
+    case 'process':
+      return <PProcess {...props} />;
+    case 'compare':
+      return <PCompare {...props} />;
+    default:
+      return <PSummary {...props} />;
+  }
+}
+
+function PHeader({ scene, progress, index, subject }: Props) {
+  const a = seg(progress, 0, 0.08);
+  const lines = wrap(scene.title, 24).slice(0, 2);
+  return (
+    <g opacity={a} transform={`translate(${(1 - a) * -24} 0)`}>
+      <rect x={48} y={90} width={7} height={40 + lines.length * 48} rx={3} fill={color(subject)} />
+      <text x={74} y={114} fontSize={22} letterSpacing={4} fill="rgb(255 255 255 / 0.55)" style={BODY} fontWeight={600}>
+        {`SCENE ${index + 1}`}
+      </text>
+      {lines.map((l, i) => (
+        <text key={i} x={74} y={162 + i * 48} fontSize={42} fill="white" style={DISPLAY} fontWeight={700}>
+          {l}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+function PCaption({ scene, progress }: Props) {
+  if (!scene.caption) return null;
+  const a = seg(progress, 0.12, 0.24);
+  const lines = wrap(scene.caption, 30).slice(0, 2);
+  const h = 36 + lines.length * 38;
+  return (
+    <g opacity={a} transform={`translate(0 ${(1 - a) * 16})`}>
+      <rect x={40} y={PH - 90 - h} width={PW - 80} height={h} rx={24} fill="rgb(255 255 255 / 0.08)" stroke="rgb(255 255 255 / 0.12)" />
+      {lines.map((l, i) => (
+        <text key={i} x={PW / 2} y={PH - 90 - h + 50 + i * 38} textAnchor="middle" fontSize={29} fill="rgb(255 255 255 / 0.95)" style={BODY} fontWeight={500}>
+          {l}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+function PIntro({ scene, progress, subject }: Props) {
+  const c = color(subject);
+  const lines = wrap(scene.title, 14).slice(0, 4);
+  const spin = progress * 90;
+  const top = 760;
+  return (
+    <g>
+      <g transform={`translate(${PW / 2} 450)`} opacity={seg(progress, 0, 0.15)}>
+        {[0, 1, 2].map((r) => (
+          <ellipse key={r} rx={170 + r * 38} ry={52 + r * 12} fill="none" stroke={c} strokeOpacity={0.5 - r * 0.12} strokeWidth={2.5}
+            transform={`rotate(${spin * (r % 2 ? -1 : 1) + r * 60})`} />
+        ))}
+        <circle r={40 + Math.sin(progress * 20) * 3} fill={c} filter="url(#soft)" />
+      </g>
+      {lines.map((line, li) => {
+        const k = clamp01((progress - 0.08 - li * 0.07) / 0.16);
+        return (
+          <text key={li} x={PW / 2} y={top + li * 80 + (1 - easeOut(k)) * 50} opacity={k} textAnchor="middle" fontSize={68} fontWeight={800} fill="white" style={DISPLAY}>
+            {line}
+          </text>
+        );
+      })}
+      <rect x={PW / 2 - 110 * seg(progress, 0.35, 0.55)} y={top + lines.length * 80 - 30} width={220 * seg(progress, 0.35, 0.55)} height={6} rx={3} fill={c} />
+      {scene.caption &&
+        wrap(scene.caption, 30).slice(0, 2).map((l, i) => (
+          <text key={i} x={PW / 2} y={top + lines.length * 80 + 30 + i * 40} textAnchor="middle" fontSize={30} fill="rgb(255 255 255 / 0.75)" opacity={seg(progress, 0.45, 0.6)} style={BODY}>
+            {l}
+          </text>
+        ))}
+    </g>
+  );
+}
+
+function PDefinition({ scene, progress, subject }: Props) {
+  const c = color(subject);
+  const def = scene.definition ?? '';
+  const typed = def.slice(0, Math.floor(seg(progress, 0.18, 0.7) * def.length));
+  const termLines = wrap(scene.term ?? '', 15).slice(0, 3);
+  const defLines = wrap(typed, 30);
+  const a = seg(progress, 0.04, 0.18);
+  const defTop = 420 + termLines.length * 70;
+  return (
+    <g>
+      <rect x={48} y={330} width={8} height={(defTop + 8 * 46 - 330) * seg(progress, 0.02, 0.2)} rx={4} fill={c} />
+      <text x={80} y={350} fontSize={22} letterSpacing={5} fill={c} opacity={a} style={BODY} fontWeight={700}>
+        KEY TERM
+      </text>
+      {termLines.map((l, i) => (
+        <text key={i} x={80 + (1 - a) * 40} y={420 + i * 70} opacity={a} fontSize={60} fontWeight={800} fill="white" style={DISPLAY}>
+          {l}
+        </text>
+      ))}
+      {defLines.map((line, i) => (
+        <text key={i} x={80} y={defTop + 20 + i * 48} fontSize={34} fill="rgb(255 255 255 / 0.9)" style={BODY}>
+          {line}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+function PEquation({ scene, progress, subject }: Props) {
+  const c = color(subject);
+  const eq = scene.equation!;
+  const a = seg(progress, 0.05, 0.25);
+  const size = eq.expression.length > 16 ? 52 : eq.expression.length > 10 ? 70 : 92;
+  return (
+    <g>
+      <g opacity={a} transform={`translate(${PW / 2} 380) scale(${0.85 + 0.15 * a})`}>
+        <rect x={-320} y={-90} width={640} height={160} rx={28} fill="rgb(255 255 255 / 0.05)" stroke={c} strokeOpacity={0.5} />
+        <text textAnchor="middle" y={size * 0.3} fontSize={size} fontWeight={700} fill="white" style={DISPLAY} filter="url(#soft)">
+          {eq.expression}
+        </text>
+      </g>
+      {eq.legend.map((item, i) => {
+        const b = seg(progress, 0.3 + i * 0.08, 0.42 + i * 0.08);
+        return (
+          <g key={i} opacity={b} transform={`translate(${40 + (1 - b) * 40} ${520 + i * 128})`}>
+            <rect width={PW - 80} height={110} rx={22} fill="rgb(255 255 255 / 0.06)" stroke="rgb(255 255 255 / 0.12)" />
+            <text x={70} y={72} textAnchor="middle" fontSize={50} fontWeight={700} fill={c} style={DISPLAY}>
+              {item.symbol}
+            </text>
+            <text x={140} y={item.unit ? 52 : 66} fontSize={30} fill="white" style={BODY}>
+              {item.meaning.length > 28 ? `${item.meaning.slice(0, 27)}…` : item.meaning}
+            </text>
+            {item.unit && (
+              <text x={140} y={88} fontSize={24} fill="rgb(255 255 255 / 0.6)" style={BODY}>
+                {`unit: ${item.unit}`}
+              </text>
+            )}
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+function PProcess({ scene, progress, subject }: Props) {
+  const c = color(subject);
+  const steps = scene.steps ?? [];
+  const n = steps.length;
+  const gap = 34;
+  const cardH = Math.min(170, (820 - gap * (n - 1)) / n);
+  const active = Math.min(n - 1, Math.floor(clamp01((progress - 0.05) / 0.85) * n));
+  return (
+    <g>
+      {steps.map((step, i) => {
+        const appear = seg(progress, 0.03 + i * 0.05, 0.15 + i * 0.05);
+        const isActive = i === active;
+        const done = i < active;
+        const y = 300 + i * (cardH + gap);
+        const lines = wrap(step, 27).slice(0, cardH > 140 ? 3 : 2);
+        return (
+          <g key={i} opacity={appear} transform={`translate(${40 + (1 - appear) * 40 + (isActive ? 0 : 12)} ${y})`}>
+            <rect width={PW - 80 - (isActive ? 0 : 24)} height={cardH} rx={24}
+              fill={isActive ? 'rgb(255 255 255 / 0.1)' : 'rgb(255 255 255 / 0.04)'}
+              stroke={isActive ? c : 'rgb(255 255 255 / 0.12)'} strokeWidth={isActive ? 3 : 1.5} />
+            <circle cx={56} cy={cardH / 2} r={28} fill={done || isActive ? c : 'rgb(255 255 255 / 0.1)'} />
+            <text x={56} y={cardH / 2 + 10} textAnchor="middle" fontSize={28} fontWeight={700} fill="white" style={DISPLAY}>
+              {done ? '✓' : i + 1}
+            </text>
+            {lines.map((line, j) => (
+              <text key={j} x={110} y={cardH / 2 + 11 - ((lines.length - 1) * 38) / 2 + j * 38} fontSize={30}
+                fill={isActive ? 'white' : 'rgb(255 255 255 / 0.72)'} style={BODY} fontWeight={isActive ? 600 : 400}>
+                {line}
+              </text>
+            ))}
+          </g>
+        );
+      })}
+      {steps.slice(0, -1).map((_, i) => {
+        const y = 300 + (i + 1) * cardH + i * gap + 4;
+        const on = i < active;
+        return <line key={i} x1={96} x2={96} y1={y} y2={y + gap - 8} stroke={on ? c : 'rgb(255 255 255 / 0.25)'} strokeWidth={4} strokeLinecap="round" />;
+      })}
+    </g>
+  );
+}
+
+function PCompare({ scene, progress, subject }: Props) {
+  const sides = [
+    { ...scene.compare!.left, col: color(subject) },
+    { ...scene.compare!.right, col: SECOND },
+  ];
+  const cardH = (pts: number) => 100 + Math.min(4, pts) * 74;
+  const topH = cardH(sides[0].points.length);
+  const vs = backOut(clamp01((progress - 0.15) / 0.15));
+  return (
+    <g>
+      {sides.map((side, s) => {
+        const a = seg(progress, 0.03 + s * 0.08, 0.2 + s * 0.08);
+        const y = s === 0 ? 300 : 300 + topH + 70;
+        const h = cardH(side.points.length);
+        return (
+          <g key={s} opacity={a} transform={`translate(${40 + (s ? 1 : -1) * (1 - a) * 60} ${y})`}>
+            <rect width={PW - 80} height={h} rx={26} fill="rgb(255 255 255 / 0.05)" stroke={side.col} strokeOpacity={0.7} strokeWidth={2} />
+            <text x={36} y={60} fontSize={38} fontWeight={700} fill={side.col} style={DISPLAY}>
+              {side.title}
+            </text>
+            {side.points.slice(0, 4).map((pt, i) => {
+              const b = seg(progress, 0.25 + i * 0.1 + s * 0.05, 0.35 + i * 0.1 + s * 0.05);
+              return (
+                <g key={i} opacity={b}>
+                  <circle cx={46} cy={118 + i * 74} r={8} fill={side.col} />
+                  <text x={72} y={128 + i * 74} fontSize={29} fill="white" style={BODY}>
+                    {pt.length > 32 ? `${pt.slice(0, 31)}…` : pt}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+        );
+      })}
+      <g transform={`translate(${PW / 2} ${300 + topH + 35}) scale(${clamp01(vs)})`}>
+        <circle r={36} fill="#070b14" stroke="white" strokeOpacity={0.5} strokeWidth={2} />
+        <text y={10} textAnchor="middle" fontSize={26} fontWeight={800} fill="white" style={DISPLAY}>
+          VS
+        </text>
+      </g>
+    </g>
+  );
+}
+
+function PSummary({ scene, progress, subject }: Props) {
+  const c = color(subject);
+  let y = 330;
+  return (
+    <g>
+      <text x={PW / 2} y={300} textAnchor="middle" fontSize={24} letterSpacing={6} fill={c} opacity={seg(progress, 0, 0.12)} style={BODY} fontWeight={700}>
+        WHAT TO REMEMBER
+      </text>
+      {scene.bullets.slice(0, 4).map((bullet, i) => {
+        const a = seg(progress, 0.08 + i * 0.12, 0.22 + i * 0.12);
+        const tick = seg(progress, 0.16 + i * 0.12, 0.28 + i * 0.12);
+        const lines = wrap(bullet, 26).slice(0, 3);
+        const h = 44 + lines.length * 40;
+        const top = y;
+        y += h + 22;
+        return (
+          <g key={i} opacity={a} transform={`translate(${(1 - a) * -40} 0)`}>
+            <rect x={40} y={top} width={PW - 80} height={h} rx={22} fill="rgb(255 255 255 / 0.05)" stroke="rgb(255 255 255 / 0.1)" />
+            <circle cx={92} cy={top + h / 2} r={24} fill={c} fillOpacity={0.25} stroke={c} strokeWidth={2} />
+            <path d={`M${79} ${top + h / 2} l9 9 l17 -19`} fill="none" stroke="white" strokeWidth={4.5} strokeLinecap="round" strokeLinejoin="round"
+              strokeDasharray={46} strokeDashoffset={46 * (1 - tick)} />
+            {lines.map((l, j) => (
+              <text key={j} x={136} y={top + h / 2 + 11 - ((lines.length - 1) * 40) / 2 + j * 40} fontSize={31} fill="white" style={BODY} fontWeight={500}>
                 {l}
               </text>
             ))}

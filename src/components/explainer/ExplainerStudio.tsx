@@ -38,6 +38,14 @@ export function ExplainerStudio({
   const [durations, setDurations] = useState<number[]>([]);
   const audioSceneRef = useRef<number | null>(null);
   const playerRef = useRef<HTMLDivElement | null>(null);
+  const [phone, setPhone] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 640px)');
+    const update = () => setPhone(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
 
   const rafRef = useRef<number | null>(null);
   const lastTickRef = useRef<number>(0);
@@ -270,8 +278,11 @@ export function ExplainerStudio({
               )}
             </div>
 
-            <div ref={playerRef} className="relative bg-black">
-              <SceneVisual scene={scene} progress={progress} index={sceneIndex} subject={storyboard.subject} />
+            <div
+              ref={playerRef}
+              className={cn('relative overflow-hidden bg-black', phone ? 'mx-auto max-h-[78vh] max-w-[calc(78vh*9/16)] rounded-2xl' : '')}
+            >
+              <SceneVisual scene={scene} progress={progress} index={sceneIndex} subject={storyboard.subject} portrait={phone} />
               {!playing && (
                 <button
                   type="button"
