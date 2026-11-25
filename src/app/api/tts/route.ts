@@ -7,22 +7,15 @@ import { GoogleProvider } from '@/lib/ai/google';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/**
- * Narration for the explainer studio.
- *
- * One request voices every scene of a storyboard, so it counts as a single
- * explainer rather than eating the AI quota once per scene. Scenes are voiced
- * a few at a time: firing all of them at once trips Gemini's rate limit.
- */
+/** Narration for the explainer studio: the whole storyboard as one track. */
 const schema = z.object({
-  texts: z.array(z.string().trim().min(1).max(700)).min(1).max(8),
+  texts: z.array(z.string().trim().min(1).max(700)).min(1).max(10),
 });
 
 const MODEL = () => process.env.AI_TTS_MODEL?.trim() || 'gemini-3.1-flash-tts-preview';
 const VOICE = () => process.env.AI_TTS_VOICE?.trim() || 'Charon';
 const STYLE =
   'Read this aloud as an engaging, warm science teacher narrating an explainer video: clear British English, natural rhythm, steady pace, slight emphasis on key terms. Read only the text below.';
-const CONCURRENCY = 3;
 
 export const POST = handleRoute('tts', async (request) => {
   await requireFeature('explainer');
@@ -31,25 +24,22 @@ export const POST = handleRoute('tts', async (request) => {
   const keys = googleApiKeys();
   if (!keys.length) return fail('No Google AI key is set, so the narrator voice is unavailable.', 503, { code: 'tts_unavailable' });
 
+  // One request for the whole script, played as one continuous track. Per-
+  // scene clips hit the TTS model's tiny per-minute quota (later scenes came
+  // back silent), and phones only let a sound start from a tap — a single
+  // track started by the Play tap keeps narrating to the end.
   const voice = new GoogleProvider(keys, MODEL());
-  const audio: (string | null)[] = new Array(body.texts.length).fill(null);
-
-  let next = 0;
-  async function worker() {
-    while (next < body.texts.length) {
-      const index = next++;
-      try {
-        const wav = await voice.speak(body.texts[index], VOICE(), STYLE);
-        audio[index] = `data:audio/wav;base64,${wav.toString('base64')}`;
-      } catch (error) {
-        console.warn(`[tts] scene ${index + 1} failed:`, error instanceof Error ? error.message : error);
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, body.texts.length) }, worker));
-
-  if (audio.every((a) => a === null)) {
+  const script = body.texts.join('\n\n');
+  try {
+    const wav = await voice.speak(script, VOICE(), STYLE);
+    return ok({
+      audio: `data:audio/wav;base64,${wav.toString('base64')}`,
+      // Share of the track each scene takes, by length of its narration; the
+      // player turns these into scene start times.
+      weights: body.texts.map((t) => t.length + 25),
+    });
+  } catch (error) {
+    console.warn('[tts] narration failed:', error instanceof Error ? error.message : error);
     return fail('The narrator voice could not be generated right now.', 502, { code: 'tts_failed' });
   }
-  return ok({ audio });
 });

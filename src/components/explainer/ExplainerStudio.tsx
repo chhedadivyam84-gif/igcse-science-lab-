@@ -31,12 +31,15 @@ export function ExplainerStudio({
   const [elapsed, setElapsed] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [narrate, setNarrate] = useState(true);
-  const [voice, setVoice] = useState<{ status: 'idle' | 'loading' | 'ready' | 'failed'; audio: (HTMLAudioElement | null)[] }>({
+  // The narrator is ONE continuous audio track for the whole explainer. The
+  // visuals follow its clock, so scenes change exactly when their narration
+  // starts, and a single Play tap is enough for phones to allow the sound.
+  const [voice, setVoice] = useState<{ status: 'idle' | 'loading' | 'ready' | 'failed'; track: HTMLAudioElement | null }>({
     status: 'idle',
-    audio: [],
+    track: null,
   });
   const [durations, setDurations] = useState<number[]>([]);
-  const audioSceneRef = useRef<number | null>(null);
+  const elapsedRef = useRef(0);
   const playerRef = useRef<HTMLDivElement | null>(null);
   const [phone, setPhone] = useState(false);
   useEffect(() => {
@@ -56,14 +59,61 @@ export function ExplainerStudio({
     durations[index] ?? storyboard?.scenes[index]?.seconds ?? 0;
   const sceneDuration = sceneSeconds(sceneIndex);
 
-  const goToScene = useCallback((index: number) => {
-    setSceneIndex(index);
-    setElapsed(0);
-  }, []);
+  const sceneStart = useCallback(
+    (index: number) => durations.slice(0, index).reduce((sum, d) => sum + d, 0),
+    [durations],
+  );
+  const trackActive = voice.status === 'ready' && !!voice.track && narrate;
+  elapsedRef.current = elapsed;
 
-  // Animation clock. One rAF loop drives both the visuals and the timeline.
+  const goToScene = useCallback(
+    (index: number) => {
+      setSceneIndex(index);
+      setElapsed(0);
+      if (voice.track) voice.track.currentTime = sceneStart(index);
+    },
+    [voice.track, sceneStart],
+  );
+
+  /** Start or pause from a tap, so the browser allows the narrator to play. */
+  function togglePlay(next?: boolean) {
+    const play = next ?? !playing;
+    const track = voice.track;
+    if (track && voice.status === 'ready' && narrate) {
+      if (play) {
+        const at = sceneStart(sceneIndex) + elapsedRef.current;
+        if (Math.abs(track.currentTime - at) > 0.3) track.currentTime = at;
+        track.play().catch(() => undefined);
+      } else track.pause();
+    }
+    setPlaying(play);
+  }
+
+  // Animation clock. With the narrator on, the audio track IS the clock;
+  // otherwise a rAF timer runs the scenes at their own lengths.
   useEffect(() => {
     if (!playing || !storyboard || !scene) return;
+
+    if (trackActive && voice.track) {
+      const track = voice.track;
+      const starts = storyboard.scenes.map((_, i) => sceneStart(i));
+      const follow = () => {
+        const t = track.currentTime;
+        let index = 0;
+        while (index < starts.length - 1 && t >= starts[index + 1]) index++;
+        if (index !== sceneIndex) setSceneIndex(index);
+        setElapsed(Math.max(0, t - starts[index]));
+        if (track.ended) {
+          setPlaying(false);
+          return;
+        }
+        rafRef.current = requestAnimationFrame(follow);
+      };
+      rafRef.current = requestAnimationFrame(follow);
+      return () => {
+        if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      };
+    }
 
     lastTickRef.current = performance.now();
     const tick = (now: number) => {
@@ -90,7 +140,7 @@ export function ExplainerStudio({
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, [playing, storyboard, scene, sceneIndex, sceneDuration]);
+  }, [playing, storyboard, scene, sceneIndex, sceneDuration, trackActive, voice.track, sceneStart]);
 
   // Narration follows the current scene rather than the clock, so a scrub does
   // not restart mid-sentence.
@@ -98,6 +148,7 @@ export function ExplainerStudio({
     if (!speechSupported) return;
     window.speechSynthesis.cancel();
     if (voice.status !== 'failed' || !narrate || !playing || !scene) return;
+    // (Only when the Google narrator failed: then each scene is read aloud.)
 
     const utterance = new SpeechSynthesisUtterance(scene.narration);
     utterance.rate = 1.0;
@@ -108,26 +159,24 @@ export function ExplainerStudio({
     // Deliberately keyed on the scene id: re-narrate only when the scene changes.
   }, [scene?.id, narrate, playing, speechSupported, scene, voice.status]);
 
-  // Google narrator voice. Same scene → resume where it paused; new scene →
-  // start that scene's clip from the top.
+  // Turning the narrator off mid-play pauses the track; the timer takes over.
   useEffect(() => {
-    voice.audio.forEach((a, i) => {
-      if (a && i !== sceneIndex) a.pause();
-    });
-    const clip = voice.audio[sceneIndex];
-    if (!clip) return;
-    if (audioSceneRef.current !== sceneIndex) {
-      clip.currentTime = 0;
-      audioSceneRef.current = sceneIndex;
+    const track = voice.track;
+    if (!track) return;
+    if (!narrate) track.pause();
+    else if (playing && track.paused) {
+      track.currentTime = sceneStart(sceneIndex) + elapsedRef.current;
+      track.play().catch(() => undefined);
     }
-    if (playing && narrate) clip.play().catch(() => undefined);
-    else clip.pause();
-  }, [sceneIndex, playing, narrate, voice.audio]);
+    // Only when the narrator is switched on or off.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [narrate, voice.track]);
 
-  useEffect(() => () => voice.audio.forEach((a) => a?.pause()), [voice.audio]);
+  useEffect(() => () => voice.track?.pause(), [voice.track]);
 
   async function loadVoice(board: Storyboard) {
-    setVoice({ status: 'loading', audio: [] });
+    voice.track?.pause();
+    setVoice({ status: 'loading', track: null });
     setDurations([]);
     try {
       const response = await fetch('/api/tts', {
@@ -136,29 +185,23 @@ export function ExplainerStudio({
         body: JSON.stringify({ texts: board.scenes.map((s) => s.narration.slice(0, 700)) }),
       });
       if (!response.ok) throw new Error('tts');
-      const data = (await response.json()) as { audio: (string | null)[] };
-      const clips = data.audio.map((src) => (src ? new Audio(src) : null));
-      // Each scene lasts as long as its narration (plus a breath), never less
-      // than the storyboard's own minimum.
-      const lengths = await Promise.all(
-        clips.map(
-          (clip, i) =>
-            new Promise<number>((resolve) => {
-              const fallback = board.scenes[i].seconds;
-              if (!clip) return resolve(fallback);
-              const done = () => resolve(Number.isFinite(clip.duration) ? Math.max(clip.duration + 0.8, 5) : fallback);
-              if (clip.readyState >= 1) done();
-              else {
-                clip.addEventListener('loadedmetadata', done, { once: true });
-                clip.addEventListener('error', () => resolve(fallback), { once: true });
-              }
-            }),
-        ),
-      );
-      setDurations(lengths);
-      setVoice({ status: 'ready', audio: clips });
+      const data = (await response.json()) as { audio: string; weights: number[] };
+      const track = new Audio(data.audio);
+      track.preload = 'auto';
+      const total = await new Promise<number>((resolve, reject) => {
+        const done = () => (Number.isFinite(track.duration) && track.duration > 0 ? resolve(track.duration) : reject(new Error('length')));
+        if (track.readyState >= 1) done();
+        else {
+          track.addEventListener('loadedmetadata', done, { once: true });
+          track.addEventListener('error', () => reject(new Error('audio')), { once: true });
+        }
+      });
+      // Each scene gets the share of the track its narration takes.
+      const sum = data.weights.reduce((a, b) => a + b, 0);
+      setDurations(data.weights.map((w) => (total * w) / sum));
+      setVoice({ status: 'ready', track });
     } catch {
-      setVoice({ status: 'failed', audio: [] });
+      setVoice({ status: 'failed', track: null });
     }
   }
 
@@ -193,7 +236,6 @@ export function ExplainerStudio({
       }
       setStoryboard(data.storyboard as Storyboard);
       goToScene(0);
-      audioSceneRef.current = null;
       loadVoice(data.storyboard as Storyboard);
     } catch {
       setError('Could not reach the server. Check your connection and try again.');
@@ -286,7 +328,7 @@ export function ExplainerStudio({
               {!playing && (
                 <button
                   type="button"
-                  onClick={() => !voiceLoading && setPlaying(true)}
+                  onClick={() => !voiceLoading && togglePlay(true)}
                   disabled={voiceLoading}
                   className="absolute inset-0 flex items-center justify-center bg-black/35 transition-colors hover:bg-black/25"
                   aria-label="Play explainer"
@@ -329,7 +371,7 @@ export function ExplainerStudio({
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => setPlaying((p) => !p)}
+                  onClick={() => togglePlay()}
                   disabled={voiceLoading && !playing}
                   aria-label={playing ? 'Pause' : 'Play'}
                 >
