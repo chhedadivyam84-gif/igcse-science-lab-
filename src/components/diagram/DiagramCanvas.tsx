@@ -66,6 +66,28 @@ export function DiagramCanvas({ spec, className }: { spec: DiagramSpec; classNam
   );
 }
 
+/**
+ * A dark outline behind text (painted under the fill) so labels stay readable
+ * where they cross field lines, wires or arrows.
+ */
+const HALO = { paintOrder: 'stroke', stroke: 'rgb(var(--surface))', strokeWidth: 4, strokeLinejoin: 'round' } as const;
+
+/** Splits a label into lines that fit `width` at roughly 7px per character. */
+export function wrapLabel(text: string, width: number, charWidth = 7): string[] {
+  const max = Math.max(4, Math.floor(width / charWidth));
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let line = '';
+  for (const word of words) {
+    if ((line + ' ' + word).trim().length > max && line) {
+      lines.push(line);
+      line = word;
+    } else line = (line + ' ' + word).trim();
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
 function Node({ node }: { node: DiagramNode }) {
   const stroke = colour(node.tone);
 
@@ -84,17 +106,20 @@ function Node({ node }: { node: DiagramNode }) {
             stroke={stroke}
             strokeWidth={1.5}
           />
-          {node.label && (
-            <text
-              x={node.x + node.w / 2}
-              y={node.y + node.h / 2 + 4}
-              textAnchor="middle"
-              fontSize={13}
-              fill="rgb(var(--text))"
-            >
-              {node.label}
-            </text>
-          )}
+          {node.label &&
+            (() => {
+              const lines = wrapLabel(node.label, node.w - 10);
+              const top = node.y + node.h / 2 + 4 - ((lines.length - 1) * 15) / 2;
+              return (
+                <text textAnchor="middle" fontSize={13} fill="rgb(var(--text))" style={HALO}>
+                  {lines.map((line, i) => (
+                    <tspan key={i} x={node.x + node.w / 2} y={top + i * 15}>
+                      {line}
+                    </tspan>
+                  ))}
+                </text>
+              );
+            })()}
         </g>
       );
 
@@ -111,7 +136,7 @@ function Node({ node }: { node: DiagramNode }) {
             strokeWidth={1.5}
           />
           {node.label && (
-            <text x={node.x} y={node.y + 4} textAnchor="middle" fontSize={12} fill="rgb(var(--text))">
+            <text x={node.x} y={node.y + 4} textAnchor="middle" fontSize={/^[⊗⊙×•·~+−-]$/.test(node.label) ? 18 : 12} dominantBaseline={/^[⊗⊙]$/.test(node.label) ? 'central' : undefined} dy={/^[⊗⊙]$/.test(node.label) ? -4 : undefined} fill="rgb(var(--text))" style={HALO}>
               {node.label}
             </text>
           )}
@@ -145,11 +170,17 @@ function Node({ node }: { node: DiagramNode }) {
             strokeWidth={1.8}
             markerEnd={`url(#arrow-${node.tone ?? 'accent'})`}
           />
-          {node.label && (
-            <text x={midX} y={midY - 7} textAnchor="middle" fontSize={11} fill={stroke}>
-              {node.label}
-            </text>
-          )}
+          {node.label &&
+            (Math.abs(node.y2 - node.y1) > Math.abs(node.x2 - node.x1) ? (
+              // Vertical arrow: label beside it, not across it.
+              <text x={midX + 8} y={midY + 4} textAnchor="start" fontSize={11} fill={stroke} style={HALO}>
+                {node.label}
+              </text>
+            ) : (
+              <text x={midX} y={midY - 7} textAnchor="middle" fontSize={11} fill={stroke} style={HALO}>
+                {node.label}
+              </text>
+            ))}
         </g>
       );
     }
@@ -162,6 +193,7 @@ function Node({ node }: { node: DiagramNode }) {
           textAnchor={node.anchor ?? 'start'}
           fontSize={12}
           fill={node.tone ? colour(node.tone) : 'rgb(var(--text))'}
+          style={HALO}
         >
           {node.text}
         </text>

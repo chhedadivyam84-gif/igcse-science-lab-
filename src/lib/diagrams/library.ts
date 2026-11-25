@@ -54,6 +54,87 @@ function shellNodes(
 
 const ENTRIES: LibraryEntry[] = [
   {
+    key: 'motor-effect',
+    match: ['motor effect', 'force on a current', 'current-carrying conductor', 'current carrying conductor', 'current-carrying wire', 'fleming', 'left-hand rule', 'left hand rule', 'catapult'],
+    build: () =>
+      base({
+        title: 'The motor effect',
+        caption:
+          'A current-carrying wire in a magnetic field feels a force at right angles to both the current and the field (Fleming’s left-hand rule).',
+        nodes: [
+          { kind: 'box', id: 'n', x: 50, y: 110, w: 100, h: 200, label: 'N', tone: 'negative' },
+          { kind: 'box', id: 's', x: 570, y: 110, w: 100, h: 200, label: 'S', tone: 'accent' },
+          { kind: 'field', id: 'field', x: 150, y: 110, w: 420, h: 200, density: 5, tone: 'muted' },
+          { kind: 'arrow', id: 'b-dir', x1: 300, y1: 92, x2: 420, y2: 92, label: 'magnetic field, N → S', tone: 'muted' },
+          { kind: 'circle', id: 'wire', x: 360, y: 210, r: 22, label: '⊗', tone: 'physics' },
+          { kind: 'label', id: 'i-label', x: 360, y: 176, text: 'current into the page', anchor: 'middle', tone: 'physics' },
+          { kind: 'arrow', id: 'force', x1: 360, y1: 236, x2: 360, y2: 330, tone: 'positive' },
+          { kind: 'label', id: 'f-label', x: 372, y: 316, text: 'force (downwards)', anchor: 'start', tone: 'positive' },
+          { kind: 'label', id: 'rule', x: 360, y: 364, text: 'Left hand: First finger = Field, seCond finger = Current, thuMb = Motion', anchor: 'middle', tone: 'muted' },
+          { kind: 'label', id: 'reverse', x: 360, y: 388, text: 'Reverse the current OR the field and the force reverses', anchor: 'middle', tone: 'muted' },
+        ],
+        keyTerms: [
+          { term: 'Motor effect', meaning: 'The force on a current-carrying conductor in a magnetic field.' },
+          { term: 'Fleming’s left-hand rule', meaning: 'Thumb = force (motion), first finger = field (N → S), second finger = current (+ → −).' },
+          { term: '⊗ and ⊙', meaning: 'Current into the page (⊗, the tail of an arrow) and out of the page (⊙, the tip).' },
+        ],
+        explanation: [
+          'The magnet’s field runs from the N pole to the S pole.',
+          'The current in the wire makes its own circular magnetic field around the wire.',
+          'The two fields combine: stronger on one side of the wire, weaker on the other.',
+          'The wire is pushed from the stronger field towards the weaker one — here, downwards.',
+          'A bigger current, a stronger magnet or a longer wire in the field gives a bigger force.',
+          'Reversing either the current or the field reverses the force; reversing both leaves it unchanged.',
+        ],
+        sourceRefs: ['4.5'],
+      }),
+  },
+
+  {
+    key: 'dc-motor',
+    match: ['d.c. motor', 'dc motor', 'd.c motor', 'electric motor', 'simple motor', 'motor', 'split-ring', 'split ring', 'commutator', 'turning effect on a coil'],
+    build: () =>
+      base({
+        title: 'The d.c. motor (coil seen end-on)',
+        caption:
+          'Current flows in opposite directions in the two sides of the coil, so the forces on them are opposite and the coil turns. The split-ring commutator keeps it turning the same way.',
+        nodes: [
+          { kind: 'box', id: 'n', x: 50, y: 100, w: 100, h: 220, label: 'N', tone: 'negative' },
+          { kind: 'box', id: 's', x: 570, y: 100, w: 100, h: 220, label: 'S', tone: 'accent' },
+          { kind: 'field', id: 'field', x: 150, y: 100, w: 420, h: 220, density: 5, tone: 'muted' },
+          { kind: 'arrow', id: 'b-dir', x1: 300, y1: 84, x2: 420, y2: 84, label: 'magnetic field, N → S', tone: 'muted' },
+          { kind: 'line', id: 'coil', x1: 280, y1: 210, x2: 440, y2: 210, tone: 'physics' },
+          { kind: 'circle', id: 'axle', x: 360, y: 210, r: 5, tone: 'muted' },
+          { kind: 'circle', id: 'side-a', x: 280, y: 210, r: 18, label: '⊗', tone: 'physics' },
+          { kind: 'circle', id: 'side-b', x: 440, y: 210, r: 18, label: '⊙', tone: 'physics' },
+          { kind: 'label', id: 'a-label', x: 280, y: 178, text: 'current into page', anchor: 'middle', tone: 'physics' },
+          { kind: 'label', id: 'b-label', x: 440, y: 252, text: 'current out of page', anchor: 'middle', tone: 'physics' },
+          { kind: 'arrow', id: 'f-a', x1: 280, y1: 230, x2: 280, y2: 300, tone: 'positive' },
+          { kind: 'label', id: 'f-a-label', x: 270, y: 296, text: 'force down', anchor: 'end', tone: 'positive' },
+          { kind: 'arrow', id: 'f-b', x1: 440, y1: 190, x2: 440, y2: 120, tone: 'positive' },
+          { kind: 'label', id: 'f-b-label', x: 452, y: 128, text: 'force up', anchor: 'start', tone: 'positive' },
+          { kind: 'label', id: 'turn', x: 360, y: 344, text: 'equal and opposite forces → the coil turns anticlockwise', anchor: 'middle', tone: 'accent' },
+          { kind: 'label', id: 'comm', x: 360, y: 372, text: 'Split-ring commutator: reverses the current in the coil every half turn', anchor: 'middle', tone: 'muted' },
+          { kind: 'label', id: 'brush', x: 360, y: 396, text: 'Carbon brushes: connect the d.c. supply to the turning commutator', anchor: 'middle', tone: 'muted' },
+        ],
+        keyTerms: [
+          { term: 'Split-ring commutator', meaning: 'Reverses the current in the coil every half turn so the coil keeps turning in the same direction.' },
+          { term: 'Brushes', meaning: 'Carbon contacts that press on the commutator and connect the rotating coil to the supply.' },
+          { term: 'Turning effect', meaning: 'Increased by more turns on the coil, a bigger current or a stronger magnetic field.' },
+        ],
+        explanation: [
+          'Current flows into the page in one side of the coil and out of the page in the other.',
+          'By Fleming’s left-hand rule the forces on the two sides are equal and opposite: one down, one up.',
+          'The two forces make a turning effect, so the coil rotates.',
+          'Every half turn the split-ring commutator reverses the current in the coil.',
+          'So the side passing each pole always has the same current direction, and the coil keeps turning the same way.',
+          'More turns, a larger current or a stronger magnet make the motor turn faster.',
+        ],
+        sourceRefs: ['4.5'],
+      }),
+  },
+
+  {
     key: 'transformer',
     match: ['transformer', 'step-up', 'step up', 'step-down', 'step down', 'turns ratio', 'national grid'],
     build: () =>

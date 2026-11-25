@@ -5,7 +5,8 @@ import { fail, handleRoute, ok, parseBody } from '@/lib/api';
 import { requireAiAccess } from '@/lib/ai/guard';
 import { getAiProvider } from '@/lib/ai';
 import { buildGrounding } from '@/lib/ai/grounding';
-import { DIAGRAM_SYSTEM } from '@/lib/ai/prompts';
+import { DIAGRAM_REVIEW_SYSTEM, DIAGRAM_SYSTEM } from '@/lib/ai/prompts';
+import { declutter } from '@/lib/diagrams/declutter';
 import { findLibraryDiagram } from '@/lib/diagrams/library';
 import { extractJson } from '@/lib/json';
 import { clamp } from '@/lib/utils';
@@ -71,13 +72,31 @@ export const POST = handleRoute('diagram', async (request) => {
   const raw = await provider.complete({
     system: `${DIAGRAM_SYSTEM}\n\n${grounding.text}`,
     messages: [{ role: 'user', content: body.request }],
-    maxTokens: 3000,
+    maxTokens: 5000,
     temperature: 0.2,
     responseFormat: 'json',
   });
 
   const parsed = extractJson<unknown>(raw, null);
-  const validated = parsed ? modelSchema.safeParse(parsed) : null;
+  let validated = parsed ? modelSchema.safeParse(parsed) : null;
+
+  // Examiner pass: fixes wrong directions, labels and overlapping layout.
+  // If it fails, the first draft (if valid) is used.
+  if (validated?.success) {
+    try {
+      const reviewed = await provider.complete({
+        system: `${DIAGRAM_REVIEW_SYSTEM}\n\n${grounding.text}`,
+        messages: [{ role: 'user', content: `Request: ${body.request}\n\nDiagram to check:\n${JSON.stringify(validated.data)}` }],
+        maxTokens: 5000,
+        temperature: 0,
+        responseFormat: 'json',
+      });
+      const checked = modelSchema.safeParse(extractJson<unknown>(reviewed, null));
+      if (checked.success) validated = checked;
+    } catch (error) {
+      console.warn('[diagram] review skipped:', error instanceof Error ? error.message : error);
+    }
+  }
   if (!validated?.success) {
     // Set AI_DEBUG=1 to see what the model actually produced. Off by default so
     // raw model output never reaches a student.
@@ -93,7 +112,7 @@ export const POST = handleRoute('diagram', async (request) => {
   const width = clamp(validated.data.width, 320, 1200);
   const height = clamp(validated.data.height, 240, 900);
 
-  const spec: DiagramSpec = {
+  const spec: DiagramSpec = declutter({
     title: validated.data.title,
     caption: validated.data.caption,
     width,
@@ -104,7 +123,7 @@ export const POST = handleRoute('diagram', async (request) => {
     explanation: validated.data.explanation.slice(0, 8),
     sourceRefs: grounding.sourceRefs,
     aiAssisted: true,
-  };
+  });
 
   const id = body.save ? await save(user.id, spec) : null;
   return ok({ id, spec, source: 'generated' });

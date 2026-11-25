@@ -160,7 +160,32 @@ Rules:
 - 6 to 20 nodes. Label everything a student would need to identify in an exam.
 - Do not overlap labels with shapes; place labels beside what they name.
 - "explanation" has 3 to 6 ordered steps describing how the thing works.
-- The response must parse with JSON.parse.`;
+- The response must parse with JSON.parse.
+
+Layout — the diagram is drawn exactly where you put things:
+- Leave at least 30px between any two labelled items. Never put two boxes on top of or touching each other.
+- A box must be wide enough for its label (about 8px per character), or keep the label to 1–3 short words.
+- Put a "label" node BESIDE the thing it names (left, right, above or below), never on top of another shape or another label.
+- Arrow labels should be short (1–3 words). For a vertical arrow, the label is drawn to its right.
+- Prefer a clean schematic (as in a Cambridge exam paper) over a crowded picture.
+
+Physics directions — get these right, they are what examiners check:
+- Magnetic field lines go from N to S outside a magnet. Conventional current goes from + to −.
+- A current going INTO the page is a circle labelled "⊗"; OUT of the page is a circle labelled "⊙".
+- The force on a current in a magnetic field is at right angles to BOTH the current and the field (Fleming's left-hand rule: First finger = Field, seCond finger = Current, thuMb = Motion). So if the field is drawn across the page, the current must be shown as ⊗ or ⊙ and the force is up or down the page. Never draw the current and the field both in the plane with the force also in the plane.
+- For a d.c. motor seen end-on with the field N (left) → S (right): the coil side with ⊗ is forced DOWN, the side with ⊙ is forced UP.
+- Generators and induced current use Fleming's right-hand rule.`;
+
+export const DIAGRAM_REVIEW_SYSTEM = `${SHARED_RULES}
+
+You are a Cambridge IGCSE examiner checking a scientific diagram (given as JSON) before students see it.
+
+Fix, in the JSON:
+- every scientific error: wrong arrow or force directions, wrong field direction, wrong labels, missing or wrong ⊗/⊙ current symbols, wrong equations, impossible arrangements;
+- layout problems: boxes overlapping or touching, labels placed on top of other shapes or labels, boxes too narrow for their label (about 8px per character), anything outside the canvas with a 20px margin.
+Use the direction rules: field N → S; conventional current + → −; force ⟂ current and field (left-hand rule); ⊗ = into page, ⊙ = out of page; for a motor end-on with field left→right, ⊗ side is forced down, ⊙ side up.
+
+Return ONLY the corrected diagram JSON in exactly the same shape. Keep everything that is already correct. The response must parse with JSON.parse.`;
 
 export const STORYBOARD_SYSTEM = `${SHARED_RULES}
 
